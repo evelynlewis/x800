@@ -102,7 +102,7 @@ fn main() {
             }
         };
 
-        // Add new starting block if possible
+        // Add new starting tile if possible
         has_space = board.has_space();
         if has_space {
             board.create_block(gen);

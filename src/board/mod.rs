@@ -22,18 +22,18 @@
 
 use std::{cmp::max, fmt, fs, io::Read};
 
-mod block;
+mod tile;
 pub(super) mod constants;
 
 use super::colour::Colour;
-use block::Block;
+use tile::Tile;
 
 // Promote Generation type to public within this module
-pub type Generation = block::Generation;
+pub type Generation = tile::Generation;
 
 const NUMBER_BLOCKS_PER_LINE: usize = 4;
 const BOARD_DIMENSION: usize = NUMBER_BLOCKS_PER_LINE + 2;
-type Row = [block::Block; BOARD_DIMENSION];
+type Row = [tile::Tile; BOARD_DIMENSION];
 
 #[derive(Debug, Clone)]
 pub struct Board {
@@ -98,10 +98,10 @@ impl Board {
         for i in 1..BOARD_DIMENSION {
             for j in 1..BOARD_DIMENSION {
                 match board.rows[i][j] {
-                    Block::Empty() => {
+                    Tile::Empty() => {
                         board.open_blocks += 1;
                     }
-                    Block::Number(n, _) => {
+                    Tile::Number(n, _) => {
                         board.max_block = std::cmp::max(board.max_block, n);
                     }
                     _ => {
@@ -138,17 +138,17 @@ impl Board {
         update: &mut UpdateStatus,
     ) {
         let merged = self.rows[r0][c0].merge(&self.rows[r1][c1], gen);
-        let previous: &Block = &self.rows[r0][c0];
+        let previous: &Tile = &self.rows[r0][c0];
         let result = match merged {
-            Some(Block::Number(n, _)) => {
-                if let Block::Number(m, _) = previous {
+            Some(Tile::Number(n, _)) => {
+                if let Tile::Number(m, _) = previous {
                     if *m != n {
                         self.open_blocks += 1;
                         self.score += 1 << u64::from(n);
                         self.max_block = std::cmp::max(self.max_block, n);
                     }
                 }
-                self.rows[r0][c0] = Block::Empty();
+                self.rows[r0][c0] = Tile::Empty();
                 self.rows[r1][c1] = merged.unwrap();
                 true
             }
@@ -159,7 +159,7 @@ impl Board {
     }
 
     // Carry out an action on the board
-    pub fn update(&mut self, action: Action, gen: block::Generation) -> bool {
+    pub fn update(&mut self, action: Action, gen: tile::Generation) -> bool {
         // Determine if we have iterated over the entire board without any updates
         // And also if the board has been changed over the course of this move
         let mut update = UpdateStatus {
@@ -219,8 +219,8 @@ impl Board {
         update.made_move
     }
 
-    // Create a new '2' or '4' starting number block
-    pub fn create_block(&mut self, gen: block::Generation) {
+    // Create a new '2' or '4' starting number tile
+    pub fn create_block(&mut self, gen: tile::Generation) {
         const CHANCE_OF_FOUR_BLOCK: u8 = 4;
         assert!(self.open_blocks > 0);
 
@@ -231,9 +231,9 @@ impl Board {
         let new_index = buffer[0] % self.open_blocks;
         rng.read_exact(&mut buffer).unwrap();
         let new_value = if (buffer[0] % CHANCE_OF_FOUR_BLOCK) == (CHANCE_OF_FOUR_BLOCK - 1) {
-            2 // '4' block
+            2 // '4' tile
         } else {
-            1 // '2' block
+            1 // '2' tile
         };
 
         let mut scan_index: u8 = 0;
@@ -241,9 +241,9 @@ impl Board {
         // Brute force isn't great, but it's an exceptionally small board (about 36 ops)
         for r in 1..BOARD_DIMENSION {
             for c in 1..BOARD_DIMENSION {
-                if self.rows[r][c] == Block::Empty() {
+                if self.rows[r][c] == Tile::Empty() {
                     if scan_index == new_index {
-                        self.rows[r][c] = Block::Number(new_value, gen);
+                        self.rows[r][c] = Tile::Number(new_value, gen);
                         self.open_blocks -= 1;
                         self.max_block = max(new_value, self.max_block);
                         return;

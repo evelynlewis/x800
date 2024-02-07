@@ -31,7 +31,7 @@ use crate::{board::BOARD_DIMENSION, colour::Colour};
 use std::fmt;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub(super) enum Block {
+pub(super) enum Tile {
     Empty(),
     Number(Power, Generation),
     Edge(EdgeSide),
@@ -54,14 +54,14 @@ pub(super) enum CornerSide {
     BottomRight,
 }
 
-impl Block {
+impl Tile {
     pub(super) fn merge(self, other: &Self, gen: Generation) -> Option<Self> {
         match (self, other) {
             // Merge two similar number blocks
             (Self::Number(n, j), Self::Number(m, k)) if n == *m && ((j != gen) && (*k != gen)) => {
                 Some(Self::Number(n + 1, gen))
             }
-            // Shift number block to fill space
+            // Shift number tile to fill space
             (Self::Number(n, j), Self::Empty()) => Some(Self::Number(n, j)),
             // Anything else
             (_, _) => None,
@@ -69,7 +69,7 @@ impl Block {
     }
 }
 
-impl fmt::Display for Block {
+impl fmt::Display for Tile {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Number(num, _) => {
