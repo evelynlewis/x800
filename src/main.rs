@@ -20,7 +20,10 @@
   SOFTWARE.
 */
 
-use std::{fs::File, io::Read, mem};
+use std::{
+    io::{self, Read},
+    mem,
+};
 
 mod board;
 mod colour;
@@ -28,13 +31,12 @@ use board::{Action, Board};
 
 const INITIAL_BLOCK_COUNT: u8 = 2;
 
-fn input() -> Action {
+fn input() -> io::Result<Action> {
     // Read a byte from stdin
-    let mut stdin = File::open("/dev/stdin").unwrap();
     let mut buffer = [0u8; 1];
-    stdin.read_exact(&mut buffer).unwrap();
+    io::stdin().read_exact(&mut buffer)?;
 
-    Action::parse(buffer[0] as char)
+    Ok(Action::parse(buffer[0] as char))
 }
 
 fn shutdown(fd: i32, ios: &libc::termios) {
@@ -42,7 +44,6 @@ fn shutdown(fd: i32, ios: &libc::termios) {
         // Restore initial board state
         libc::tcsetattr(fd, libc::TCSANOW, ios);
     }
-    std::process::exit(libc::EXIT_SUCCESS);
 }
 
 fn startup() -> (i32, libc::termios) {
@@ -71,33 +72,38 @@ fn main() {
     // Startup
     let (fd, termios) = startup();
 
+    let handle_tile_err = |e: &io::Error| {
+        println!("{}creating new tile: {}", board::constants::LEFT_SPACE, e);
+        shutdown(fd, &termios);
+    };
+
     // Clear screen and draw intial board
     for _ in 0..INITIAL_BLOCK_COUNT {
-        board.create_block(gen);
+        if let Err(e) = board.create_new_tile(gen) {
+            return handle_tile_err(&e);
+        }
     }
     board.draw();
 
     loop {
-        // Assume no update
-        update = false;
-
         // Increment generation
         gen += 1;
 
         // Read input and take action
         match input() {
-            Action::Shutdown => {
+            Err(_) | Ok(Action::Shutdown) => {
                 print!(
                     "{}{}",
                     board::constants::LEFT_SPACE,
                     board::constants::GOODBYE
                 );
-                shutdown(fd, &termios);
+                // Handle graceful shutdown
+                return shutdown(fd, &termios);
             }
-            Action::Continue => {
+            Ok(Action::Continue) => {
                 continue;
             }
-            other => {
+            Ok(other) => {
                 update = board.update(other, gen);
             }
         };
@@ -105,7 +111,9 @@ fn main() {
         // Add new starting tile if possible
         has_space = board.has_space();
         if has_space {
-            board.create_block(gen);
+            if let Err(e) = board.create_new_tile(gen) {
+                return handle_tile_err(&e);
+            }
         }
 
         // Draw new board state
@@ -118,7 +126,7 @@ fn main() {
                 board::constants::LEFT_SPACE,
                 board::constants::GAME_OVER
             );
-            shutdown(fd, &termios);
+            return shutdown(fd, &termios);
         }
     }
 }

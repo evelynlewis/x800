@@ -20,10 +20,14 @@
   SOFTWARE.
 */
 
-use std::{cmp::max, fmt, fs, io::Read};
+use std::{
+    cmp::max,
+    fmt, fs,
+    io::{self, Read},
+};
 
-mod tile;
 pub(super) mod constants;
+mod tile;
 
 use super::colour::Colour;
 use tile::Tile;
@@ -220,16 +224,16 @@ impl Board {
     }
 
     // Create a new '2' or '4' starting number tile
-    pub fn create_block(&mut self, gen: tile::Generation) {
+    pub fn create_new_tile(&mut self, gen: tile::Generation) -> io::Result<()> {
         const CHANCE_OF_FOUR_BLOCK: u8 = 4;
         assert!(self.open_blocks > 0);
 
         // Collect random numbers
-        let mut rng = fs::File::open("/dev/urandom").unwrap();
+        let mut rng = fs::File::open("/dev/urandom")?;
         let mut buffer = [0u8; 1];
-        rng.read_exact(&mut buffer).unwrap();
+        rng.read_exact(&mut buffer)?;
         let new_index = buffer[0] % self.open_blocks;
-        rng.read_exact(&mut buffer).unwrap();
+        rng.read_exact(&mut buffer)?;
         let new_value = if (buffer[0] % CHANCE_OF_FOUR_BLOCK) == (CHANCE_OF_FOUR_BLOCK - 1) {
             2 // '4' tile
         } else {
@@ -246,12 +250,13 @@ impl Board {
                         self.rows[r][c] = Tile::Number(new_value, gen);
                         self.open_blocks -= 1;
                         self.max_block = max(new_value, self.max_block);
-                        return;
+                        return Ok(())
                     }
                     scan_index += 1;
                 }
             }
         }
+        Ok(())
     }
 
     fn fmt_score(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
