@@ -1,0 +1,32 @@
+[package]
+name = "x800"
+version = "0.1.0"
+authors = ["Evelyn Lewis <evelyn@evelynlewis.net>"]
+edition = "2021"
+description = "POSIX-compliant ANSI terminal 2048"
+license = "MIT"
+categories = ["command-line-utilities", "games", "embedded"]
+repository = "https://github.com/evelynlewis/x800"
+keywords = [
+    "2048",
+    "POSIX",
+    "command-line",
+    "game",
+    "libc",
+    "minimal",
+    "embedded",
+]
+readme = "README.md"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+libc = "0.2"
+
+[lints.clippy]
+all = "deny"
+pedantic = "deny"
+cargo = "deny"
+
+[profile.release]
+debug = true
