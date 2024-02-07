@@ -11,19 +11,27 @@ It was also an exercise in creating a working program of substantial size with m
 
 With the above in mind, choices were made to write the code in an idiomatic as possible style, and in general follow the principle of least surprise.
 
+## Preview
+![x800 screenshotmar](screenshot.jpg)
+
 ## Quick start
-`x800` should run on any POSIX compatible host targeted by a Rust toolchain supporting the `2021` epoch. The [rustup](https://rustup.rs) tool can be used to install the required Rust toolchain on your build host.
+`x800` should run on any POSIX compatible host targeted by a Rust toolchain supporting the Rust 2021 epoch. 
 
-### Trying out with `cargo run`
+The [rustup](https://rustup.rs) tool can be used to install the required Rust toolchain on your build host.
 
-Running from the checked out repository can done with:
+### Running `x800` with `cargo run`
+
+Check out the repository and use `cargo run`:
+
 ```sh
 git clone 'https://github.com/evelynlewis/x800.git'
-cargo run --release --manifest-path x800/Cargo.toml
+cd x800
+cargo run --release
 ```
+
 ### Installation with Cargo
 
-If you wish to install the program in your home directory, (while still managed by Cargo), that can be done with:
+If you wish to install the program in your home directory, while still managed by Cargo, that can be done with:
 
 ```sh
 git clone 'https://github.com/evelynlewis/x800.git'
@@ -61,8 +69,8 @@ Docker is used by `cross` behind the scenes, so a working installation and a bui
 
 Note that with the default `cross` setup, Macs with ARM seem not to be supported as a build host. I didn't look into it much further at the time since I had another machine on hand.
 
-```
-# M1 MacOS host fails
+```sh
+# On an M1 MacOS host, this fails like so:
 cross build --release --target=arm-unknown-linux-gnueabihf
 Unable to find image 'ghcr.io/cross-rs/arm-unknown-linux-gnueabihf:0.2.5' locally
 0.2.5: Pulling from cross-rs/arm-unknown-linux-gnueabihf
