@@ -1,4 +1,4 @@
-# `x800`: fast and minimal ANSI TERM *2048*
+# `x800`: a fast and minimal *2048* for the ANSI terminal
 ### *ɛks eɪt ˈhʌndrəd*
 
 ## Introduction
