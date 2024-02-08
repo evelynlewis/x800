@@ -3,7 +3,7 @@
 
 ## Introduction
 
-How fast? A sustained update rate with a lower bound of 3.12 million input-process-output cycles (ie. moves) per second on an Pentium G3220T from 2013.
+How fast? A sustained update rate with a lower bound of 3.12 million input-process-output cycles (ie. moves) per second, on an Pentium G3220T from 2013.
 
 This project was created in part as a hands-on spike project for the author to learn [rustlang](rust-lang.org) as an experienced C and C++ systems software developer.
 
@@ -23,9 +23,9 @@ With the above in mind, choices were made to write the code in an idiomatic as p
 
 The keys ('w', 'a', 's', 'd') are used for (up, left, down, right) moves respectively. Since *2048* also supports letter keys, this a focused implementation of the *2048* concept.
 
-[Wikipedia](https://en.wikipedia.org/wiki/2048_(video_game)): 
+[Wikipedia](https://en.wikipedia.org/wiki/2048_(video_game)):
 
-> 2048 is played on a plain 4×4 grid, with numbered tiles that slide when a player moves them using the four arrow keys. The game begins with two tiles already in the grid, having a value of either 2 or 4, and another such tile appears in a random empty space after each turn. Tiles slide as far as possible in the chosen direction until they are stopped by either another tile or the edge of the grid. If two tiles of the same number collide while moving, they will merge into a tile with the total value of the two tiles that collided. 
+> 2048 is played on a plain 4×4 grid, with numbered tiles that slide when a player moves them using the four arrow keys. The game begins with two tiles already in the grid, having a value of either 2 or 4, and another such tile appears in a random empty space after each turn. Tiles slide as far as possible in the chosen direction until they are stopped by either another tile or the edge of the grid. If two tiles of the same number collide while moving, they will merge into a tile with the total value of the two tiles that collided.
 
 ## Compatibility
 `x800` has the following requirements:
@@ -36,7 +36,7 @@ The keys ('w', 'a', 's', 'd') are used for (up, left, down, right) moves respect
 - The OS provides a `/dev/urandom` device.
   - > Note: this is common but technically not part of POSIX.
 
-This means that Linux, MacOS, other BSDs, QNX, and MinGW should all work on a variety of architectures.  
+This means that Linux, MacOS, other BSDs, QNX, and MinGW should all work on a variety of architectures.
 
 > Note: Refer to the  [Platform Support](https://doc.rust-lang.org/rustc/platform-support.html) page and `libc` [documentation](https://docs.rs/libc/latest/libc/).
 
@@ -93,7 +93,7 @@ cross build --release --target=arm-unknown-linux-gnueabihf
 
 Docker is used by `cross` behind the scenes, so a working installation and a build host supported by the appropriate `cross` crate Docker image is required.
 
-Note that with the default `cross` setup, Macs with ARM seem not to be supported as a build host. 
+Note that with the default `cross` setup, Macs with ARM seem not to be supported as a build host.
 I didn't look into it much further at the time since I had another machine on hand.
 
 ```sh
@@ -108,14 +108,14 @@ See 'docker run --help'.
 # Mini-benchmarks
 
 Since `x800` takes input from `stdin` and exits at the completion of a game, random games can be played by sending a stream of random moves to `stdin`.
-Monitoring the speed of characters being read from input and the typical time required to finish a gave provides a reasonable benchmark.
+Monitoring the speed of characters being read from input and the typical time required to finish a game provides a reasonable benchmark.
 
 ### Notes on benchmark result interpretation
-- `[ N MiB/s]` corresponds to `N × 1024²`, or `N × 1048576` discrete directional moves processed by `x800` per second.
-- `hyperfine` latency numbers correspond to the duration of a complete randomly-run game, beginning-to-end.
-- At present it is difficult to measure the input consumption rate when using an in-memory file as input (ie. input pre-generation). 
-  - Nonetheless it can be said with some certainty that `x800` is limited by the current method of live-generating moves during a benchmark scenario
-  - Therefore, the multi-million move-per-second results realized by this method act can be seen as a lower bound.
+  1. `[ N MiB/s]` corresponds to `N × 1024²`, or `N × 1048576` discrete directional moves processed by `x800` per second.
+
+  2. `hyperfine` latency numbers correspond to the duration of a complete randomly-run game, beginning-to-end.
+
+  3. When using an in-memory file as input, below referred to as "hyperfine with in-memory input pre-generation", it's difficult to measure the rate at which random moves are consumed by `x800`. Nonetheless, looking at the below benchmark results, it can be said with some certainty that `x800` is  limited by the current alternative of live-generating moves from /dev/urandom during a benchmark scenario. This is done by by converting to base32, converting to the stream to lowercase, and then dropping non-matching moves. Therefore, the multi-million move-per-second results realized by this method act can be seen as a lower bound on `x800` performance.
 
 ## Using the `hyperfine` tool
 
@@ -126,13 +126,15 @@ Requires GNU `base32`, `tr`, `pv`, and a recent version of [hyperfine](https://g
 
 > Note: The `hyperfine` binary can be installed via your system package manager or with `cargo install hyperfine`. Your package manager's version may be too old.
 
-### hyperfine with input pre-generation
+### hyperfine with in-memory input pre-generation
+
 ```sh
 touch /tmp/input-moves
 hyperfine --prepare './gen-input-moves.sh /tmp/input-moves' --warmup=64 --runs=2048 --input=/tmp/input-moves -N './target/release/x800'
 ```
 
-### hyperfine with input pre-generation results on 2020 M1 MacBook Air running MacOS
+#### 2020 M1 MacBook Air running MacOS
+
 ```sh
 touch /tmp/input-moves
 hyperfine --prepare './gen-input-moves.sh /tmp/input-moves' --warmup=64 --runs=2048 --input='/tmp/input-moves' -N './target/release/x800'
@@ -141,9 +143,9 @@ Benchmark 1: ./target/release/x800
   Range (min … max):     1.0 ms …   1.3 ms    2048 runs
 ```
 
-### hyperfine with input pre-generation results on Intel(R) Pentium(R) CPU G3220T @ 2.60GHz running Linux 6.5
+#### Intel(R) Pentium(R) CPU G3220T @ 2.60GHz running Linux 6.5
 ```sh
-touch /tmp/input-moves
+touch /tmp/input-moves:%s/
 hyperfine --prepare './gen-input-moves.sh /tmp/input-moves' --warmup=64 --runs=2048 --input=/tmp/input-moves -N './target/release/x800'
 Benchmark 1: ./target/release/x800
   Time (mean ± σ):       2.4 ms ±   0.5 ms    [User: 1.7 ms, System: 0.6 ms]
@@ -162,7 +164,8 @@ cat /dev/urandom \
     | hyperfine -N ./target/release/x800 -n x800 --input /dev/stdin --style=color --warmup 256 --runs 2048
 ```
 
-### hyperfine with input live-generation results on M1 MacBook Air running MacOS
+#### M1 MacBook Air running MacOS
+
 ```sh
  cat /dev/urandom \
     | gbase32 \
@@ -172,11 +175,12 @@ cat /dev/urandom \
 Benchmark 1: x800
   Time (mean ± σ):       2.8 ms ±   0.8 ms    [User: 0.9 ms, System: 1.0 ms]
   Range (min … max):     1.3 ms …   5.4 ms    2048 runs
- 
+
 [2.75MiB/s] [2.75MiB/s]
 ```
 
-### hyperfine with input live-generation results on Intel(R) Pentium(R) CPU G3220T @ 2.60GHz running Linux 6.5
+#### Intel(R) Pentium(R) CPU G3220T @ 2.60GHz running Linux 6.5
+
 ```sh
  cat /dev/urandom \
     | base32 \
@@ -186,7 +190,7 @@ Benchmark 1: x800
 Benchmark 1: x800
   Time (mean ± σ):       2.6 ms ±   0.5 ms    [User: 1.7 ms, System: 0.6 ms]
   Range (min … max):     1.4 ms …   5.2 ms    2048 runs
- 
+
 [2.98MiB/s] [2.98MiB/s]
 ```
 
@@ -204,7 +208,8 @@ cat /dev/urandom \
     | dash -c 'while true; do ./target/release/x800; done' > /dev/null
 ```
 
-### Results: mini shell benchmark on 1.1 Intel(R) Pentium(R) CPU G3220T @ 2.60GHz running Linux 6.5
+#### 1.1 Intel(R) Pentium(R) CPU G3220T @ 2.60GHz running Linux 6.5
+
 ```sh
 # Intel(R) Pentium(R) CPU G3220T @ 2.60GHz using shell tools
 cat /dev/urandom \
@@ -214,7 +219,8 @@ cat /dev/urandom \
     | dash -c 'while true; do ./target/release/x800; done' > /dev/null
 [3.12MiB/s] [3.04MiB/s]
 ```
-### Results: mini shell benchmark on M1 MacBook Air running MacOS
+
+### M1 MacBook Air running MacOS
 ```sh
 # M1 MacBook Air late 2020 using shell tools
 cat /dev/urandom \
@@ -234,3 +240,5 @@ cat /dev/urandom \
 - [*Zero-dependency random number generation in Rust*](https://blog.orhun.dev/zero-deps-random-in-rust/)
 - [*termios(3) — Linux manual page*](https://man7.org/linux/man-pages/man3/termios.3.html)
 - [*The Rust Performance Book*](https://nnethercote.github.io/perf-book)
+- [*Clippy's Lints*](https://doc.rust-lang.org/stable/clippy/lints.html)
+- [hyperfine](https://github.com/sharkdp/hyperfine)
