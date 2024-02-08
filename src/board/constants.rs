@@ -20,7 +20,7 @@
   SOFTWARE.
 */
 
-use super::tile::{Tile, CornerSide, EdgeSide};
+use super::tile::{CornerSide, EdgeSide, Tile};
 use super::Board;
 
 pub(super) const EMPTY_BLOCK: &str = "      ";

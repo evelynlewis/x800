@@ -118,10 +118,12 @@ impl Board {
     }
 
     // Clear screen
+    #[inline]
     pub fn clear() {
         print!("{}{esc}[2H{esc}[2J", Colour::default(), esc = '\u{1B}');
     }
 
+    #[inline]
     pub fn has_space(&self) -> bool {
         self.open_blocks != 0
     }
@@ -250,7 +252,7 @@ impl Board {
                         self.rows[r][c] = Tile::Number(new_value, gen);
                         self.open_blocks -= 1;
                         self.max_block = max(new_value, self.max_block);
-                        return Ok(())
+                        return Ok(());
                     }
                     scan_index += 1;
                 }

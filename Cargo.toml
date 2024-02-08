@@ -24,8 +24,11 @@ libc = "0.2"
 
 [lints.clippy]
 all = "deny"
-pedantic = "deny"
 cargo = "deny"
+pedantic = "deny"
 
 [profile.release]
+codegen-units = 1
 debug = true
+lto = "fat"
+panic = "abort"
