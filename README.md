@@ -28,17 +28,19 @@ The keys ('w', 'a', 's', 'd') are used for (up, left, down, right) moves respect
 > 2048 is played on a plain 4×4 grid, with numbered tiles that slide when a player moves them using the four arrow keys. The game begins with two tiles already in the grid, having a value of either 2 or 4, and another such tile appears in a random empty space after each turn. Tiles slide as far as possible in the chosen direction until they are stopped by either another tile or the edge of the grid. If two tiles of the same number collide while moving, they will merge into a tile with the total value of the two tiles that collided. 
 
 ## Compatibility
-The `x800` has the following target OS requirements:
-- Rust toolchain supporting:
-  - Rust 2021 Edition
-  - The target system's target-triple
-  - a POSIX-compatible `libc` crate
-- Target with a `/dev/urandom` device (technically not defined in POSIX)
+`x800` has the following requirements:
+- Rust toolchain requirements:
+  - Toolchain supports Rust 2021 Edition (version 1.56.0 or better)
+  - Target system's target-triple is supported.
+  - Target's `libc` is POSIX-conforming.
+- The OS provides a `/dev/urandom` device.
+  - > Note: this is common but technically not part of POSIX.
 
-This means that Linux, MacOS, other BSDs, QNX, and MinGW should all work on a variety of architectures.  Refer to the 
-[Platform Support](https://doc.rust-lang.org/rustc/platform-support.html) page and `libc` [documentation](https://docs.rs/libc/latest/libc/).
+This means that Linux, MacOS, other BSDs, QNX, and MinGW should all work on a variety of architectures.  
 
->Note: see-also the ['Cross compilation with `cross`'](#cross-compilation-with-cross-crate) section below.
+> Note: Refer to the  [Platform Support](https://doc.rust-lang.org/rustc/platform-support.html) page and `libc` [documentation](https://docs.rs/libc/latest/libc/).
+
+> Note: For cross-compilation, see the respective [section](#cross-compilation-with-cross-crate) below.
 
 ## Quick start
 The [rustup](https://rustup.rs) tool can be used to install the required Rust toolchain on your build host.
