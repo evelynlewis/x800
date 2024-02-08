@@ -108,6 +108,10 @@ See 'docker run --help'.
 Since `x800` takes input from `stdin` and exits at the completion of a game, random games can be played by sending a stream of random moves to `stdin`.
 Monitoring the speed of characters being read from input and the typical time required to finish a gave provides a reasonable benchmark.
 
+### Note on benchmark result interpretation
+- `[ N MiB/s]` corresponds to `N × 1024²`, or `N × 1048576` discrete directional moves processed by `x800` per second.
+- `hyperfine` latency numbers correspond to the duration of a complete randomly-run game, beginning-to-end.
+
 ## Using the `hyperfine` tool
 
 hyperfine is [described](https://nnethercote.github.io/perf-book/benchmarking.html) by *The Rust Performance Book* as "an excellent general-purpose benchmarking tool."
