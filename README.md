@@ -1,7 +1,7 @@
 # `x800`: a fast and minimal *2048* for POSIX
 ### *ɛks eɪt ˈhʌndrəd*
 
-## Introduction
+# Introduction
 
 How fast? A sustained update rate with a lower bound of 3.12 million input-process-output cycles (ie. moves) per second, on an Pentium G3220T from 2013.
 
@@ -14,7 +14,7 @@ is a POSIX-compatible `libc` crate, which is already included in rustlang's `std
 
 With the above in mind, choices were made to write the code in an idiomatic as possible style, and in general follow the principle of least surprise.
 
-## Preview
+# Preview
 ![x800 screenshot](screenshot.jpg)
 
 # Gameplay
@@ -27,7 +27,7 @@ The keys ('w', 'a', 's', 'd') are used for (up, left, down, right) moves respect
 
 > 2048 is played on a plain 4×4 grid, with numbered tiles that slide when a player moves them using the four arrow keys. The game begins with two tiles already in the grid, having a value of either 2 or 4, and another such tile appears in a random empty space after each turn. Tiles slide as far as possible in the chosen direction until they are stopped by either another tile or the edge of the grid. If two tiles of the same number collide while moving, they will merge into a tile with the total value of the two tiles that collided.
 
-## Compatibility
+# Compatibility
 `x800` has the following requirements:
 - Rust toolchain requirements:
   - Toolchain supports Rust 2021 Edition (version 1.56.0 or better)
@@ -36,16 +36,16 @@ The keys ('w', 'a', 's', 'd') are used for (up, left, down, right) moves respect
 - The OS provides a `/dev/urandom` device.
   - > Note: this is common but technically not part of POSIX.
 
-This means that Linux, MacOS, other BSDs, QNX, and MinGW should all work on a variety of architectures.
+This means that Linux, MacOS, other BSDs, QNX, and MinGW should all work, and on a variety of architectures.
 
-> Note: Refer to the  [Platform Support](https://doc.rust-lang.org/rustc/platform-support.html) page and `libc` [documentation](https://docs.rs/libc/latest/libc/).
+> Note: Refer to the Rust [Platform Support](https://doc.rust-lang.org/rustc/platform-support.html) page and Rust `libc` [documentation](https://docs.rs/libc/latest/libc/).
 
 > Note: For cross-compilation, see the respective [section](#cross-compilation-with-cross-crate) below.
 
-## Quick start
+# Quick start
 The [rustup](https://rustup.rs) tool can be used to install the required Rust toolchain on your build host.
 
-### Running `x800` with `cargo run`
+## Running `x800` with `cargo run`
 
 Check out the repository and use `cargo run`:
 
@@ -55,7 +55,7 @@ cd x800
 cargo run --release
 ```
 
-### Installation with Cargo
+## Installation with Cargo
 
 If you wish to install the program in your home directory, while still managed by Cargo, that can be done with:
 
@@ -70,7 +70,7 @@ Then the binary can be run from any directory with:
 x800
 ```
 
-### Uninstallation with Cargo
+## Uninstallation with Cargo
 
 To uninstall the binary:
 
@@ -78,7 +78,7 @@ To uninstall the binary:
 cargo uninstall x800
 ```
 
-## Cross-compilation with `cross` crate
+# Cross-compilation with `cross` crate
 
 In case you wanted to play 2048 on a somewhat more underpowered or exotic platform, the `cross` crate can be used to cross-compile from a better-supported host.
 
@@ -89,7 +89,7 @@ cargo install cross
 cross build --release --target=arm-unknown-linux-gnueabihf
 ```
 
-### Compatibility note
+## Compatibility note
 
 Docker is used by `cross` behind the scenes, so a working installation and a build host supported by the appropriate `cross` crate Docker image is required.
 
@@ -110,30 +110,30 @@ See 'docker run --help'.
 Since `x800` takes input from `stdin` and exits at the completion of a game, random games can be played by sending a stream of random moves to `stdin`.
 Monitoring the speed of characters being read from input and the typical time required to finish a game provides a reasonable benchmark.
 
-### Notes on benchmark result interpretation
+## Notes on benchmark result interpretation
   1. `[ N MiB/s]` corresponds to `N × 1024²`, or `N × 1048576` discrete directional moves processed by `x800` per second.
 
   2. `hyperfine` latency numbers correspond to the duration of a complete randomly-run game, beginning-to-end.
 
-  3. When using an in-memory file as input, below referred to as "hyperfine with in-memory input pre-generation", it's difficult to measure the rate at which random moves are consumed by `x800`. Nonetheless, looking at the below benchmark results, it can be said with some certainty that `x800` is  limited by the current alternative of live-generating moves from /dev/urandom during a benchmark scenario. This is done by by converting to base32, converting to the stream to lowercase, and then dropping non-matching moves. Therefore, the multi-million move-per-second results realized by this method act can be seen as a lower bound on `x800` performance.
+  3. When using an in-memory file as input, below referred to as "`hyperfine` with in-memory input pre-generation", it's difficult to measure the rate at which random moves are consumed by `x800`. Nonetheless, looking at the below benchmark results, it can be said with some certainty that `x800` is  limited by the current alternative of live-generating moves from /dev/urandom during a benchmark scenario. This is done by by converting to base32, converting to the stream to lowercase, and then dropping non-matching moves. Therefore, the multi-million move-per-second results realized by this method act can be seen as a lower bound on `x800` performance.
 
-## Using the `hyperfine` tool
+## Mini-benchmarks using the `hyperfine` tool
 
-hyperfine is [described](https://nnethercote.github.io/perf-book/benchmarking.html) by *The Rust Performance Book* as "an excellent general-purpose benchmarking tool."
+`hyperfine` is [described](https://nnethercote.github.io/perf-book/benchmarking.html) by *The Rust Performance Book* as "an excellent general-purpose benchmarking tool."
 It seems to deliver.
 
-Requires GNU `base32`, `tr`, `pv`, and a recent version of [hyperfine](https://github.com/sharkdp/hyperfine).
+Requires GNU `base32`, `tr`, `pv`, and a recent version of [`hyperfine`](https://github.com/sharkdp/hyperfine).
 
 > Note: The `hyperfine` binary can be installed via your system package manager or with `cargo install hyperfine`. Your package manager's version may be too old.
 
-### hyperfine with in-memory input pre-generation
+### `hyperfine` with in-memory input pre-generation
 
 ```sh
 touch /tmp/input-moves
 hyperfine --prepare './gen-input-moves.sh /tmp/input-moves' --warmup=64 --runs=2048 --input=/tmp/input-moves -N './target/release/x800'
 ```
 
-#### 2020 M1 MacBook Air running MacOS
+#### M1 MacBook Air running MacOS
 
 ```sh
 touch /tmp/input-moves
@@ -194,7 +194,7 @@ Benchmark 1: x800
 [2.98MiB/s] [2.98MiB/s]
 ```
 
-## Using shell tools
+## Mini-benchmarks using shell tools
 
 Requires GNU `base32`, `tr`, `dash`, `grep`, and `pv`.
 
@@ -208,7 +208,7 @@ cat /dev/urandom \
     | dash -c 'while true; do ./target/release/x800; done' > /dev/null
 ```
 
-#### 1.1 Intel(R) Pentium(R) CPU G3220T @ 2.60GHz running Linux 6.5
+#### Intel(R) Pentium(R) CPU G3220T @ 2.60GHz running Linux 6.5
 
 ```sh
 # Intel(R) Pentium(R) CPU G3220T @ 2.60GHz using shell tools
@@ -220,7 +220,7 @@ cat /dev/urandom \
 [3.12MiB/s] [3.04MiB/s]
 ```
 
-### M1 MacBook Air running MacOS
+#### M1 MacBook Air running MacOS
 ```sh
 # M1 MacBook Air late 2020 using shell tools
 cat /dev/urandom \
@@ -231,14 +231,14 @@ cat /dev/urandom \
 [2.66MiB/s] [2.65MiB/s]
 ```
 
-## License
+# License
 [MIT License](LICENSE.txt)
 
-## References
+# References
 - [*ANSI escape code*](https://en.wikipedia.org/wiki/ANSI_escape_code)
 - [*The TTY demystified*](http://www.linusakesson.net/programming/tty/)
 - [*Zero-dependency random number generation in Rust*](https://blog.orhun.dev/zero-deps-random-in-rust/)
 - [*termios(3) — Linux manual page*](https://man7.org/linux/man-pages/man3/termios.3.html)
 - [*The Rust Performance Book*](https://nnethercote.github.io/perf-book)
 - [*Clippy's Lints*](https://doc.rust-lang.org/stable/clippy/lints.html)
-- [hyperfine](https://github.com/sharkdp/hyperfine)
+- [`hyperfine`](https://github.com/sharkdp/hyperfine)
