@@ -129,26 +129,27 @@ Requires GNU `base32`, `tr`, `pv`, and a recent version of [`hyperfine`](https:/
 ### `hyperfine` with in-memory input pre-generation
 
 ```sh
-touch /tmp/input-moves
-hyperfine --prepare './gen-input-moves.sh /tmp/input-moves' --warmup=64 --runs=2048 --input=/tmp/input-moves -N './target/release/x800'
+touch /tmp/moves
+hyperfine --prepare './etc/gen-moves.sh /tmp/moves' --warmup=64 --runs=2048 --input=/tmp/moves -N './target/release/x800'
 ```
 
 #### M1 MacBook Air running MacOS
 
 ```sh
-touch /tmp/input-moves
-hyperfine --prepare './gen-input-moves.sh /tmp/input-moves' --warmup=64 --runs=2048 --input='/tmp/input-moves' -N './target/release/x800'
+touch /tmp/moves
+hyperfine --prepare './etc/gen-moves.sh /tmp/moves' --warmup=64 --runs=2048 --input='/tmp/moves' -N './target/release/x800'
+
 Benchmark 1: ./target/release/x800
-  Time (mean ± σ):       1.1 ms ±   0.0 ms    [User: 0.4 ms, System: 0.4 ms]
-  Range (min … max):     1.0 ms …   1.3 ms    2048 runs
+  Time (mean ± σ):       2.2 ms ±   0.3 ms    [User: 0.9 ms, System: 1.1 ms]
+  Range (min … max):     1.5 ms …   3.9 ms    2048 runs
 ```
 
 #### Intel(R) Pentium(R) CPU G3220T @ 2.60GHz running Linux 6.5
 ```sh
-touch /tmp/input-moves:%s/
-hyperfine --prepare './gen-input-moves.sh /tmp/input-moves' --warmup=64 --runs=2048 --input=/tmp/input-moves -N './target/release/x800'
+touch /tmp/moves
+hyperfine --prepare './etc/gen-moves.sh /tmp/moves' --warmup=64 --runs=2048 --input='/tmp/moves' -N './target/release/x800'
 Benchmark 1: ./target/release/x800
-  Time (mean ± σ):       2.4 ms ±   0.5 ms    [User: 1.7 ms, System: 0.6 ms]
+  Time (mean ± σ):       2.5 ms ±   0.5 ms    [User: 1.7 ms, System: 0.6 ms]
   Range (min … max):     1.4 ms …   4.8 ms    2048 runs
 ```
 
@@ -167,14 +168,14 @@ cat /dev/urandom \
 #### M1 MacBook Air running MacOS
 
 ```sh
- cat /dev/urandom \
+cat /dev/urandom \
     | gbase32 \
     | tr '[:upper:]' '[:lower:]' | tr -dC 'asdw' \
     | pv --rate --average-rate \
     | hyperfine -N ./target/release/x800 -n x800 --input /dev/stdin --style=color --warmup 256 --runs 2048
 Benchmark 1: x800
-  Time (mean ± σ):       2.8 ms ±   0.8 ms    [User: 0.9 ms, System: 1.0 ms]
-  Range (min … max):     1.3 ms …   5.4 ms    2048 runs
+  Time (mean ± σ):       2.8 ms ±   0.9 ms    [User: 0.9 ms, System: 1.0 ms]
+  Range (min … max):     1.3 ms …   5.5 ms    2048 runs
 
 [2.75MiB/s] [2.75MiB/s]
 ```
@@ -182,16 +183,17 @@ Benchmark 1: x800
 #### Intel(R) Pentium(R) CPU G3220T @ 2.60GHz running Linux 6.5
 
 ```sh
- cat /dev/urandom \
+cat /dev/urandom \
     | base32 \
     | tr '[:upper:]' '[:lower:]' | tr -dC 'asdw' \
     | pv --rate --average \
     | hyperfine -N ./target/release/x800 -n x800 --input /dev/stdin --style=color --warmup 256 --runs 2048
+
 Benchmark 1: x800
   Time (mean ± σ):       2.6 ms ±   0.5 ms    [User: 1.7 ms, System: 0.6 ms]
-  Range (min … max):     1.4 ms …   5.2 ms    2048 runs
+  Range (min … max):     1.4 ms …   5.3 ms    2048 runs
 
-[2.98MiB/s] [2.98MiB/s]
+[2.97MiB/s] [2.97MiB/s]
 ```
 
 ## Mini-benchmarks using shell tools
