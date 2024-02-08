@@ -15,7 +15,7 @@ is a POSIX-compatible `libc` crate, which is already included in rustlang's `std
 With the above in mind, choices were made to write the code in an idiomatic as possible style, and in general follow the principle of least surprise.
 
 # Preview
-![x800 screenshot](screenshot.jpg)
+![x800 screenshot](etc/screenshot.jpeg)
 
 # Gameplay
 
