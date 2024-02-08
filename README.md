@@ -3,7 +3,7 @@
 
 ## Introduction
 
-How fast? A sustained update rate of 3.12 million input-process-output cycles (ie. moves) per second – on an Pentium G3220T from 2013.
+How fast? A sustained update rate with a lower bound of 3.12 million input-process-output cycles (ie. moves) per second on an Pentium G3220T from 2013.
 
 This project was created in part as a hands-on spike project for the author to learn [rustlang](rust-lang.org) as an experienced C and C++ systems software developer.
 
@@ -110,9 +110,12 @@ See 'docker run --help'.
 Since `x800` takes input from `stdin` and exits at the completion of a game, random games can be played by sending a stream of random moves to `stdin`.
 Monitoring the speed of characters being read from input and the typical time required to finish a gave provides a reasonable benchmark.
 
-### Note on benchmark result interpretation
+### Notes on benchmark result interpretation
 - `[ N MiB/s]` corresponds to `N × 1024²`, or `N × 1048576` discrete directional moves processed by `x800` per second.
 - `hyperfine` latency numbers correspond to the duration of a complete randomly-run game, beginning-to-end.
+- At present it is difficult to measure the input consumption rate when using an in-memory file as input (ie. input pre-generation). 
+  - Nonetheless it can be said with some certainty that `x800` is limited by the current method of live-generating moves during a benchmark scenario
+  - Therefore, the multi-million move-per-second results realized by this method act can be seen as a lower bound.
 
 ## Using the `hyperfine` tool
 
@@ -122,6 +125,32 @@ It seems to deliver.
 Requires GNU `base32`, `tr`, `pv`, and a recent version of [hyperfine](https://github.com/sharkdp/hyperfine).
 
 > Note: The `hyperfine` binary can be installed via your system package manager or with `cargo install hyperfine`. Your package manager's version may be too old.
+
+### hyperfine with input pre-generation
+```sh
+touch /tmp/input-moves
+hyperfine --prepare './gen-input-moves.sh /tmp/input-moves' --warmup=64 --runs=2048 --input=/tmp/input-moves -N './target/release/x800'
+```
+
+### hyperfine with input pre-generation results on 2020 M1 MacBook Air running MacOS
+```sh
+touch /tmp/input-moves
+hyperfine --prepare './gen-input-moves.sh /tmp/input-moves' --warmup=64 --runs=2048 --input='/tmp/input-moves' -N './target/release/x800'
+Benchmark 1: ./target/release/x800
+  Time (mean ± σ):       1.1 ms ±   0.0 ms    [User: 0.4 ms, System: 0.4 ms]
+  Range (min … max):     1.0 ms …   1.3 ms    2048 runs
+```
+
+### hyperfine with input pre-generation results on Intel(R) Pentium(R) CPU G3220T @ 2.60GHz running Linux 6.5
+```sh
+touch /tmp/input-moves
+hyperfine --prepare './gen-input-moves.sh /tmp/input-moves' --warmup=64 --runs=2048 --input=/tmp/input-moves -N './target/release/x800'
+Benchmark 1: ./target/release/x800
+  Time (mean ± σ):       2.4 ms ±   0.5 ms    [User: 1.7 ms, System: 0.6 ms]
+  Range (min … max):     1.4 ms …   4.8 ms    2048 runs
+```
+
+### hyperfine with input live-generation
 
 > Note: MacOS arguments and tool names modified slightly.
 
@@ -133,21 +162,7 @@ cat /dev/urandom \
     | hyperfine -N ./target/release/x800 -n x800 --input /dev/stdin --style=color --warmup 256 --runs 2048
 ```
 
-### Results: mini hyperfine benchmark on 1.1 Intel(R) Pentium(R) CPU G3220T @ 2.60GHz running Linux 6.5
-```sh
- cat /dev/urandom \
-    | base32 \
-    | tr '[:upper:]' '[:lower:]' | tr -dC 'asdw' \
-    | pv --rate --average \
-    | hyperfine -N ./target/release/x800 -n x800 --input /dev/stdin --style=color --warmup 256 --runs 2048
-Benchmark 1: x800
-  Time (mean ± σ):       2.6 ms ±   0.5 ms    [User: 1.7 ms, System: 0.6 ms]
-  Range (min … max):     1.4 ms …   5.2 ms    2048 runs
- 
-[2.98MiB/s] [2.98MiB/s]
-```
-
-### Results: mini hyperfine benchmark on M1 MacBook Air running MacOS
+### hyperfine with input live-generation results on M1 MacBook Air running MacOS
 ```sh
  cat /dev/urandom \
     | gbase32 \
@@ -159,6 +174,20 @@ Benchmark 1: x800
   Range (min … max):     1.3 ms …   5.4 ms    2048 runs
  
 [2.75MiB/s] [2.75MiB/s]
+```
+
+### hyperfine with input live-generation results on Intel(R) Pentium(R) CPU G3220T @ 2.60GHz running Linux 6.5
+```sh
+ cat /dev/urandom \
+    | base32 \
+    | tr '[:upper:]' '[:lower:]' | tr -dC 'asdw' \
+    | pv --rate --average \
+    | hyperfine -N ./target/release/x800 -n x800 --input /dev/stdin --style=color --warmup 256 --runs 2048
+Benchmark 1: x800
+  Time (mean ± σ):       2.6 ms ±   0.5 ms    [User: 1.7 ms, System: 0.6 ms]
+  Range (min … max):     1.4 ms …   5.2 ms    2048 runs
+ 
+[2.98MiB/s] [2.98MiB/s]
 ```
 
 ## Using shell tools
