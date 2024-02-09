@@ -3,7 +3,7 @@
 
 # Introduction
 
-How fast? A sustained update rate with a lower bound of 3.12 million input-process-output cycles (ie. moves) per second, on an Pentium G3220T from 2013.
+How fast? A sustained update rate in excess of 3.1 million input-process-output cycles (ie. moves) per second, on an Pentium G3220T from 2013.
 
 This project was created in part as a hands-on spike project for the author to learn [rustlang](rust-lang.org) as an experienced C and C++ systems software developer.
 
