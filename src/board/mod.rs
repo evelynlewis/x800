@@ -24,6 +24,7 @@ use std::{
     cmp::max,
     fmt, fs,
     io::{self, Read},
+    ops,
 };
 
 pub(super) mod constants;
@@ -166,6 +167,8 @@ impl Board {
 
     // Carry out an action on the board
     pub fn update(&mut self, action: Action, gen: tile::Generation) -> bool {
+        const RANGE: ops::Range<usize> = 1..BOARD_DIMENSION;
+
         // Determine if we have iterated over the entire board without any updates
         // And also if the board has been changed over the course of this move
         let mut update = UpdateStatus {
@@ -180,8 +183,8 @@ impl Board {
             Action::Left => {
                 while update.go_again {
                     update.go_again = false;
-                    for r in 1..BOARD_DIMENSION {
-                        for c in 1..BOARD_DIMENSION {
+                    for r in RANGE {
+                        for c in RANGE {
                             self.merge(r, c, r, c - 1, gen, &mut update);
                         }
                     }
@@ -190,8 +193,8 @@ impl Board {
             Action::Up => {
                 while update.go_again {
                     update.go_again = false;
-                    for r in (1..BOARD_DIMENSION).rev() {
-                        for c in (1..BOARD_DIMENSION).rev() {
+                    for r in RANGE.rev() {
+                        for c in RANGE.rev() {
                             self.merge(r, c, r - 1, c, gen, &mut update);
                         }
                     }
@@ -200,8 +203,8 @@ impl Board {
             Action::Right => {
                 while update.go_again {
                     update.go_again = false;
-                    for r in (1..BOARD_DIMENSION).rev() {
-                        for c in (1..BOARD_DIMENSION).rev() {
+                    for r in RANGE.rev() {
+                        for c in RANGE.rev() {
                             self.merge(r, c - 1, r, c, gen, &mut update);
                         }
                     }
@@ -210,8 +213,8 @@ impl Board {
             Action::Down => {
                 while update.go_again {
                     update.go_again = false;
-                    for r in 1..BOARD_DIMENSION {
-                        for c in 1..BOARD_DIMENSION {
+                    for r in RANGE {
+                        for c in RANGE {
                             self.merge(r - 1, c, r, c, gen, &mut update);
                         }
                     }
