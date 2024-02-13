@@ -134,6 +134,7 @@ impl Board {
         print!("{self}");
     }
 
+    #[inline]
     fn merge(
         &mut self,
         r0: usize,

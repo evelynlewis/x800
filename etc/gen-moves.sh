@@ -6,7 +6,7 @@ else
 	OUT="${1}"
 fi
 
-BS="8M"
+BS="4K"
 COUNT="1"
 
 # Check to see if we need a modifed variant of the command

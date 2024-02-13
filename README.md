@@ -121,35 +121,44 @@ Monitoring the speed of characters being read from input and the typical time re
 `hyperfine` is [described](https://nnethercote.github.io/perf-book/benchmarking.html) by *The Rust Performance Book* as "an excellent general-purpose benchmarking tool."
 It seems to deliver.
 
-Requires GNU `base32`, `tr`, `pv`, and a recent version of [`hyperfine`](https://github.com/sharkdp/hyperfine).
+These benchmarks require GNU `base32`, `tr`, `pv`, and a recent version of [`hyperfine`](https://github.com/sharkdp/hyperfine).
 
 > Note: The `hyperfine` binary can be installed via your system package manager or with `cargo install hyperfine`. Your package manager's version may be too old.
 
 ### `hyperfine` with in-memory input pre-generation
 
 ```sh
-touch /tmp/moves
-hyperfine --prepare './etc/gen-moves.sh /tmp/moves' --warmup=64 --runs=2048 --input=/tmp/moves -N './target/release/x800'
+cat etc/bench.sh 
+#!/bin/sh
+
+set -ex
+
+touch /tmp/moves 
+hyperfine --prepare 'etc/gen-moves.sh /tmp/moves' --warmup=256 --runs=1024 --input=/tmp/moves -N target/release/x800
+
 ```
 
 #### M1 MacBook Air running MacOS
 
 ```sh
-touch /tmp/moves
-hyperfine --prepare './etc/gen-moves.sh /tmp/moves' --warmup=64 --runs=2048 --input='/tmp/moves' -N './target/release/x800'
+./etc/bench.sh  
++ touch /tmp/moves
++ hyperfine --prepare 'etc/gen-moves.sh /tmp/moves' --warmup=256 --runs=1024 --input=/tmp/moves -N target/release/x800
+Benchmark 1: target/release/x800
+  Time (mean ± σ):       1.7 ms ±   0.2 ms    [User: 0.8 ms, System: 0.6 ms]
+  Range (min … max):     1.3 ms …   2.5 ms    1024 runs
 
-Benchmark 1: ./target/release/x800
-  Time (mean ± σ):       2.2 ms ±   0.3 ms    [User: 0.9 ms, System: 1.1 ms]
-  Range (min … max):     1.5 ms …   3.9 ms    2048 runs
 ```
 
 #### Intel(R) Pentium(R) CPU G3220T @ 2.60GHz running Linux 6.5
 ```sh
-touch /tmp/moves
-hyperfine --prepare './etc/gen-moves.sh /tmp/moves' --warmup=64 --runs=2048 --input='/tmp/moves' -N './target/release/x800'
-Benchmark 1: ./target/release/x800
-  Time (mean ± σ):       2.5 ms ±   0.5 ms    [User: 1.7 ms, System: 0.6 ms]
-  Range (min … max):     1.4 ms …   4.8 ms    2048 runs
+./etc/bench.sh 
++ touch /tmp/moves
++ hyperfine --prepare etc/gen-moves.sh /tmp/moves --warmup=256 --runs=1024 --input=/tmp/moves -N target/release/x800
+Benchmark 1: target/release/x800
+  Time (mean ± σ):       2.1 ms ±   0.4 ms    [User: 1.6 ms, System: 0.4 ms]
+  Range (min … max):     1.3 ms …   3.2 ms    1024 runs
+
 ```
 
 ### hyperfine with input live-generation
@@ -161,7 +170,7 @@ cat /dev/urandom \
     | base32 \
     | tr '[:upper:]' '[:lower:]' | tr -dC 'asdw' \
     | pv --rate --average \
-    | hyperfine -N ./target/release/x800 -n x800 --input /dev/stdin --style=color --warmup 256 --runs 2048
+    | hyperfine -N ./target/release/x800 -n x800 --input /dev/stdin --style=color --warmup 256 --runs 1024
 ```
 
 #### M1 MacBook Air running MacOS
@@ -171,12 +180,13 @@ cat /dev/urandom \
     | gbase32 \
     | tr '[:upper:]' '[:lower:]' | tr -dC 'asdw' \
     | pv --rate --average-rate \
-    | hyperfine -N ./target/release/x800 -n x800 --input /dev/stdin --style=color --warmup 256 --runs 2048
-Benchmark 1: x800
-  Time (mean ± σ):       2.8 ms ±   0.9 ms    [User: 0.9 ms, System: 1.0 ms]
-  Range (min … max):     1.3 ms …   5.5 ms    2048 runs
+    | hyperfine -N ./target/release/x800 -n x800 --input /dev/stdin --style=color --warmup 256 --runs 1024
 
-[2.75MiB/s] [2.75MiB/s]
+Benchmark 1: x800
+  Time (mean ± σ):       2.8 ms ±   1.2 ms    [User: 0.8 ms, System: 0.6 ms]
+  Range (min … max):     1.2 ms …   5.4 ms    1024 runs
+ 
+[2.77MiB/s] [2.77MiB/s]
 ```
 
 #### Intel(R) Pentium(R) CPU G3220T @ 2.60GHz running Linux 6.5
@@ -186,13 +196,12 @@ cat /dev/urandom \
     | base32 \
     | tr '[:upper:]' '[:lower:]' | tr -dC 'asdw' \
     | pv --rate --average \
-    | hyperfine -N ./target/release/x800 -n x800 --input /dev/stdin --style=color --warmup 256 --runs 2048
-
+    | hyperfine -N ./target/release/x800 -n x800 --input /dev/stdin --style=color --warmup 256 --runs 1024
 Benchmark 1: x800
-  Time (mean ± σ):       2.6 ms ±   0.5 ms    [User: 1.7 ms, System: 0.6 ms]
-  Range (min … max):     1.4 ms …   5.3 ms    2048 runs
-
-[2.97MiB/s] [2.97MiB/s]
+  Time (mean ± σ):       2.2 ms ±   0.4 ms    [User: 1.6 ms, System: 0.3 ms]
+  Range (min … max):     1.3 ms …   3.9 ms    1024 runs
+ 
+[3.51MiB/s] [3.51MiB/s]
 ```
 
 ## Mini-benchmarks using shell tools
@@ -218,7 +227,7 @@ cat /dev/urandom \
     | tr -s '[:upper:]' '[:lower:]' | tr -dC 'asdw' \
     | pv --wait --rate --average-rate \
     | dash -c 'while true; do ./target/release/x800; done' > /dev/null
-[3.12MiB/s] [3.04MiB/s]
+[3.67MiB/s] [3.57MiB/s]
 ```
 
 #### M1 MacBook Air running MacOS
@@ -229,7 +238,7 @@ cat /dev/urandom \
     | tr -s '[:upper:]' '[:lower:]' | tr -dC 'asdw' \
     | pv --rate --average-rate \
     | dash -c 'while true; do ./target/release/x800; done' > /dev/null
-[2.66MiB/s] [2.65MiB/s]
+[2.68MiB/s] [2.68MiB/s]
 ```
 
 # License
