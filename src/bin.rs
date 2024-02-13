@@ -24,6 +24,8 @@ mod board;
 mod colour;
 mod play;
 
+use play::{play, stdin_reader, Input};
+
 fn main() {
-    play::play(&play::Input::Fn(play::stdin_reader))
+    play(&Input::Interactive(stdin_reader))
 }

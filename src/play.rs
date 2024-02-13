@@ -25,7 +25,7 @@ fn shutdown(fd: i32, ios: &libc::termios) {
     }
 }
 
-fn startup() -> (i32, libc::termios) {
+fn startup(input: &Input) -> (i32, libc::termios) {
     let fd = libc::STDIN_FILENO;
     let return_ios: libc::termios;
     unsafe {
@@ -34,9 +34,12 @@ fn startup() -> (i32, libc::termios) {
         libc::tcgetattr(fd, &mut ios);
         // Copy
         return_ios = ios;
-        // Enable and set raw mode
-        libc::cfmakeraw(&mut ios);
-        libc::tcsetattr(fd, libc::TCSANOW, &ios);
+
+        // Enable and set raw mode in case of terminal
+        if let Input::Interactive(_) = input {
+            libc::cfmakeraw(&mut ios);
+            libc::tcsetattr(fd, libc::TCSANOW, &ios);
+        }
     }
     (fd, return_ios)
 }
@@ -44,7 +47,7 @@ fn startup() -> (i32, libc::termios) {
 #[allow(dead_code)]
 pub enum Input<'a> {
     Slice(&'a [u8]),
-    Fn(fn() -> Action),
+    Interactive(fn() -> Action),
 }
 
 pub fn play(input: &Input) {
@@ -56,7 +59,7 @@ pub fn play(input: &Input) {
     let mut action: Action;
 
     // Startup
-    let (fd, termios) = startup();
+    let (fd, termios) = startup(input);
 
     // Clear screen and draw intial board
     for _ in 0..INITIAL_BLOCK_COUNT {
@@ -77,7 +80,7 @@ pub fn play(input: &Input) {
     loop {
         action = match input {
             Input::Slice(_) => Action::parse(iter.next()),
-            Input::Fn(f) => f(),
+            Input::Interactive(f) => f(),
         };
 
         // Increment generation
