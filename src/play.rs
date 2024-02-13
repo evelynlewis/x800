@@ -1,42 +1,21 @@
-/*
-  Copyright (c) 2024 Evelyn Lewis
-
-  Permission is hereby granted, free of charge, to any person obtaining a copy
-  of this software and associated documentation files (the "Software"), to deal
-  in the Software without restriction, including without limitation the rights
-  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-  copies of the Software, and to permit persons to whom the Software is
-  furnished to do so, subject to the following conditions:
-
-  The above copyright notice and this permission notice shall be included in all
-  copies or substantial portions of the Software.
-
-  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-  SOFTWARE.
-*/
-
 use std::{
     io::{self, Read},
     mem,
 };
 
-mod board;
-mod colour;
+use crate::board;
 use board::{Action, Board};
 
 const INITIAL_BLOCK_COUNT: u8 = 2;
 
-fn input() -> io::Result<Action> {
+#[allow(dead_code)]
+pub fn stdin_reader() -> Action {
     // Read a byte from stdin
     let mut buffer = [0u8; 1];
-    io::stdin().read_exact(&mut buffer)?;
-
-    Ok(Action::parse(buffer[0] as char))
+    if io::stdin().read_exact(&mut buffer).is_err() {
+        return Action::Shutdown;
+    }
+    Action::parse(Some(&buffer[0]))
 }
 
 fn shutdown(fd: i32, ios: &libc::termios) {
@@ -62,36 +41,51 @@ fn startup() -> (i32, libc::termios) {
     (fd, return_ios)
 }
 
-fn main() {
+#[allow(dead_code)]
+pub enum Input<'a> {
+    Slice(&'a [u8]),
+    Fn(fn() -> Action),
+}
+
+pub fn play(input: &Input) {
     // Runtime storage
     let mut board = Board::new();
     let mut gen: board::Generation = 0;
     let mut update;
     let mut has_space;
+    let mut action: Action;
 
     // Startup
     let (fd, termios) = startup();
 
-    let handle_tile_err = |e: &io::Error| {
-        println!("{}creating new tile: {}", board::constants::LEFT_SPACE, e);
-        shutdown(fd, &termios);
-    };
-
     // Clear screen and draw intial board
     for _ in 0..INITIAL_BLOCK_COUNT {
-        if let Err(e) = board.create_new_tile(gen) {
-            return handle_tile_err(&e);
-        }
+        board.create_new_tile(gen);
     }
+
     board.draw();
 
+    // Pre-setup for slice input
+    let mut iter = Default::default();
+    match input {
+        Input::Slice(slice) => {
+            iter = slice.iter();
+        }
+        _ => {}
+    }
+
     loop {
+        action = match input {
+            Input::Slice(_) => Action::parse(iter.next()),
+            Input::Fn(f) => f(),
+        };
+
         // Increment generation
         gen += 1;
 
         // Read input and take action
-        match input() {
-            Err(_) | Ok(Action::Shutdown) => {
+        match action {
+            Action::Shutdown => {
                 print!(
                     "{}{}",
                     board::constants::LEFT_SPACE,
@@ -100,10 +94,10 @@ fn main() {
                 // Handle graceful shutdown
                 return shutdown(fd, &termios);
             }
-            Ok(Action::Continue) => {
+            Action::Continue => {
                 continue;
             }
-            Ok(other) => {
+            other => {
                 update = board.update(other, gen);
             }
         };
@@ -111,9 +105,7 @@ fn main() {
         // Add new starting tile if possible
         has_space = board.has_space();
         if has_space {
-            if let Err(e) = board.create_new_tile(gen) {
-                return handle_tile_err(&e);
-            }
+            board.create_new_tile(gen);
         }
 
         // Draw new board state

@@ -27,7 +27,8 @@ use super::constants::{
     BOTTOM_EDGE, BOTTOM_LEFT_CORNER, BOTTOM_RIGHT_CORNER, BOTTOM_RIGHT_CORNER_SPACE, EMPTY_BLOCK,
     LEFT_EDGE, LEFT_SPACE, RIGHT_EDGE, TOP_EDGE, TOP_LEFT_CORNER, TOP_RIGHT_CORNER,
 };
-use crate::{board::BOARD_DIMENSION, colour::Colour};
+use super::BOARD_DIMENSION;
+use crate::colour::Colour;
 use std::fmt;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

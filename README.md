@@ -9,8 +9,7 @@ This project was created in part as a hands-on spike project for the author to l
 
 The name `x800` is the number `2048` in base sixteen, modified to comply with Cargo's package naming rules which disallow a leading digit in package names.
 
-It was also an exercise in creating a working program of substantial size with minimal external dependencies. It doesn't use ncurses. The only build dependency
-is a POSIX-compatible `libc` crate, which is already included in rustlang's `std` – so depending how you count it, `x800` has either zero dependencies or one.
+This project was also an exercise in creating a program of substantial size with a low number of external dependencies. It doesn't use ncurses. The only external build dependency is [`fastrand`](https://crates.io/crates/fastrand) – a simple PRNG Crate, without child dependencies. The program also requires a POSIX-compatible `libc` crate, which is already included in rustlang's `std` when building for POSIX targets.
 
 With the above in mind, choices were made to write the code in an idiomatic as possible style, and in general follow the principle of least surprise.
 
@@ -40,7 +39,7 @@ This means that Linux, MacOS, other BSDs, QNX, and MinGW should all work, and on
 
 > Note: Refer to the Rust [Platform Support](https://doc.rust-lang.org/rustc/platform-support.html) page and Rust `libc` [documentation](https://docs.rs/libc/latest/libc/).
 
-> Note: For cross-compilation, see the respective [section](#cross-compilation-with-cross-crate) below.
+> Note: For straightforward cross-compilation, see the related [section](#cross-compilation-with-cross-crate) below.
 
 # Quick start
 The [rustup](https://rustup.rs) tool can be used to install the required Rust toolchain on your build host.
@@ -78,9 +77,9 @@ To uninstall the binary:
 cargo uninstall x800
 ```
 
-# Cross-compilation with `cross` crate
+# Cross-compilation with `cross` Crate
 
-In case you wanted to play 2048 on a somewhat more underpowered or exotic platform, the `cross` crate can be used to cross-compile from a better-supported host.
+In case you wanted to play 2048 on a somewhat more underpowered or exotic platform, the `cross` Crate can be used to cross-compile from a better-supported host.
 
 Here's an example which I tested on an x86-64 Linux box to build `x800` targeting a Raspberry Pi Zero W:
 
@@ -91,7 +90,7 @@ cross build --release --target=arm-unknown-linux-gnueabihf
 
 ## Compatibility note
 
-Docker is used by `cross` behind the scenes, so a working installation and a build host supported by the appropriate `cross` crate Docker image is required.
+Docker is used by `cross` behind the scenes, so a working installation and a build host supported by the appropriate `cross` Crate Docker image is required.
 
 Note that with the default `cross` setup, Macs with ARM seem not to be supported as a build host.
 I didn't look into it much further at the time since I had another machine on hand.

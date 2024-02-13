@@ -20,13 +20,8 @@
   SOFTWARE.
 */
 
-use std::{
-    cmp::max,
-    fmt, fs,
-    io::{self, Read},
-    ops,
-};
-
+use fastrand;
+use std::{cmp::max, fmt, ops};
 pub(super) mod constants;
 mod tile;
 
@@ -39,6 +34,9 @@ pub type Generation = tile::Generation;
 const NUMBER_BLOCKS_PER_LINE: usize = 4;
 const BOARD_DIMENSION: usize = NUMBER_BLOCKS_PER_LINE + 2;
 type Row = [tile::Tile; BOARD_DIMENSION];
+
+// Control-C character will end game
+const END_OF_GAME_CHARACTER: u8 = '\u{3}' as u8;
 
 #[derive(Debug, Clone)]
 pub struct Board {
@@ -59,8 +57,8 @@ pub(super) enum Action {
 }
 
 impl Action {
-    pub(super) fn parse(input: char) -> Self {
-        match input {
+    pub(super) fn parse(input: Option<&u8>) -> Self {
+        match *(input.unwrap_or(&END_OF_GAME_CHARACTER)) as char {
             'w' => Action::Up,
             'a' => Action::Left,
             'd' => Action::Right,
@@ -82,7 +80,7 @@ fn action_parse_test() {
             '\u{3}' => Action::Shutdown,
             _ => Action::Continue,
         };
-        assert_eq!(Action::parse(c as char), action);
+        assert_eq!(Action::parse(Some(&c)), action);
     }
 }
 struct UpdateStatus {
@@ -97,6 +95,7 @@ impl Board {
 
         assert_eq!(board.rows.len(), BOARD_DIMENSION);
         assert_eq!(board.rows[0].len(), BOARD_DIMENSION);
+        assert_eq!(board.rows.len(), board.rows[0].len());
         board.open_blocks = 0;
         board.max_block = 0;
 
@@ -229,17 +228,13 @@ impl Board {
     }
 
     // Create a new '2' or '4' starting number tile
-    pub fn create_new_tile(&mut self, gen: tile::Generation) -> io::Result<()> {
+    pub fn create_new_tile(&mut self, gen: tile::Generation) {
         const CHANCE_OF_FOUR_BLOCK: u8 = 4;
         assert!(self.open_blocks > 0);
 
         // Collect random numbers
-        let mut rng = fs::File::open("/dev/urandom")?;
-        let mut buffer = [0u8; 1];
-        rng.read_exact(&mut buffer)?;
-        let new_index = buffer[0] % self.open_blocks;
-        rng.read_exact(&mut buffer)?;
-        let new_value = if (buffer[0] % CHANCE_OF_FOUR_BLOCK) == (CHANCE_OF_FOUR_BLOCK - 1) {
+        let new_index = fastrand::u8(..self.open_blocks);
+        let new_value = if fastrand::u8(..CHANCE_OF_FOUR_BLOCK) == (CHANCE_OF_FOUR_BLOCK - 1) {
             2 // '4' tile
         } else {
             1 // '2' tile
@@ -255,13 +250,12 @@ impl Board {
                         self.rows[r][c] = Tile::Number(new_value, gen);
                         self.open_blocks -= 1;
                         self.max_block = max(new_value, self.max_block);
-                        return Ok(());
+                        return;
                     }
                     scan_index += 1;
                 }
             }
         }
-        Ok(())
     }
 
     fn fmt_score(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

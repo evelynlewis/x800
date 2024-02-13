@@ -59,11 +59,7 @@ impl Colour {
     pub fn from_power(power: u8) -> Self {
         match power {
             // empty colour
-            0 => Colour {
-                empty: true,
-                row: 0,
-                column: 0,
-            },
+            0 => Colour::default(),
             // first, left-most column, upwards (ie. /|\)
             1..=3 => Colour {
                 empty: false,

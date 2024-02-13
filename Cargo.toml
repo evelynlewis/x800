@@ -17,9 +17,16 @@ keywords = [
 ]
 readme = "README.md"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[lib]
+name = "x800"
+path = "src/lib.rs"
+
+[[bin]]
+name = "x800"
+path = "src/bin.rs"
 
 [dependencies]
+fastrand = "2.0.1"
 libc = "0.2"
 
 [lints.clippy]
