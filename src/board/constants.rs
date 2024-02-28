@@ -39,8 +39,13 @@ pub const SCORE: &str = "score is ";
 pub const WIN_MESSAGE: &str = "- - - - you win!! - - - -\r\n";
 pub const GAME_OVER: &str = "- - - - game over - - - -\r\n";
 pub const GOODBYE: &str = "- - - - goodbye now - - -\r\n";
-pub const WIN_POWER: u8 = 11u8;
+pub const GAME_FAILURE_MESSAGE: &str = " an ongoing game problem \r\n";
+pub const WIN_POWER: u8 = 11_u8;
 pub const BLOCK_WIDTH: usize = 4;
+
+pub const NUMBER_BLOCKS_PER_LINE: usize = 4;
+pub const BOARD_DIMENSION: usize = NUMBER_BLOCKS_PER_LINE + 2;
+pub const DISPLAY_BUFFER_SIZE: usize = (BOARD_DIMENSION + 6) * (BOARD_DIMENSION + 4);
 
 pub const DEFAULT_BOARD: &Board = &Board {
     rows: [
@@ -93,7 +98,7 @@ pub const DEFAULT_BOARD: &Board = &Board {
             Tile::Corner(CornerSide::BottomRight),
         ],
     ],
-    open_blocks: 0,
+    open_blocks: 16,
     score: 0,
     max_block: 0,
 };

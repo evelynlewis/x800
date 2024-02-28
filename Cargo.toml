@@ -7,14 +7,7 @@ description = "a fast and minimal 2048 for POSIX"
 license = "MIT"
 categories = ["command-line-utilities", "games", "embedded"]
 repository = "https://github.com/evelynlewis/x800"
-keywords = [
-    "2048",
-    "command-line",
-    "game",
-    "libc",
-    "minimal",
-    "embedded",
-]
+keywords = ["2048", "command-line", "game", "libc", "minimal", "embedded"]
 readme = "README.md"
 
 [lib]
@@ -36,6 +29,6 @@ pedantic = "deny"
 
 [profile.release]
 codegen-units = 1
-debug = true
-lto = "fat"
 panic = "abort"
+strip = "debuginfo"
+

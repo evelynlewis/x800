@@ -31,56 +31,41 @@
 /// the top right corner. Chosen order is to move down the
 /// right-hand column, across the bottom, up the left side,
 /// and across the top.
-use std::{default::Default, fmt};
+use std::fmt;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Colour {
-    pub empty: bool,
     pub row: u8,
     pub column: u8,
 }
 
 impl Default for Colour {
     fn default() -> Self {
-        Colour {
-            empty: true,
-            row: 0,
-            column: 0,
-        }
+        Colour { row: 0, column: 0 }
     }
-}
-
-#[test]
-fn power_to_colour_zero_test() {
-    assert_eq!(Colour::from_power(0), Colour::default());
 }
 
 impl Colour {
     pub fn from_power(power: u8) -> Self {
         match power {
-            // empty colour
             0 => Colour::default(),
             // first, left-most column, upwards (ie. /|\)
             1..=3 => Colour {
-                empty: false,
                 row: 5 - ((power - 1) * 2),
                 column: COLOUR_LEFT_COLUMN,
             },
             // top-most row (ie. '>->')
             4..=6 => Colour {
-                empty: false,
                 row: 0,
                 column: COLOUR_LEFT_COLUMN + ((power - 4) * 2),
             },
             // right-most column, downwards (ie. '\|/')
             7..=9 => Colour {
-                empty: false,
                 row: (power - 7) * 2,
                 column: COLOUR_RIGHT_COLUMN,
             },
             // bottom-most row (ie. '<-<')
             10..=12 => Colour {
-                empty: false,
                 row: 5,
                 column: COLOUR_RIGHT_COLUMN + ((power - 10) * 2),
             },
@@ -94,6 +79,11 @@ const COLOUR_LEFT_COLUMN: u8 = 34 - 16;
 const COLOUR_RIGHT_COLUMN: u8 = COLOUR_LEFT_COLUMN + 5;
 
 #[test]
+fn power_to_colour_zero_test() {
+    assert_eq!(Colour::from_power(0), Colour::default());
+}
+
+#[test]
 fn power_to_colour_cycle_test() {
     for power in 0..=255u8 {
         assert_eq!(Colour::from_power(power), Colour::from_power(power % 13));
@@ -102,15 +92,12 @@ fn power_to_colour_cycle_test() {
 
 impl fmt::Display for Colour {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let bg: u32;
-        let fg: u32;
-        if self.empty {
-            bg = 0;
-            fg = 15;
-        } else {
-            bg = 16 + u32::from(self.column) + (u32::from(self.row) * 36);
-            fg = 0;
+        let (mut bg, mut fg) = (16 + self.column + (self.row * 36), 0);
+
+        if *self == Default::default() {
+            (bg, fg) = (0, 15);
         }
+
         write!(f, "{esc}[48;5;{}m{esc}[38;5;{}m", bg, fg, esc = '\u{1B}')
     }
 }

@@ -20,8 +20,8 @@
   SOFTWARE.
 */
 
-use fastrand;
-use std::{cmp::max, fmt, ops};
+use core::fmt;
+use std::{cmp::max, fmt::Write, io, ops};
 pub(super) mod constants;
 mod tile;
 
@@ -30,28 +30,32 @@ use tile::Tile;
 
 // Promote Generation type to public within this module
 pub type Generation = tile::Generation;
+use constants::{BOARD_DIMENSION, NUMBER_BLOCKS_PER_LINE};
 
-const NUMBER_BLOCKS_PER_LINE: usize = 4;
-const BOARD_DIMENSION: usize = NUMBER_BLOCKS_PER_LINE + 2;
 type Row = [tile::Tile; BOARD_DIMENSION];
 
 // Control-C character will end game
 const END_OF_GAME_CHARACTER: u8 = '\u{3}' as u8;
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct Board {
     rows: [Row; BOARD_DIMENSION],
-    open_blocks: u8,
+    open_blocks: u32,
     score: u64,
     max_block: u8,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub(super) enum Action {
+#[derive(PartialEq, Eq)]
+pub(super) enum Direction {
     Up,
     Down,
     Left,
     Right,
+}
+
+#[derive(PartialEq, Eq)]
+pub(super) enum Action {
+    Direction(Direction),
     Continue,
     Shutdown,
 }
@@ -59,82 +63,49 @@ pub(super) enum Action {
 impl Action {
     pub(super) fn parse(input: Option<&u8>) -> Self {
         match *(input.unwrap_or(&END_OF_GAME_CHARACTER)) as char {
-            'w' => Action::Up,
-            'a' => Action::Left,
-            'd' => Action::Right,
-            's' => Action::Down,
+            'w' => Action::Direction(Direction::Up),
+            'a' => Action::Direction(Direction::Left),
+            'd' => Action::Direction(Direction::Right),
+            's' => Action::Direction(Direction::Down),
             '\u{3}' => Action::Shutdown,
             _ => Action::Continue,
         }
     }
 }
 
-#[test]
-fn action_parse_test() {
-    for c in 0..=255u8 {
-        let action = match c as char {
-            'w' => Action::Up,
-            'a' => Action::Left,
-            's' => Action::Down,
-            'd' => Action::Right,
-            '\u{3}' => Action::Shutdown,
-            _ => Action::Continue,
-        };
-        assert_eq!(Action::parse(Some(&c)), action);
-    }
-}
 struct UpdateStatus {
     made_move: bool,
     go_again: bool,
 }
 
 impl Board {
-    /// Create a new default Board instance
-    pub fn new() -> Board {
-        let mut board = constants::DEFAULT_BOARD.clone();
-
-        assert_eq!(board.rows.len(), BOARD_DIMENSION);
-        assert_eq!(board.rows[0].len(), BOARD_DIMENSION);
-        assert_eq!(board.rows.len(), board.rows[0].len());
-        board.open_blocks = 0;
-        board.max_block = 0;
-
-        for i in 1..BOARD_DIMENSION {
-            for j in 1..BOARD_DIMENSION {
-                match board.rows[i][j] {
-                    Tile::Empty() => {
-                        board.open_blocks += 1;
-                    }
-                    Tile::Number(n, _) => {
-                        board.max_block = std::cmp::max(board.max_block, n);
-                    }
-                    _ => {
-                        continue;
-                    }
-                }
-            }
-        }
-        board
-    }
-
     // Clear screen
-    #[inline]
-    pub fn clear() {
-        print!("{}{esc}[2H{esc}[2J", Colour::default(), esc = '\u{1B}');
+    pub fn draw_clear(&self, output: &mut String) -> fmt::Result {
+        write!(
+            output,
+            "{}{esc}[2H{esc}[2J",
+            Colour::default(),
+            esc = '\u{1B}'
+        )
     }
 
-    #[inline]
     pub fn has_space(&self) -> bool {
         self.open_blocks != 0
     }
 
     /// Draw board display
-    pub fn draw(&self) {
-        Self::clear();
-        print!("{self}");
+    pub fn draw(&self, buffer: &mut String, out: &mut dyn io::Write) -> fmt::Result {
+        if !cfg!(fuzzing) {
+            self.draw_clear(buffer)?;
+            self.draw_header(buffer)?;
+            self.draw_blocks(buffer)?;
+            self.draw_score(buffer)?;
+            write!(out, "{}", buffer).unwrap();
+            buffer.clear();
+        }
+        Ok(())
     }
 
-    #[inline]
     fn merge(
         &mut self,
         r0: usize,
@@ -144,7 +115,13 @@ impl Board {
         gen: u64,
         update: &mut UpdateStatus,
     ) {
-        let merged = self.rows[r0][c0].merge(&self.rows[r1][c1], gen);
+        // Do bounds checking here to avoid extra checks
+        assert!(r0 < self.rows.len());
+        assert!(r1 < self.rows.len());
+        assert!(c0 < self.rows[0].len());
+        assert!(c1 < self.rows[0].len());
+
+        let merged: Option<Tile> = self.rows[r0][c0].merge(&self.rows[r1][c1], gen);
         let previous: &Tile = &self.rows[r0][c0];
         let result = match merged {
             Some(Tile::Number(n, _)) => {
@@ -166,7 +143,7 @@ impl Board {
     }
 
     // Carry out an action on the board
-    pub fn update(&mut self, action: Action, gen: tile::Generation) -> bool {
+    pub fn update(&mut self, direction: Direction, gen: tile::Generation) -> bool {
         const RANGE: ops::Range<usize> = 1..BOARD_DIMENSION;
 
         // Determine if we have iterated over the entire board without any updates
@@ -179,8 +156,8 @@ impl Board {
         };
 
         // Take appropriate action
-        match action {
-            Action::Left => {
+        match direction {
+            Direction::Left => {
                 while update.go_again {
                     update.go_again = false;
                     for r in RANGE {
@@ -190,7 +167,7 @@ impl Board {
                     }
                 }
             }
-            Action::Up => {
+            Direction::Up => {
                 while update.go_again {
                     update.go_again = false;
                     for r in RANGE.rev() {
@@ -200,7 +177,7 @@ impl Board {
                     }
                 }
             }
-            Action::Right => {
+            Direction::Right => {
                 while update.go_again {
                     update.go_again = false;
                     for r in RANGE.rev() {
@@ -210,7 +187,7 @@ impl Board {
                     }
                 }
             }
-            Action::Down => {
+            Direction::Down => {
                 while update.go_again {
                     update.go_again = false;
                     for r in RANGE {
@@ -220,30 +197,26 @@ impl Board {
                     }
                 }
             }
-
-            Action::Continue | Action::Shutdown => {
-                unreachable!("Reached invalid Action: {:?}", action);
-            }
         }
         update.made_move
     }
 
     // Create a new '2' or '4' starting number tile
     pub fn create_new_tile(&mut self, gen: tile::Generation) {
-        const CHANCE_OF_FOUR_BLOCK: u8 = 4;
+        const CHANCE_OF_FOUR_BLOCK: u32 = 4;
         assert!(self.open_blocks > 0);
 
         // Collect random numbers
-        let new_index = fastrand::u8(..self.open_blocks);
-        let new_value = if fastrand::u8(..CHANCE_OF_FOUR_BLOCK) == (CHANCE_OF_FOUR_BLOCK - 1) {
+        let new_index = fastrand::u32(..self.open_blocks);
+        let new_value = if fastrand::u32(..CHANCE_OF_FOUR_BLOCK) == (CHANCE_OF_FOUR_BLOCK - 1) {
             2 // '4' tile
         } else {
             1 // '2' tile
         };
 
-        let mut scan_index: u8 = 0;
+        let mut scan_index: u32 = 0;
 
-        // Brute force isn't great, but it's an exceptionally small board (about 36 ops)
+        // Brute force isn't great, but it's an exceptionally small board (about 16 ops maximum)
         for r in 1..BOARD_DIMENSION {
             for c in 1..BOARD_DIMENSION {
                 if self.rows[r][c] == Tile::Empty() {
@@ -251,6 +224,7 @@ impl Board {
                         self.rows[r][c] = Tile::Number(new_value, gen);
                         self.open_blocks -= 1;
                         self.max_block = max(new_value, self.max_block);
+                        // Early exit
                         return;
                     }
                     scan_index += 1;
@@ -259,35 +233,34 @@ impl Board {
         }
     }
 
-    fn fmt_score(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        if self.max_block >= constants::WIN_POWER {
-            write!(f, "{}{}", constants::LEFT_SPACE, constants::WIN_MESSAGE)?;
-        } else {
-            write!(f, "\r\n")?;
-        }
+    pub fn draw_score(&self, buffer: &mut String) -> fmt::Result {
         write!(
-            f,
-            "{}{}{score}{:<colour_len$}{}\r\n",
-            constants::LEFT_SPACE,
+            buffer,
+            "{space}{}{space}{}{score}{:<colour_len$}{}\r\n",
+            if self.max_block >= constants::WIN_POWER {
+                constants::WIN_MESSAGE
+            } else {
+                "\r\n"
+            },
             Colour::from_power(self.max_block),
             self.score,
             Colour::default(),
+            space = constants::LEFT_SPACE,
             score = constants::SCORE,
             colour_len = (NUMBER_BLOCKS_PER_LINE * constants::BLOCK_WIDTH)
                 + (2 * constants::LR_EDGE_WIDTH)
                 + constants::LEFT_SPACE.len()
                 - constants::SCORE.len()
-        )?;
-        Ok(())
+        )
     }
 
-    fn fmt_header(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn draw_header(&self, buffer: &mut String) -> fmt::Result {
         write!(
-            f,
+            buffer,
             "{}{}{:<colour_len$}{}\r\n\n",
             constants::LEFT_SPACE,
             Colour::from_power(self.max_block),
-            "",
+            String::default(),
             Colour::default(),
             colour_len = (NUMBER_BLOCKS_PER_LINE * constants::BLOCK_WIDTH)
                 + (2 * constants::LR_EDGE_WIDTH)
@@ -295,22 +268,17 @@ impl Board {
         )
     }
 
-    fn fmt_blocks(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn draw_blocks(&self, buffer: &mut String) -> fmt::Result {
+        // Allow bounds-checking elision
+        assert_eq!(self.rows.len(), BOARD_DIMENSION);
+        assert_eq!(self.rows[0].len(), BOARD_DIMENSION);
+
         // Iterate over each row and column, then print
         for i in 0..BOARD_DIMENSION {
             for j in 0..BOARD_DIMENSION {
-                write!(f, "{}", self.rows[i][j])?;
+                write!(buffer, "{}", self.rows[i][j])?;
             }
         }
-        Ok(())
-    }
-}
-
-impl fmt::Display for Board {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        self.fmt_header(f)?;
-        self.fmt_blocks(f)?;
-        self.fmt_score(f)?;
         Ok(())
     }
 }

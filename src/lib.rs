@@ -26,5 +26,5 @@ use play::{play, Input};
 
 pub fn fuzz(input: &[u8], seed: u64) {
     fastrand::seed(seed);
-    play(&Input::Slice(input))
+    play(&Input::Slice(input)).unwrap();
 }

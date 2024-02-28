@@ -1,0 +1,4 @@
+left="a"
+down="s"
+right="d"
+up="w"

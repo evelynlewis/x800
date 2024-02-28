@@ -9,9 +9,18 @@ cargo-fuzz = true
 
 [dependencies]
 libfuzzer-sys = "0.4"
+x800 = { path = ".." }
 
-[dependencies.x800]
-path = ".."
+[lints.clippy]
+all = "deny"
+cargo = "deny"
+pedantic = "deny"
+
+[profile.release]
+codegen-units = 1
+strip = "debuginfo"
+lto = "fat"
+panic = "abort"
 
 [[bin]]
 name = "roger"
