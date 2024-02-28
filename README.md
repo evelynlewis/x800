@@ -1,4 +1,4 @@
-# `x800`: a fast and minimal *2048* for POSIX
+# `x800`: a fast and portable *2048* for POSIX
 
 x800: [ɛks eɪt ˈhʌndrəd]
 
