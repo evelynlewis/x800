@@ -186,6 +186,10 @@ cat /dev/urandom \
 
 A fuzzer named `roger`, after the rabbit, is provided in the `fuzz/` directory. It is build using [`cargo-fuzz`](https://github.com/rust-fuzz/cargo-fuzz), which uses [LibFuzzer](https://llvm.org/docs/LibFuzzer.html), part of the LLVM project. A convenience script is provided under `util/fuzz.sh`. Both a small dictionary and a minimized corpus with good coverage are checked into the repository.
 
+## Flame graphs
+
+Flame graphs, first created by [Brendan Gregg](https://www.brendangregg.com/flamegraphs.html), are a powerful and intuitive performance-visualization tool. `x800` makes use of the Rust [flamegraph](https://github.com/flamegraph-rs/flamegraph) Crate for its straightforward flame graph support. A helper script at `util/flamegraph.sh` allows for easy sampling of `x800`. In its default configuration, the script uses the `roger` fuzzer as the binary under test.
+
 ## License
 
 [MIT License](LICENSE.txt)
@@ -202,3 +206,4 @@ A fuzzer named `roger`, after the rabbit, is provided in the `fuzz/` directory. 
 - [LibFuzzer, llvm.org](https://llvm.org/docs/LibFuzzer.html)
 - [*Rust Fuzz Book*, The Rust Fuzzing Authority](https://rust-fuzz.github.io/book)
 - [`cargo-fuzz`, GitHub](https://github.com/rust-fuzz/cargo-fuzz)
+- [*Flame Graphs*, Brendan Gregg](https://www.brendangregg.com/flamegraphs.html)

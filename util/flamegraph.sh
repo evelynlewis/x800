@@ -28,18 +28,23 @@ test -d ./util/
 test -d ./fuzz/
 
 FUZZER_NAME="roger"
+WARMUP_DURATION="4"
 
-if pgrep "${FUZZER_NAME}"; then 
+if pgrep "${FUZZER_NAME}"; then
 	echo "Fuzzer '${FUZZER_NAME}' is already running: kill above PIDs or use 'killall ${FUZZER_NAME}' to continue";
 	exit 1;
 fi
 
-echo "Starting fuzzer launch script" 
+echo "
+Starting '${FUZZER_NAME}' launch script.
+"
 ./util/fuzz.sh
 
-echo 'Waiting for fuzzer warmup'
-sleep 4
-echo 'Collecting flamegraph samples: press Control-C to stop'
+echo "
+Waiting ${WARMUP_DURATION}s for process warmup."
+sleep ${WARMUP_DURATION}
 
+echo "
+Sampling '${FUZZER_NAME}' process with flamegraph: press CTRL-C to stop.
+"
 sh -c "set -x; flamegraph --deterministic --root --open --pid $(pgrep ${FUZZER_NAME})"
-
