@@ -31,17 +31,18 @@ set -x
 test -d ./fuzz
 
 # Do a blocking build first
-cargo fuzz build --sanitizer none --release
+cargo fuzz build "$@" --sanitizer none --release
 
 # Run fuzzer using cargo-fuzz
 nice -n 8 cargo fuzz run \
+	"$@" \
 	--sanitizer none \
 	--release "${FUZZER_NAME}" \
 	-- \
-		-dict=./fuzz/dictionary.txt \
-		-len_control=0 \
-		-max_len=2048 \
-		-use_value_profile=1 \
-	1> /dev/null \
-	2>> ./fuzz/target/fuzz-output.txt \
+	-dict=./fuzz/dictionary.txt \
+	-len_control=0 \
+	-max_len=2048 \
+	-use_value_profile=1 \
+	1>/dev/null \
+	2>>./fuzz/target/fuzz-output.txt \
 	&

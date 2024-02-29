@@ -22,35 +22,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# x800 gapless gameplay script
-#
-# This is a convenience script for x800 gameplay, as it provides the ability
-# to play several games in a loop. It can be placed in the MacOS /Applications
-# directory or a similar location on other OSs.
+set -ex
+test -d ./util/
 
-set -e
-
-INTERNAL_BIN_PATH="/Applications/internal-x-eight-hundred"
-SOURCE_BINARY_LOCATION="${HOME}/.cargo/bin/x800"
-
-# Setup
-if command -v "${SOURCE_BINARY_LOCATION}" && ! command -v ${INTERNAL_BIN_PATH}; then
-	# If the usable bin path is already set, continue
-	ln -s "${SOURCE_BINARY_LOCATION}" "${INTERNAL_BIN_PATH}"
-else
-	INTERNAL_BIN_PATH="$(which x800)"
-fi
-
-# Game loop
-while true; do
-	"${INTERNAL_BIN_PATH}"
-
-	# Prompt for new game input. Note that the embedded newline and spaces
-	# are intentional
-	echo "
-      press enter for a new game
-"
-	read -r input
-	# To avoid unused variable
-	echo "${input}" >/dev/null
-done
+SCRIPT_ARGS="--no-cfg-fuzzing"
+./util/flamegraph.sh ${SCRIPT_ARGS}

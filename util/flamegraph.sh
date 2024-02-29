@@ -28,17 +28,19 @@ test -d ./util/
 test -d ./fuzz/
 
 FUZZER_NAME="roger"
+SCRIPT_ARGS="${*}"
 WARMUP_DURATION="4"
 
 if pgrep "${FUZZER_NAME}"; then
-	echo "Fuzzer '${FUZZER_NAME}' is already running: kill above PIDs or use 'killall ${FUZZER_NAME}' to continue";
-	exit 1;
+	echo "A process named '${FUZZER_NAME}' is already running. Kill above PIDs to continue. You may also try: 
+killall ${FUZZER_NAME}"
+	exit 1
 fi
 
 echo "
-Starting '${FUZZER_NAME}' launch script.
+Starting '${FUZZER_NAME}' launch script with args: ${SCRIPT_ARGS}
 "
-./util/fuzz.sh
+sh -c "set -x; ./util/fuzz.sh ${SCRIPT_ARGS}"
 
 echo "
 Waiting ${WARMUP_DURATION}s for process warmup."
