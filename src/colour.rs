@@ -35,12 +35,12 @@ use std::fmt;
 
 #[derive(Clone, Debug, PartialEq, Eq, Default)]
 pub struct Colour {
-    pub row: u8,
-    pub column: u8,
+    pub row: u64,
+    pub column: u64,
 }
 
 impl Colour {
-    pub fn from_power(power: u8) -> Self {
+    pub fn from_power(power: u64) -> Self {
         match power {
             0 => Colour::default(),
             // first, left-most column, upwards (ie. /|\)
@@ -69,8 +69,8 @@ impl Colour {
     }
 }
 
-const COLOUR_LEFT_COLUMN: u8 = 34 - 16;
-const COLOUR_RIGHT_COLUMN: u8 = COLOUR_LEFT_COLUMN + 5;
+const COLOUR_LEFT_COLUMN: u64 = 34 - 16;
+const COLOUR_RIGHT_COLUMN: u64 = COLOUR_LEFT_COLUMN + 5;
 
 #[test]
 fn power_to_colour_zero_test() {
@@ -79,17 +79,17 @@ fn power_to_colour_zero_test() {
 
 #[test]
 fn power_to_colour_cycle_test() {
-    for power in 0..=255u8 {
-        assert_eq!(Colour::from_power(power), Colour::from_power(power % 13));
+    for power in 0..=255_u8 {
+        assert_eq!(Colour::from_power(power as u64), Colour::from_power(power as u64 % 13));
     }
 }
 
 impl fmt::Display for Colour {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let (bg, fg) = if *self == Self::default() {
-            (0, 15)
+            (0_u32, 15_u32)
         } else {
-            (16 + self.column + (self.row * 36), 0)
+            (16_u32 + self.column as u32 + (self.row as u32 * 36_u32), 0_u32)
         };
 
         write!(f, "\u{1B}[48;5;{bg}m\u{1B}[38;5;{fg}m")

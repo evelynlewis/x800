@@ -39,7 +39,7 @@ pub struct Board {
     rows: [Row; BOARD_DIMENSION],
     open_blocks: u32,
     score: u64,
-    max_block: u8,
+    max_block: u64,
 }
 
 #[derive(PartialEq, Eq)]

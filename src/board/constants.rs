@@ -40,7 +40,7 @@ pub const WIN_MESSAGE: &str = "- - - - you win!! - - - -\r\n";
 pub const GAME_OVER: &str = "- - - - game over - - - -\r\n";
 pub const GOODBYE: &str = "- - - - goodbye now - - -\r\n";
 pub const GAME_FAILURE_MESSAGE: &str = " an ongoing game problem \r\n";
-pub const WIN_POWER: u8 = 11_u8;
+pub const WIN_POWER: u64 = 11_u64;
 pub const BLOCK_WIDTH: usize = 4;
 pub const END_OF_GAME_CHARACTER: u8 = '\u{3}' as u8;
 
