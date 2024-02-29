@@ -33,16 +33,10 @@
 /// and across the top.
 use std::fmt;
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Default)]
 pub struct Colour {
     pub row: u8,
     pub column: u8,
-}
-
-impl Default for Colour {
-    fn default() -> Self {
-        Colour { row: 0, column: 0 }
-    }
 }
 
 impl Colour {
@@ -94,10 +88,10 @@ impl fmt::Display for Colour {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let (mut bg, mut fg) = (16 + self.column + (self.row * 36), 0);
 
-        if *self == Default::default() {
+        if *self == Self::default() {
             (bg, fg) = (0, 15);
         }
 
-        write!(f, "{esc}[48;5;{}m{esc}[38;5;{}m", bg, fg, esc = '\u{1B}')
+        write!(f, "{esc}[48;5;{bg}m{esc}[38;5;{fg}m", esc = '\u{1B}')
     }
 }

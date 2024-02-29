@@ -83,9 +83,8 @@ impl Board {
     pub fn draw_clear(&self, output: &mut String) -> fmt::Result {
         write!(
             output,
-            "{}{esc}[2H{esc}[2J",
-            Colour::default(),
-            esc = '\u{1B}'
+            "{}",
+            format_args!("{}{esc}[2H{esc}[2J", Colour::default(), esc = '\u{1B}')
         )
     }
 
@@ -100,7 +99,7 @@ impl Board {
             self.draw_header(buffer)?;
             self.draw_blocks(buffer)?;
             self.draw_score(buffer)?;
-            write!(out, "{}", buffer).unwrap();
+            write!(out, "{}", buffer).expect("failed to write to screen");
             buffer.clear();
         }
         Ok(())
@@ -234,37 +233,40 @@ impl Board {
     }
 
     pub fn draw_score(&self, buffer: &mut String) -> fmt::Result {
+        let space = constants::LEFT_SPACE;
+        let score_colour = Colour::from_power(self.max_block);
+        let score_text = constants::SCORE_TEXT;
+        let length = constants::COLOUR_BLOCK_LENGTH;
+        let no_colour = Colour::default();
+        let header = if self.max_block >= constants::WIN_POWER {
+            constants::WIN_MESSAGE
+        } else {
+            "\r\n"
+        };
+
         write!(
             buffer,
-            "{space}{}{space}{}{score}{:<colour_len$}{}\r\n",
-            if self.max_block >= constants::WIN_POWER {
-                constants::WIN_MESSAGE
-            } else {
-                "\r\n"
-            },
-            Colour::from_power(self.max_block),
-            self.score,
-            Colour::default(),
-            space = constants::LEFT_SPACE,
-            score = constants::SCORE,
-            colour_len = (NUMBER_BLOCKS_PER_LINE * constants::BLOCK_WIDTH)
-                + (2 * constants::LR_EDGE_WIDTH)
-                + constants::LEFT_SPACE.len()
-                - constants::SCORE.len()
+            "{before}{score:<length$}{after}",
+            score = self.score,
+            before = format_args!("{space}{header}{space}{score_colour}{score_text}"),
+            after = format_args!("{no_colour}\r\n"),
         )
     }
 
     fn draw_header(&self, buffer: &mut String) -> fmt::Result {
         write!(
             buffer,
-            "{}{}{:<colour_len$}{}\r\n\n",
-            constants::LEFT_SPACE,
-            Colour::from_power(self.max_block),
-            String::default(),
-            Colour::default(),
-            colour_len = (NUMBER_BLOCKS_PER_LINE * constants::BLOCK_WIDTH)
-                + (2 * constants::LR_EDGE_WIDTH)
-                + constants::LEFT_SPACE.len()
+            "{}",
+            format_args!(
+                "{}{}{:<colour_len$}{}\r\n\n",
+                constants::LEFT_SPACE,
+                Colour::from_power(self.max_block),
+                String::default(),
+                Colour::default(),
+                colour_len = (NUMBER_BLOCKS_PER_LINE * constants::BLOCK_WIDTH)
+                    + (2 * constants::LR_EDGE_WIDTH)
+                    + constants::LEFT_SPACE.len()
+            )
         )
     }
 
