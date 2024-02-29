@@ -81,7 +81,7 @@ impl Board {
         write!(
             output,
             "{}",
-            format_args!("{}{esc}[2H{esc}[2J", Colour::default(), esc = '\u{1B}')
+            format_args!("{}\u{1B}[2H\u{1B}[2J", Colour::default())
         )
     }
 

@@ -86,12 +86,12 @@ fn power_to_colour_cycle_test() {
 
 impl fmt::Display for Colour {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let (mut bg, mut fg) = (16 + self.column + (self.row * 36), 0);
+        let (bg, fg) = if *self == Self::default() {
+            (0, 15)
+        } else {
+            (16 + self.column + (self.row * 36), 0)
+        };
 
-        if *self == Self::default() {
-            (bg, fg) = (0, 15);
-        }
-
-        write!(f, "{esc}[48;5;{bg}m{esc}[38;5;{fg}m", esc = '\u{1B}')
+        write!(f, "\u{1B}[48;5;{bg}m\u{1B}[38;5;{fg}m")
     }
 }
