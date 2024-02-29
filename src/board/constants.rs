@@ -42,6 +42,7 @@ pub const GOODBYE: &str = "- - - - goodbye now - - -\r\n";
 pub const GAME_FAILURE_MESSAGE: &str = " an ongoing game problem \r\n";
 pub const WIN_POWER: u8 = 11_u8;
 pub const BLOCK_WIDTH: usize = 4;
+pub const END_OF_GAME_CHARACTER: u8 = '\u{3}' as u8;
 
 pub const NUMBER_BLOCKS_PER_LINE: usize = 4;
 pub const BOARD_DIMENSION: usize = NUMBER_BLOCKS_PER_LINE + 2;

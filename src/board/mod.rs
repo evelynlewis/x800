@@ -34,9 +34,6 @@ use constants::{BOARD_DIMENSION, NUMBER_BLOCKS_PER_LINE};
 
 type Row = [tile::Tile; BOARD_DIMENSION];
 
-// Control-C character will end game
-const END_OF_GAME_CHARACTER: u8 = '\u{3}' as u8;
-
 #[derive(Clone)]
 pub struct Board {
     rows: [Row; BOARD_DIMENSION],
@@ -61,8 +58,8 @@ pub(super) enum Action {
 }
 
 impl Action {
-    pub(super) fn parse(input: Option<&u8>) -> Self {
-        match *(input.unwrap_or(&END_OF_GAME_CHARACTER)) as char {
+    pub(super) const fn parse(input: u8) -> Self {
+        match input as char {
             'w' => Action::Direction(Direction::Up),
             'a' => Action::Direction(Direction::Left),
             'd' => Action::Direction(Direction::Right),

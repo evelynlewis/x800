@@ -27,7 +27,7 @@ use std::{
 
 use crate::board::{
     self,
-    constants::{self, DEFAULT_BOARD},
+    constants::{self, DEFAULT_BOARD, END_OF_GAME_CHARACTER},
 };
 use board::{Action, Board};
 
@@ -40,7 +40,7 @@ pub fn stdin_reader() -> Action {
     if let Err(_) = io::stdin().read_exact(&mut buffer) {
         return Action::Shutdown;
     }
-    Action::parse(Some(&buffer[0]))
+    Action::parse(buffer[0])
 }
 
 fn fuzz_cleanup(buf: &mut String, board: &Board) -> Result<(), ()> {
@@ -127,7 +127,7 @@ pub fn play(input: &Input) -> Result<(), ()> {
 
     loop {
         action = match input {
-            Input::Slice(_) => Action::parse(iter.next()),
+            Input::Slice(_) => Action::parse(*iter.next().unwrap_or(&END_OF_GAME_CHARACTER)),
             Input::Interactive(f) => f(),
         };
 
