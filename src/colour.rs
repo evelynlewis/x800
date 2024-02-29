@@ -80,16 +80,22 @@ fn power_to_colour_zero_test() {
 #[test]
 fn power_to_colour_cycle_test() {
     for power in 0..=255_u8 {
-        assert_eq!(Colour::from_power(power as u64), Colour::from_power(power as u64 % 13));
+        assert_eq!(
+            Colour::from_power(power as u64),
+            Colour::from_power(power as u64 % 13)
+        );
     }
 }
 
 impl fmt::Display for Colour {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let (bg, fg) = if *self == Self::default() {
-            (0_u32, 15_u32)
+            (0_u64, 15_u64)
         } else {
-            (16_u32 + self.column as u32 + (self.row as u32 * 36_u32), 0_u32)
+            (
+                16_u64 + self.column as u64 + (self.row as u64 * 36_u64),
+                0_u64,
+            )
         };
 
         write!(f, "\u{1B}[48;5;{bg}m\u{1B}[38;5;{fg}m")

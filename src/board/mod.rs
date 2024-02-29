@@ -37,7 +37,7 @@ type Row = [tile::Tile; BOARD_DIMENSION];
 #[derive(Clone)]
 pub struct Board {
     rows: [Row; BOARD_DIMENSION],
-    open_blocks: u32,
+    open_blocks: u64,
     score: u64,
     max_block: u64,
 }
@@ -203,27 +203,27 @@ impl Board {
         assert!(self.open_blocks > 0);
 
         // Collect random numbers
-        let new_index = fastrand::u32(..self.open_blocks);
-        let new_value = if fastrand::u32(..CHANCE_OF_FOUR_BLOCK) == (CHANCE_OF_FOUR_BLOCK - 1) {
+        let insert_index = fastrand::u32(..self.open_blocks as u32);
+        let insert_value = if fastrand::u32(..CHANCE_OF_FOUR_BLOCK) == (CHANCE_OF_FOUR_BLOCK - 1) {
             2 // '4' tile
         } else {
             1 // '2' tile
         };
 
-        let mut scan_index: u32 = 0;
+        let mut current_index = 0;
 
         // Brute force isn't great, but it's an exceptionally small board (about 16 ops maximum)
         for r in 1..BOARD_DIMENSION {
             for c in 1..BOARD_DIMENSION {
                 if self.rows[r][c] == Tile::Empty() {
-                    if scan_index == new_index {
-                        self.rows[r][c] = Tile::Number(new_value, gen);
+                    if current_index == insert_index {
+                        self.rows[r][c] = Tile::Number(insert_value, gen);
                         self.open_blocks -= 1;
-                        self.max_block = max(new_value, self.max_block);
+                        self.max_block = max(insert_value, self.max_block);
                         // Early exit
                         return;
                     }
-                    scan_index += 1;
+                    current_index += 1;
                 }
             }
         }

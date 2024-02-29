@@ -31,7 +31,7 @@ use crate::board::{
 };
 use board::{Action, Board};
 
-const INITIAL_BLOCK_COUNT: u32 = 2;
+const INITIAL_BLOCK_COUNT: u64 = 2;
 
 #[allow(dead_code)]
 pub fn stdin_reader() -> Action {
