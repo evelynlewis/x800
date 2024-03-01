@@ -84,62 +84,65 @@ struct UpdateStatus {
 }
 
 pub fn draw_board(board: Arc<RwLock<Board>>, done: &Arc<atomic::AtomicBool>) -> fmt::Result {
-    // In the case of fuzzing, this is a no-op
-    if !cfg!(fuzzing) {
-        // Use one buffer for program duration
-        let buffer = &mut String::with_capacity(constants::DISPLAY_BUFFER_SIZE);
+    // When fuzzing this fn is a no-op
+    if cfg!(fuzzing) {
+        return Ok(());
+    }
 
-        // Duration between draws. 8333us is 120Hz
-        const DRAW_DURATION: time::Duration = time::Duration::from_micros(8333);
+    // Use one buffer for program duration
+    let buffer = &mut String::with_capacity(constants::DISPLAY_BUFFER_SIZE);
 
-        // If set, draw the board this time
-        let mut force_draw = true;
+    // Duration between draws. 8333us is 120Hz
+    const DRAW_DURATION: time::Duration = time::Duration::from_micros(8333);
 
-        // Always draw the first time
-        let mut timestamp = time::Instant::now();
-        let mut exit_after = false;
+    // If set, draw the board this time
+    let mut force_draw = true;
 
-        loop {
-            // Wait for wakeup
-            thread::park();
+    // Always draw the first time
+    let mut timestamp = time::Instant::now();
+    let mut exit_after = false;
 
-            // Check if we should exit this time
-            if done.load(atomic::Ordering::Relaxed) {
-                exit_after = true;
-                force_draw = true;
-            }
+    loop {
+        // Wait for wakeup
+        thread::park();
 
-            // Continue waiting if time has not elaped and a draw is not required
-            // Note that we use the monotonic timestamp, time::Instant()
-            if !force_draw && (time::Instant::now() - timestamp) < DRAW_DURATION {
-                continue;
-            } else {
-                force_draw = false;
-                timestamp = time::Instant::now();
-            }
+        // Check if we should exit this time
+        if done.load(atomic::Ordering::Relaxed) {
+            exit_after = true;
+            force_draw = true;
+        }
 
-            // Limit scope to avoid holding the lock
-            {
-                // Alias for reading
-                let board = board.read().unwrap();
+        // Continue waiting if time has not elaped and a draw is not required
+        // Note that we use the monotonic timestamp, time::Instant()
+        if !force_draw && (time::Instant::now() - timestamp) < DRAW_DURATION {
+            continue;
+        } else {
+            force_draw = false;
+            timestamp = time::Instant::now();
+        }
 
-                // Write out to string
-                board.draw_clear(buffer)?;
-                board.draw_header(buffer)?;
-                board.draw_blocks(buffer)?;
-                board.draw_score(buffer)?;
-            }
+        // Limit scope to avoid holding the lock
+        {
+            // Alias for reading
+            let board = board.read().unwrap();
 
-            // Write out framebuffer
-            write!(std::io::stdout(), "{}", buffer).expect("failed to write to screen");
-            buffer.clear();
+            // Write out to string
+            board.draw_clear(buffer)?;
+            board.draw_header(buffer)?;
+            board.draw_blocks(buffer)?;
+            board.draw_score(buffer)?;
+        }
 
-            // Leave the loop
-            if exit_after {
-                break;
-            }
+        // Write out framebuffer
+        write!(std::io::stdout(), "{}", buffer).expect("failed to write to screen");
+        buffer.clear();
+
+        // Leave the loop
+        if exit_after {
+            break;
         }
     }
+
     Ok(())
 }
 
