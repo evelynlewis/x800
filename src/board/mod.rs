@@ -27,7 +27,7 @@ use std::{
     io::Write as ioWrite,
     ops,
     sync::{atomic, Arc, RwLock},
-    thread,
+    thread, time,
 };
 pub(super) mod constants;
 mod tile;
@@ -85,8 +85,31 @@ struct UpdateStatus {
 pub fn draw_board(board: Arc<RwLock<Board>>, done: &Arc<atomic::AtomicBool>) -> fmt::Result {
     // In the case of fuzzing, this is a no-op
     if !cfg!(fuzzing) {
+        // Use one buffer for program duration
         let buffer = &mut String::with_capacity(constants::DISPLAY_BUFFER_SIZE);
+
+        // Duration between draws. 8333us is 120Hz
+        const DRAW_DURATION: time::Duration = time::Duration::from_micros(8333);
+        // Always draw the first time
+        let mut start = time::Instant::now() - (DRAW_DURATION + time::Duration::from_millis(1));
+
         loop {
+            // Wait for wakeup
+            thread::park();
+
+            // Check if we should exit
+            if done.load(atomic::Ordering::Relaxed) {
+                break;
+            }
+
+            // Loop around or set new start time
+            // Note that we use the monotonic time::Instant
+            if (time::Instant::now() - start) < DRAW_DURATION {
+                continue;
+            } else {
+                start = time::Instant::now();
+            }
+
             // Limit scope to avoid holding the lock
             {
                 // Alias for reading
@@ -102,14 +125,6 @@ pub fn draw_board(board: Arc<RwLock<Board>>, done: &Arc<atomic::AtomicBool>) -> 
             // Write out framebuffer
             write!(std::io::stdout(), "{}", buffer).expect("failed to write to screen");
             buffer.clear();
-
-            // Wait for wakeup
-            thread::park();
-
-            // Check if we should exit
-            if done.load(atomic::Ordering::Relaxed) {
-                break;
-            }
         }
     }
     Ok(())
