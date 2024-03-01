@@ -33,6 +33,7 @@ pub(super) mod constants;
 mod tile;
 
 use super::colour::Colour;
+
 use tile::Tile;
 
 // Promote Generation type to public within this module
@@ -90,24 +91,31 @@ pub fn draw_board(board: Arc<RwLock<Board>>, done: &Arc<atomic::AtomicBool>) -> 
 
         // Duration between draws. 8333us is 120Hz
         const DRAW_DURATION: time::Duration = time::Duration::from_micros(8333);
+
+        // If set, draw the board this time
+        let mut force_draw = true;
+
         // Always draw the first time
-        let mut start = time::Instant::now() - (DRAW_DURATION + time::Duration::from_millis(1));
+        let mut timestamp = time::Instant::now();
+        let mut exit_after = false;
 
         loop {
             // Wait for wakeup
             thread::park();
 
-            // Check if we should exit
+            // Check if we should exit this time
             if done.load(atomic::Ordering::Relaxed) {
-                break;
+                exit_after = true;
+                force_draw = true;
             }
 
-            // Loop around or set new start time
-            // Note that we use the monotonic time::Instant
-            if (time::Instant::now() - start) < DRAW_DURATION {
+            // Continue waiting if time has not elaped and a draw is not required
+            // Note that we use the monotonic timestamp, time::Instant()
+            if !force_draw && (time::Instant::now() - timestamp) < DRAW_DURATION {
                 continue;
             } else {
-                start = time::Instant::now();
+                force_draw = false;
+                timestamp = time::Instant::now();
             }
 
             // Limit scope to avoid holding the lock
@@ -125,6 +133,11 @@ pub fn draw_board(board: Arc<RwLock<Board>>, done: &Arc<atomic::AtomicBool>) -> 
             // Write out framebuffer
             write!(std::io::stdout(), "{}", buffer).expect("failed to write to screen");
             buffer.clear();
+
+            // Leave the loop
+            if exit_after {
+                break;
+            }
         }
     }
     Ok(())
