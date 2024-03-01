@@ -23,6 +23,8 @@
 use std::{
     io::{self, Read},
     mem,
+    sync::{self, atomic},
+    thread,
 };
 
 use crate::board::{
@@ -43,27 +45,13 @@ pub fn stdin_reader() -> Action {
     Action::parse(buffer[0])
 }
 
-fn fuzz_cleanup(buf: &mut String, board: &Board) -> Result<(), ()> {
-    if let Err(_) = board.draw_score(buf) {
+fn fuzz_cleanup(board: &Board) -> Result<(), ()> {
+    let mut output = String::with_capacity(constants::DISPLAY_LINE_LENGTH);
+    if let Err(_) = board.draw_score(&mut output) {
         return Err(());
     }
     // Write final score to terminal
-    print!("{}", buf);
-    Ok(())
-}
-
-fn shutdown(buf: &mut String, board: &Board, fd: i32, ios: &libc::termios) -> Result<(), ()> {
-    // Buffer final score
-    if cfg!(fuzzing) {
-        fuzz_cleanup(buf, board)?;
-    }
-
-    // Restore initial board state
-    unsafe {
-        libc::tcsetattr(fd, libc::TCSANOW, ios);
-    }
-
-    // Success!
+    print!("{}", output);
     Ok(())
 }
 
@@ -71,7 +59,7 @@ fn startup(input: &Input) -> (i32, libc::termios) {
     let fd = libc::STDIN_FILENO;
     let return_ios: libc::termios;
     unsafe {
-        let mut ios = mem::zeroed();
+        let mut ios: libc::termios = mem::zeroed();
         // Read current configuration
         libc::tcgetattr(fd, &mut ios);
         // Copy
@@ -95,26 +83,11 @@ pub enum Input<'a> {
 #[inline]
 pub fn play(input: &Input) -> Result<(), ()> {
     // Runtime storage
-    let mut board = DEFAULT_BOARD.clone();
+    let board = sync::Arc::new(sync::RwLock::new(DEFAULT_BOARD.clone()));
     let mut gen: board::Generation = 0;
-    let mut update;
-    let mut has_space;
+    let mut update = true;
+    let mut has_space = true;
     let mut action: Action;
-
-    // Startup
-    let (fd, termios) = startup(input);
-
-    // Clear screen and draw intial board
-    for _ in 0..INITIAL_BLOCK_COUNT {
-        board.create_new_tile(gen);
-    }
-
-    let mut stdout = io::stdout().lock();
-    let mut buffer = String::with_capacity(board::constants::DISPLAY_BUFFER_SIZE);
-
-    board
-        .draw(&mut buffer, &mut stdout)
-        .expect(constants::GAME_FAILURE_MESSAGE);
 
     // Pre-setup for slice input
     let mut iter = Default::default();
@@ -125,7 +98,61 @@ pub fn play(input: &Input) -> Result<(), ()> {
         _ => {}
     }
 
+    // Startup
+    let (fd, termios) = startup(input);
+
+    // Closure for ending the game
+    let goodbye = || {
+        // Buffer final score
+        if cfg!(fuzzing) {
+            fuzz_cleanup(&board.read().unwrap())?;
+        }
+
+        // Restore initial board state
+        unsafe {
+            libc::tcsetattr(fd, libc::TCSANOW, &termios);
+        }
+
+        Ok(())
+    };
+
+    // Clear screen and draw intial board
+    for _ in 0..INITIAL_BLOCK_COUNT {
+        board.write().unwrap().create_new_tile(gen);
+    }
+
+    // Bookeeping for board-drawing thread
+    let draw_board = sync::Arc::clone(&board);
+    let draw_done_reader = sync::Arc::new(atomic::AtomicBool::new(false));
+    let draw_done_writer = sync::Arc::clone(&draw_done_reader);
+
+    // Spawn board-drawing thread
+    let draw_thread_joiner = thread::spawn(move || {
+        board::draw_board(draw_board, &draw_done_reader).expect(constants::GAME_FAILURE_MESSAGE);
+    });
+
+    // We need the handle seperately
+    let draw_thread = draw_thread_joiner.thread();
+
     loop {
+        // If updated previously, draw the board
+        if update {
+            draw_thread.unpark();
+        }
+
+        // Has the player already used their last move?
+        if !update && !has_space {
+            print!(
+                "{}{}",
+                board::constants::LEFT_SPACE,
+                board::constants::GAME_OVER
+            );
+            goodbye()?;
+            break;
+        }
+
+        update = false;
+
         action = match input {
             Input::Slice(_) => Action::parse(*iter.next().unwrap_or(&END_OF_GAME_CHARACTER)),
             Input::Interactive(f) => f(),
@@ -137,7 +164,7 @@ pub fn play(input: &Input) -> Result<(), ()> {
         // Read input and take action
         match action {
             Action::Direction(direction) => {
-                update = board.update(direction, gen);
+                update = board.write().unwrap().update(direction, gen);
             }
             Action::Continue => {
                 continue;
@@ -149,29 +176,24 @@ pub fn play(input: &Input) -> Result<(), ()> {
                     board::constants::GOODBYE
                 );
                 // Handle graceful shutdown
-                return shutdown(&mut buffer, &board, fd, &termios);
+                goodbye()?;
+                break;
             }
         };
 
         // Add new starting tile if possible
-        has_space = board.has_space();
+        // Note that this value is used next iteration
+        has_space = board.read().unwrap().has_space();
+
         if has_space {
-            board.create_new_tile(gen);
-        }
-
-        // Draw new board state
-        if let Err(_) = board.draw(&mut buffer, &mut stdout) {
-            return Err(());
-        }
-
-        // Has the player used their last move?
-        if !update && !has_space {
-            print!(
-                "{}{}",
-                board::constants::LEFT_SPACE,
-                board::constants::GAME_OVER
-            );
-            return shutdown(&mut buffer, &board, fd, &termios);
+            board.write().unwrap().create_new_tile(gen);
         }
     }
+
+    // Signal and join board-drawing thread
+    draw_done_writer.store(true, atomic::Ordering::Relaxed);
+    draw_thread.unpark();
+    draw_thread_joiner.join().unwrap();
+
+    Ok(())
 }

@@ -21,7 +21,14 @@
 */
 
 use core::fmt;
-use std::{cmp::max, fmt::Write, io, ops};
+use std::{
+    cmp::max,
+    fmt::Write as fmtWrite,
+    io::Write as ioWrite,
+    ops,
+    sync::{atomic, Arc, RwLock},
+    thread,
+};
 pub(super) mod constants;
 mod tile;
 
@@ -75,6 +82,39 @@ struct UpdateStatus {
     go_again: bool,
 }
 
+pub fn draw_board(board: Arc<RwLock<Board>>, done: &Arc<atomic::AtomicBool>) -> fmt::Result {
+    // In the case of fuzzing, this is a no-op
+    if !cfg!(fuzzing) {
+        let buffer = &mut String::with_capacity(constants::DISPLAY_BUFFER_SIZE);
+        loop {
+            // Limit scope to avoid holding the lock
+            {
+                // Alias for reading
+                let board = board.read().unwrap();
+
+                // Write out to string
+                board.draw_clear(buffer)?;
+                board.draw_header(buffer)?;
+                board.draw_blocks(buffer)?;
+                board.draw_score(buffer)?;
+            }
+
+            // Write out framebuffer
+            write!(std::io::stdout(), "{}", buffer).expect("failed to write to screen");
+            buffer.clear();
+
+            // Wait for wakeup
+            thread::park();
+
+            // Check if we should exit
+            if done.load(atomic::Ordering::Relaxed) {
+                break;
+            }
+        }
+    }
+    Ok(())
+}
+
 impl Board {
     // Clear screen
     pub fn draw_clear(&self, output: &mut String) -> fmt::Result {
@@ -90,17 +130,6 @@ impl Board {
     }
 
     /// Draw board display
-    pub fn draw(&self, buffer: &mut String, out: &mut dyn io::Write) -> fmt::Result {
-        if !cfg!(fuzzing) {
-            self.draw_clear(buffer)?;
-            self.draw_header(buffer)?;
-            self.draw_blocks(buffer)?;
-            self.draw_score(buffer)?;
-            write!(out, "{}", buffer).expect("failed to write to screen");
-            buffer.clear();
-        }
-        Ok(())
-    }
 
     fn merge(
         &mut self,
@@ -233,7 +262,7 @@ impl Board {
         let space = constants::LEFT_SPACE;
         let score_colour = Colour::from_power(self.max_block);
         let score_text = constants::SCORE_TEXT;
-        let length = constants::COLOUR_BLOCK_LENGTH;
+        let length = constants::DISPLAY_LINE_LENGTH;
         let no_colour = Colour::default();
         let header = if self.max_block >= constants::WIN_POWER {
             constants::WIN_MESSAGE

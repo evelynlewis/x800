@@ -20,9 +20,7 @@
   SOFTWARE.
 */
 
-/// colour.rs
-///
-/// Simple terminal colours for c2048
+/// Simple terminal colours for x800
 ///
 /// Uses 256 colour ANSI escape codes. See:
 /// <https://en.wikipedia.org/wiki/ANSI_escape_code#8-bit>

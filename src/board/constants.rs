@@ -47,7 +47,7 @@ pub const END_OF_GAME_CHARACTER: u8 = '\u{3}' as u8;
 pub const NUMBER_BLOCKS_PER_LINE: usize = 4;
 pub const BOARD_DIMENSION: usize = NUMBER_BLOCKS_PER_LINE + 2;
 pub const DISPLAY_BUFFER_SIZE: usize = (BOARD_DIMENSION + 6) * (BOARD_DIMENSION + 4);
-pub const COLOUR_BLOCK_LENGTH: usize =
+pub const DISPLAY_LINE_LENGTH: usize =
     (NUMBER_BLOCKS_PER_LINE * BLOCK_WIDTH) + (2 * LR_EDGE_WIDTH) + LEFT_SPACE.len()
         - SCORE_TEXT.len();
 
