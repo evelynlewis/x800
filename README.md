@@ -4,7 +4,7 @@ x800: [ɛks eɪt ˈhʌndrəd]
 
 ## Introduction
 
-How fast? A sustained update rate of around six million moves per second on a 4th Generation Intel Pentium from 2013 (see methodology [below](#intel-pentium-g3220t-at-260ghz-with-linux-65-shell-benchmark)).
+How fast? A sustained update rate of 6.0 million moves per second on a 4th Generation Intel Pentium from 2013 (see methodology [below](#shell-benchmark-intel-pentium-g3220t-at-260ghz-with-linux-65)).
 
 The project has few external dependencies. It doesn't use ncurses, or a Rust terminal library such as [ratatui](https://crates.io/crates/ratatui). It instead relies on simple frame-buffering and standard [ANSI escape codes](https://en.wikipedia.org/wiki/ANSI_escape_code). The only build dependency aside from the Rust Standard Library is the [`fastrand`](https://crates.io/crates/fastrand) Crate, a simple PRNG without child dependencies. The program also requires a POSIX-compatible `libc` crate, which is included in Rust's `std` when building for POSIX targets.
 
@@ -112,22 +112,7 @@ These benchmarks require GNU `base32`, `tr`, `pv`, and a recent version of [`hyp
 
 > Note: The `hyperfine` binary can be installed via your system package manager or with `cargo install hyperfine`. Your package manager's version may be too old.
 
-#### M1 MacBook Air with MacOS hyperfine benchmark
-
-```sh
-./util/bench.sh
-+ test -d ./util/
-+ test -f ./util/gen-moves.sh
-+ cargo build -p x800 --release
-    Finished release [optimized] target(s) in 0.00s
-+ touch /tmp/moves
-+ hyperfine --prepare './util/gen-moves.sh /tmp/moves' --warmup=256 --runs=256 --input=/tmp/moves -N ./target/release/x800
-Benchmark 1: ./target/release/x800
-  Time (mean ± σ):       1.2 ms ±   0.1 ms    [User: 0.5 ms, System: 0.5 ms]
-  Range (min … max):     1.1 ms …   1.4 ms    256 runs
-```
-
-#### Intel Pentium G3220T at 2.60GHz with Linux 6.5 hyperfine benchmark
+#### `hyperfine` benchmark: Intel Pentium G3220T at 2.60GHz with Linux 6.5
 
 ```sh
 ./util/bench.sh
@@ -142,43 +127,64 @@ Benchmark 1: ./target/release/x800
   Range (min … max):     1.0 ms …   1.3 ms    256 runs
 ```
 
+#### `hyperfine` benchmark: M1 MacBook Air with MacOS
+
+```sh
+./util/bench.sh
++ test -d ./util/
++ test -f ./util/gen-moves.sh
++ cargo build -p x800 --release
+    Finished release [optimized] target(s) in 0.00s
++ touch /tmp/moves
++ hyperfine --prepare './util/gen-moves.sh /tmp/moves' --warmup=256 --runs=256 --input=/tmp/moves -N ./target/release/x800
+Benchmark 1: ./target/release/x800
+  Time (mean ± σ):       1.2 ms ±   0.1 ms    [User: 0.5 ms, System: 0.5 ms]
+  Range (min … max):     1.1 ms …   1.4 ms    256 runs
+```
+
 ### Mini-benchmarks using shell tools
 
-Requires GNU `base32`, `tr`, `dash`, `grep`, and `pv`.
+Requires POSIX `sh`, and GNU `base32`, `dd`, `tr`, and `grep`.
 
-> Note: MacOS arguments and tool names modified slightly, as provided below.
+> Note that these benchmarks are close to the performance limit for the shell tools themselves in this configuration.
 
 ```sh
 cat /dev/urandom \
     | base32 \
-    | tr -s '[:upper:]' '[:lower:]' | tr -dC 'asdw' \
-    | pv --wait --rate --average-rate \
-    | dd bs=256 \
-    | dash -c 'while true; do ./target/release/x800; done' > /dev/null
+    | dd conv=lcase 2> /dev/null \
+    | tr -dC 'asdw' \
+    | dd bs=2048 count=16k \
+    | sh -c 'while true; do ./target/release/x800; done' > /dev/null
 ```
 
-### M1 MacBook Air with MacOS shell benchmark
+### Shell benchmark: Intel Pentium G3220T at 2.60GHz with Linux 6.5
+
+```sh
+cat /dev/urandom \
+    | base32 \
+    | dd conv=lcase 2> /dev/null \
+    | tr -dC 'asdw' \
+    | dd bs=2048 count=16k \
+    | sh -c 'while true; do ./target/release/x800; done' > /dev/null
+16384+0 records in
+16384+0 records out
+33554432 bytes (34 MB, 32 MiB) copied, 5.63544 s, 6.0 MB/s
+```
+
+### Shell benchmark: M1 MacBook Air with MacOS
+
+> Note: tool names on MacOS are modified slightly, as provided below.
 
 ```sh
 cat /dev/urandom \
     | gbase32 \
-    | tr -s '[:upper:]' '[:lower:]' | tr -dC 'asdw' \
-    | dd bs=256 \
-    | pv --wait --rate --average-rate \
-    | dash -c 'while true; do ./target/release/x800; done' > /dev/null
-[2.68MiB/s] [2.68MiB/s]
-```
-
-### Intel Pentium G3220T at 2.60GHz with Linux 6.5 shell benchmark
-
-```sh
-cat /dev/urandom \
-    | base32 \
-    | tr -s '[:upper:]' '[:lower:]' | tr -dC 'asdw' \
-    | dd bs=256 \
-    | pv --wait --rate --average-rate \ate --average-rate \
-    | dash -c 'while true; do ./target/release/x800; done' > /dev/null
-[6.12MiB/s] [5.72MiB/s]
+    | gdd conv=lcase 2> /dev/null \
+    | gtr -dC 'asdw' \
+    | gdd bs=2048 count=16k \
+    | sh -c 'while true; do ./target/release/x800; done' > /dev/null
+16384+0 records in
+16384+0 records out
+33554432 bytes (34 MB, 32 MiB) copied, 5.55141 s, 6.0 MB/s
 ```
 
 ## Fuzzing
