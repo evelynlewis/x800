@@ -4,7 +4,7 @@ x800: [ɛks eɪt ˈhʌndrəd]
 
 ## Introduction
 
-How fast? A sustained update rate of around five-and-a-half million moves per second on a 4th Generation Intel Pentium from 2013 (see methodology [below](#intel-pentium-g3220t-at-260ghz-with-linux-65-shell-benchmark)).
+How fast? A sustained update rate of around six million moves per second on a 4th Generation Intel Pentium from 2013 (see methodology [below](#intel-pentium-g3220t-at-260ghz-with-linux-65-shell-benchmark)).
 
 The project has few external dependencies. It doesn't use ncurses, or a Rust terminal library such as [ratatui](https://crates.io/crates/ratatui). It instead relies on simple frame-buffering and standard [ANSI escape codes](https://en.wikipedia.org/wiki/ANSI_escape_code). The only build dependency aside from the Rust Standard Library is the [`fastrand`](https://crates.io/crates/fastrand) Crate, a simple PRNG without child dependencies. The program also requires a POSIX-compatible `libc` crate, which is included in Rust's `std` when building for POSIX targets.
 
@@ -155,7 +155,6 @@ cat /dev/urandom \
     | pv --wait --rate --average-rate \
     | dd bs=256 \
     | dash -c 'while true; do ./target/release/x800; done' > /dev/null
-
 ```
 
 ### M1 MacBook Air with MacOS shell benchmark
@@ -167,20 +166,19 @@ cat /dev/urandom \
     | dd bs=256 \
     | pv --wait --rate --average-rate \
     | dash -c 'while true; do ./target/release/x800; done' > /dev/null
-[2.67MiB/s] [2.67MiB/s]
+[2.68MiB/s] [2.68MiB/s]
 ```
 
 ### Intel Pentium G3220T at 2.60GHz with Linux 6.5 shell benchmark
 
 ```sh
-
 cat /dev/urandom \
     | base32 \
     | tr -s '[:upper:]' '[:lower:]' | tr -dC 'asdw' \
     | dd bs=256 \
-    | pv --wait --rate --average-rate \
+    | pv --wait --rate --average-rate \ate --average-rate \
     | dash -c 'while true; do ./target/release/x800; done' > /dev/null
-[5.77MiB/s] [5.24MiB/s]
+[6.12MiB/s] [5.72MiB/s]
 ```
 
 ## Fuzzing
