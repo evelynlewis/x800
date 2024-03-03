@@ -21,19 +21,15 @@
 */
 
 use core::fmt;
-use std::{
-    cmp::max,
-    fmt::Write as fmtWrite,
-    io::Write as ioWrite,
-    ops,
-    sync::{atomic, Arc, RwLock},
-    thread, time,
-};
-pub(super) mod constants;
+use std::{cmp::max, fmt::Write, ops};
+
+pub mod constants;
+pub use draw::draw;
+
+mod draw;
 mod tile;
 
 use super::colour::Colour;
-
 use tile::Tile;
 
 // Promote Generation type to public within this module
@@ -81,69 +77,6 @@ impl Action {
 struct UpdateStatus {
     made_move: bool,
     go_again: bool,
-}
-
-pub fn draw_board(board: Arc<RwLock<Board>>, done: &Arc<atomic::AtomicBool>) -> fmt::Result {
-    // When fuzzing this fn is a no-op
-    if cfg!(fuzzing) {
-        return Ok(());
-    }
-
-    // Use one buffer for program duration
-    let buffer = &mut String::with_capacity(constants::DISPLAY_BUFFER_SIZE);
-
-    // Duration between draws. 4ms is 250Hz
-    const DRAW_DURATION: time::Duration = time::Duration::from_millis(4);
-
-    // If set, draw the board this time
-    let mut force_draw = true;
-
-    // Always draw the first time
-    let mut timestamp = time::Instant::now();
-    let mut exit_after = false;
-
-    loop {
-        // Wait for wakeup
-        thread::park();
-
-        // Check if we should exit this time
-        if done.load(atomic::Ordering::Relaxed) {
-            exit_after = true;
-            force_draw = true;
-        }
-
-        // Continue waiting if time has not elaped and a draw is not required
-        // Note that we use the monotonic timestamp, time::Instant()
-        if !force_draw && (time::Instant::now() - timestamp) < DRAW_DURATION {
-            continue;
-        } else {
-            force_draw = false;
-            timestamp = time::Instant::now();
-        }
-
-        // Limit scope to avoid holding the lock
-        {
-            // Alias for reading
-            let board = board.read().unwrap();
-
-            // Write out to string
-            board.draw_clear(buffer)?;
-            board.draw_header(buffer)?;
-            board.draw_blocks(buffer)?;
-            board.draw_score(buffer)?;
-        }
-
-        // Write out framebuffer
-        write!(std::io::stdout(), "{}", buffer).expect("failed to write to screen");
-        buffer.clear();
-
-        // Leave the loop
-        if exit_after {
-            break;
-        }
-    }
-
-    Ok(())
 }
 
 impl Board {

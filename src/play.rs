@@ -128,7 +128,7 @@ pub fn play(input: &Input) -> Result<(), ()> {
 
     // Spawn board-drawing thread
     let draw_thread_joiner = thread::spawn(move || {
-        board::draw_board(draw_board, &draw_done_reader).expect(constants::GAME_FAILURE_MESSAGE);
+        board::draw(draw_board, &draw_done_reader).expect(constants::GAME_FAILURE_MESSAGE);
     });
 
     // We need the handle seperately
