@@ -65,7 +65,7 @@ impl Tile {
             // Shift number tile to fill space
             (Self::Number(n, j), Self::Empty()) => Some(Self::Number(n, j)),
             // Anything else
-            (_, _) => None,
+            _ => None,
         }
     }
 }

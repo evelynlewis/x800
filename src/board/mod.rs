@@ -101,8 +101,8 @@ impl Board {
         column: usize,
         direction: Direction,
         gen: u64,
-        update: &mut UpdateStatus,
-    ) {
+        status: UpdateStatus,
+    ) -> UpdateStatus {
         let (r0, r1, c0, c1) = match direction {
             Direction::Down => (row - 1, row, column, column),
             Direction::Up => (row, row - 1, column, column),
@@ -111,9 +111,9 @@ impl Board {
         };
 
         let merged: Option<Tile> = self.rows[r0][c0].merge(&self.rows[r1][c1], gen);
-        let previous: &Tile = &self.rows[r0][c0];
         let result = match merged {
             Some(Tile::Number(n, _)) => {
+                let previous: &Tile = &self.rows[r0][c0];
                 if let Tile::Number(m, _) = previous {
                     if *m != n {
                         self.open_blocks += 1;
@@ -125,11 +125,13 @@ impl Board {
                 self.rows[r1][c1] = merged.unwrap();
                 true
             }
-            Some(_) | None => false,
+            _ => false,
         };
 
-        update.go_again |= result;
-        update.made_move |= result;
+        UpdateStatus {
+            go_again: status.go_again | result,
+            made_move: status.made_move | result,
+        }
     }
 
     // Carry out an action on the board
@@ -139,7 +141,7 @@ impl Board {
 
         // Determine if we have iterated over the entire board without any updates
         // And also if the board has been changed over the course of this move
-        let mut update = UpdateStatus {
+        let mut status = UpdateStatus {
             // We start without having moved the board
             made_move: false,
             // We always need a first iteration
@@ -158,25 +160,25 @@ impl Board {
         }
 
         if reverse {
-            while update.go_again {
-                update.go_again = false;
+            while status.go_again {
+                status.go_again = false;
                 for r in RANGE.rev() {
                     for c in RANGE.rev() {
-                        self.merge(r, c, direction, gen, &mut update);
+                        status = self.merge(r, c, direction, gen, status);
                     }
                 }
             }
         } else {
-            while update.go_again {
-                update.go_again = false;
+            while status.go_again {
+                status.go_again = false;
                 for r in RANGE {
                     for c in RANGE {
-                        self.merge(r, c, direction, gen, &mut update);
+                        status = self.merge(r, c, direction, gen, status);
                     }
                 }
             }
         }
-        update.made_move
+        status.made_move
     }
 
     // Create a new '2' or '4' starting number tile
