@@ -22,28 +22,49 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+BS="4K"
+COUNT="1"
+
+exists () {
+	command -v "${1}" > /dev/null
+}
+
+# Use an output file if provided
 if [ -z "$1" ]; then
 	OUT="/dev/stdout"
 else
 	OUT="${1}"
 fi
 
-BS="4K"
-COUNT="1"
-
-# Check to see if we need a modifed variant of the command
-if command -v base32; then
-	BASE32="base32"
-elif command -v gbase32; then
+# Prefer the explicitly GNU tools
+if exists gbase32; then
 	BASE32="gbase32"
+elif exists base32; then
+	BASE32="base32"
+else
+	exit 1;
 fi
 
-if command -v "${BASE32}" && command -v tr && command -v dd; then
-	"${BASE32}" /dev/urandom |
-		tr '[:upper:]' '[:lower:]' |
-		tr -dC asdw |
-		dd of="${OUT}" bs="${BS}" count="${COUNT}" &&
-		exit 0
+if exists gtr; then
+	TR="gtr"
+elif exists tr; then
+	TR="tr"
+else
+	exit 1;
 fi
+
+if exists gdd; then
+	DD="gdd"
+elif exists dd; then
+	DD="dd"
+else
+	exit 1;
+fi
+
+"${BASE32}" /dev/urandom |
+	"${DD}" conv=lcase 2> /dev/null |
+	"${TR}" -dC asdw |
+	"${DD}" of="${OUT}" bs="${BS}" count="${COUNT}" 2> /dev/null &&
+	exit 0
 
 exit 1

@@ -46,7 +46,7 @@ pub struct Board {
     max_block: u64,
 }
 
-#[derive(PartialEq, Eq)]
+#[derive(PartialEq, Eq, Clone, Copy)]
 pub(super) enum Direction {
     Up,
     Down,
@@ -94,21 +94,21 @@ impl Board {
     }
 
     /// Draw board display
-
+    #[inline]
     fn merge(
         &mut self,
-        r0: usize,
-        c0: usize,
-        r1: usize,
-        c1: usize,
+        row: usize,
+        column: usize,
+        direction: Direction,
         gen: u64,
         update: &mut UpdateStatus,
     ) {
-        // Do bounds checking here to avoid extra checks
-        assert!(r0 < self.rows.len());
-        assert!(r1 < self.rows.len());
-        assert!(c0 < self.rows[0].len());
-        assert!(c1 < self.rows[0].len());
+        let (r0, r1, c0, c1) = match direction {
+            Direction::Down => (row - 1, row, column, column),
+            Direction::Up => (row, row - 1, column, column),
+            Direction::Right => (row, row, column - 1, column),
+            Direction::Left => (row, row, column, column - 1),
+        };
 
         let merged: Option<Tile> = self.rows[r0][c0].merge(&self.rows[r1][c1], gen);
         let previous: &Tile = &self.rows[r0][c0];
@@ -127,11 +127,13 @@ impl Board {
             }
             Some(_) | None => false,
         };
+
         update.go_again |= result;
         update.made_move |= result;
     }
 
     // Carry out an action on the board
+    #[inline]
     pub fn update(&mut self, direction: Direction, gen: tile::Generation) -> bool {
         const RANGE: ops::Range<usize> = 1..BOARD_DIMENSION;
 
@@ -144,45 +146,32 @@ impl Board {
             go_again: true,
         };
 
+        let reverse;
         // Take appropriate action
         match direction {
-            Direction::Left => {
-                while update.go_again {
-                    update.go_again = false;
-                    for r in RANGE {
-                        for c in RANGE {
-                            self.merge(r, c, r, c - 1, gen, &mut update);
-                        }
+            Direction::Down | Direction::Left => {
+                reverse = false;
+            }
+            Direction::Up | Direction::Right => {
+                reverse = true;
+            }
+        }
+
+        if reverse {
+            while update.go_again {
+                update.go_again = false;
+                for r in RANGE.rev() {
+                    for c in RANGE.rev() {
+                        self.merge(r, c, direction, gen, &mut update);
                     }
                 }
             }
-            Direction::Up => {
-                while update.go_again {
-                    update.go_again = false;
-                    for r in RANGE.rev() {
-                        for c in RANGE.rev() {
-                            self.merge(r, c, r - 1, c, gen, &mut update);
-                        }
-                    }
-                }
-            }
-            Direction::Right => {
-                while update.go_again {
-                    update.go_again = false;
-                    for r in RANGE.rev() {
-                        for c in RANGE.rev() {
-                            self.merge(r, c - 1, r, c, gen, &mut update);
-                        }
-                    }
-                }
-            }
-            Direction::Down => {
-                while update.go_again {
-                    update.go_again = false;
-                    for r in RANGE {
-                        for c in RANGE {
-                            self.merge(r - 1, c, r, c, gen, &mut update);
-                        }
+        } else {
+            while update.go_again {
+                update.go_again = false;
+                for r in RANGE {
+                    for c in RANGE {
+                        self.merge(r, c, direction, gen, &mut update);
                     }
                 }
             }
@@ -196,6 +185,7 @@ impl Board {
         assert!(self.open_blocks > 0);
 
         // Collect random numbers
+        // Note: use u32 for backwards compatability
         let insert_index = fastrand::u32(..self.open_blocks as u32);
         let insert_value = if fastrand::u32(..CHANCE_OF_FOUR_BLOCK) == (CHANCE_OF_FOUR_BLOCK - 1) {
             2 // '4' tile
@@ -251,7 +241,7 @@ impl Board {
                 "{}{}{:<colour_len$}{}\r\n\n",
                 constants::LEFT_SPACE,
                 Colour::from_power(self.max_block),
-                String::default(),
+                "",
                 Colour::default(),
                 colour_len = (NUMBER_BLOCKS_PER_LINE * constants::BLOCK_WIDTH)
                     + (2 * constants::LR_EDGE_WIDTH)
