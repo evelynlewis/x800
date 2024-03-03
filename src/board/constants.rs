@@ -23,6 +23,7 @@
 use super::tile::{CornerSide, EdgeSide, Tile};
 use super::Board;
 
+// Internal constants
 pub(super) const EMPTY_BLOCK: &str = "      ";
 pub(super) const LEFT_EDGE: &str = "│";
 pub(super) const RIGHT_EDGE: &str = "│\r\n";
@@ -33,20 +34,21 @@ pub(super) const BOTTOM_RIGHT_CORNER: &str = "┘\r\n";
 pub(super) const TOP_RIGHT_CORNER: &str = "┐\r\n";
 pub(super) const BOTTOM_LEFT_CORNER: &str = "└";
 pub(super) const TOP_LEFT_CORNER: &str = "┌";
-pub const LR_EDGE_WIDTH: usize = 1;
+pub(super) const LR_EDGE_WIDTH: usize = 1;
+pub(super) const SCORE_TEXT: &str = "score is ";
+pub(super) const WIN_MESSAGE: &str = "- - - - you win!! - - - -\r\n";
+pub(super) const WIN_POWER: u64 = 11_u64;
+pub(super) const BLOCK_WIDTH: usize = 4;
+pub(super) const NUMBER_BLOCKS_PER_LINE: usize = 4;
+pub(super) const BOARD_DIMENSION: usize = NUMBER_BLOCKS_PER_LINE + 2;
+pub(super) const DISPLAY_BUFFER_SIZE: usize = (BOARD_DIMENSION + 6) * (BOARD_DIMENSION + 4);
+
+// Public constants
 pub const LEFT_SPACE: &str = "\r      ";
-pub const SCORE_TEXT: &str = "score is ";
-pub const WIN_MESSAGE: &str = "- - - - you win!! - - - -\r\n";
 pub const GAME_OVER: &str = "- - - - game over - - - -\r\n";
 pub const GOODBYE: &str = "- - - - goodbye now - - -\r\n";
 pub const GAME_FAILURE_MESSAGE: &str = " an ongoing game problem \r\n";
-pub const WIN_POWER: u64 = 11_u64;
-pub const BLOCK_WIDTH: usize = 4;
 pub const END_OF_GAME_CHARACTER: u8 = '\u{3}' as u8;
-
-pub const NUMBER_BLOCKS_PER_LINE: usize = 4;
-pub const BOARD_DIMENSION: usize = NUMBER_BLOCKS_PER_LINE + 2;
-pub const DISPLAY_BUFFER_SIZE: usize = (BOARD_DIMENSION + 6) * (BOARD_DIMENSION + 4);
 pub const DISPLAY_LINE_LENGTH: usize =
     (NUMBER_BLOCKS_PER_LINE * BLOCK_WIDTH) + (2 * LR_EDGE_WIDTH) + LEFT_SPACE.len()
         - SCORE_TEXT.len();
