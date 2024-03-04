@@ -85,7 +85,8 @@ pub fn play(input: &Input) -> Result<(), ()> {
     // Runtime storage
     let board = sync::Arc::new(sync::RwLock::new(DEFAULT_BOARD.clone()));
     let mut gen: board::Generation = 0;
-    let mut update = true;
+    let mut merged = true;
+    let mut moved = true;
     let mut has_space = true;
     let mut action: Action;
 
@@ -136,12 +137,12 @@ pub fn play(input: &Input) -> Result<(), ()> {
 
     loop {
         // If updated previously, draw the board
-        if update {
+        if moved {
             draw_thread.unpark();
         }
 
         // Has the player already used their last move?
-        if !update && !has_space {
+        if !merged && !has_space {
             print!(
                 "{}{}",
                 board::constants::LEFT_SPACE,
@@ -151,20 +152,22 @@ pub fn play(input: &Input) -> Result<(), ()> {
             break;
         }
 
-        update = false;
+        // Reset for the next move
+        (merged, moved) = (false, false);
+
+        // Increment generation
+        gen += 1;
 
         action = match input {
             Input::Slice(_) => Action::parse(*iter.next().unwrap_or(&END_OF_GAME_CHARACTER)),
             Input::Interactive(f) => f(),
         };
 
-        // Increment generation
-        gen += 1;
-
         // Read input and take action
         match action {
             Action::Direction(direction) => {
-                update = board.write().unwrap().update(direction, gen);
+                moved = true;
+                merged = board.write().unwrap().update(direction, gen);
             }
             Action::Continue => {
                 continue;

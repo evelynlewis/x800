@@ -184,7 +184,7 @@ impl Board {
     // Create a new '2' or '4' starting number tile
     pub fn create_new_tile(&mut self, gen: tile::Generation) {
         const CHANCE_OF_FOUR_BLOCK: u32 = 4;
-        assert!(self.open_blocks > 0);
+        assert_ne!(self.open_blocks, 0);
 
         // Collect random numbers
         // Note: use u32 for backwards compatability
