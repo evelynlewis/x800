@@ -38,8 +38,8 @@ pub fn draw(board: Arc<RwLock<Board>>, done: &Arc<atomic::AtomicBool>) -> fmt::R
     // Use one buffer for program duration
     let buffer = &mut String::with_capacity(constants::DISPLAY_BUFFER_SIZE);
 
-    // Duration between draws. 4ms is 250Hz
-    const DRAW_DURATION: time::Duration = time::Duration::from_millis(4);
+    // Duration between draws. 4ms is 500Hz
+    const DRAW_DURATION: time::Duration = time::Duration::from_millis(2);
 
     // If set, draw the board this time
     let mut force_draw = true;
