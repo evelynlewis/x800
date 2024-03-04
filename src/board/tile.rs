@@ -24,7 +24,7 @@ pub(super) type Generation = u64;
 pub(super) type Power = u64;
 
 use super::constants::{
-    BOTTOM_EDGE, BOTTOM_LEFT_CORNER, BOTTOM_RIGHT_CORNER, BOTTOM_RIGHT_CORNER_SPACE, EMPTY_BLOCK,
+    BOTTOM_EDGE, BOTTOM_LEFT_CORNER, BOTTOM_RIGHT_CORNER, BOTTOM_RIGHT_CORNER_SPACE, EMPTY_TILE,
     LEFT_EDGE, LEFT_SPACE, RIGHT_EDGE, TOP_EDGE, TOP_LEFT_CORNER, TOP_RIGHT_CORNER,
 };
 use super::BOARD_DIMENSION;
@@ -58,7 +58,7 @@ pub(super) enum CornerSide {
 impl Tile {
     pub(super) fn merge(self, other: &Self, gen: Generation) -> Option<Self> {
         match (self, other) {
-            // Merge two similar number blocks
+            // Merge two similar number tiles
             (Self::Number(n, j), Self::Number(m, k)) if n == *m && ((j != gen) && (*k != gen)) => {
                 Some(Self::Number(n + 1, gen))
             }
@@ -108,7 +108,7 @@ impl fmt::Display for Tile {
                 write!(f, "{BOTTOM_RIGHT_CORNER}{BOTTOM_RIGHT_CORNER_SPACE}")
             }
             Self::Empty() => {
-                write!(f, "{EMPTY_BLOCK}")
+                write!(f, "{EMPTY_TILE}")
             }
         }
     }

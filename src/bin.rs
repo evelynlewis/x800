@@ -24,19 +24,19 @@ mod board;
 mod colour;
 mod play;
 
+use libc;
 use std::process;
 
-use libc::{EXIT_FAILURE, EXIT_SUCCESS};
 use play::{play, stdin_reader, Input};
 
 fn main() {
     match play(&Input::Interactive(stdin_reader)) {
         Err(_) => {
             eprintln!("{}", board::constants::GAME_FAILURE_MESSAGE);
-            process::exit(EXIT_FAILURE);
+            process::exit(libc::EXIT_FAILURE);
         }
         Ok(_) => {
-            process::exit(EXIT_SUCCESS);
+            process::exit(libc::EXIT_SUCCESS);
         }
     }
 }

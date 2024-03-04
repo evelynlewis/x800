@@ -23,7 +23,7 @@
 use std::{
     io::{self, Read},
     mem,
-    sync::{self, atomic},
+    sync::{atomic, Arc, RwLock},
     thread,
 };
 
@@ -33,7 +33,7 @@ use crate::board::{
 };
 use board::{Action, Board};
 
-const INITIAL_BLOCK_COUNT: u64 = 2;
+const INITIAL_TILES_COUNT: u64 = 2;
 
 #[allow(dead_code)]
 pub fn stdin_reader() -> Action {
@@ -83,7 +83,7 @@ pub enum Input<'a> {
 #[inline]
 pub fn play(input: &Input) -> Result<(), ()> {
     // Runtime storage
-    let board = sync::Arc::new(sync::RwLock::new(DEFAULT_BOARD.clone()));
+    let board = Arc::new(RwLock::new(DEFAULT_BOARD.clone()));
     let mut gen: board::Generation = 0;
     let mut action: Action;
 
@@ -115,14 +115,14 @@ pub fn play(input: &Input) -> Result<(), ()> {
     };
 
     // Clear screen and draw intial board
-    for _ in 0..INITIAL_BLOCK_COUNT {
+    for _ in 0..INITIAL_TILES_COUNT {
         board.write().unwrap().create_new_tile(gen);
     }
 
     // Bookeeping for board-drawing thread
-    let draw_board = sync::Arc::clone(&board);
-    let draw_done_reader = sync::Arc::new(atomic::AtomicBool::new(false));
-    let draw_done_writer = sync::Arc::clone(&draw_done_reader);
+    let draw_board = Arc::clone(&board);
+    let draw_done_reader = Arc::new(atomic::AtomicBool::new(false));
+    let draw_done_writer = Arc::clone(&draw_done_reader);
 
     // Spawn board-drawing thread
     let draw_thread_joiner = thread::spawn(move || {

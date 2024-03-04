@@ -30,7 +30,7 @@ use std::{
 use super::{constants, Board};
 
 pub fn draw(board: Arc<RwLock<Board>>, done: &Arc<atomic::AtomicBool>) -> fmt::Result {
-    // When fuzzing this fn is a no-op
+    // When fuzzing, this fn is a no-op
     if cfg!(fuzzing) {
         return Ok(());
     }
@@ -38,7 +38,7 @@ pub fn draw(board: Arc<RwLock<Board>>, done: &Arc<atomic::AtomicBool>) -> fmt::R
     // Use one buffer for program duration
     let buffer = &mut String::with_capacity(constants::DISPLAY_BUFFER_SIZE);
 
-    // Duration between draws. 4ms is 500Hz
+    // Duration between draws. 2ms is 500Hz
     const DRAW_DURATION: time::Duration = time::Duration::from_millis(2);
 
     // If set, draw the board this time
@@ -75,7 +75,7 @@ pub fn draw(board: Arc<RwLock<Board>>, done: &Arc<atomic::AtomicBool>) -> fmt::R
             // Write out to string
             board.draw_clear(buffer)?;
             board.draw_header(buffer)?;
-            board.draw_blocks(buffer)?;
+            board.draw_tiles(buffer)?;
             board.draw_score(buffer)?;
         }
 

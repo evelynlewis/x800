@@ -21,7 +21,7 @@
 */
 
 use core::fmt;
-use std::{cmp::max, fmt::Write, ops};
+use std::{cmp, fmt::Write};
 
 pub mod constants;
 pub use draw::draw;
@@ -34,16 +34,16 @@ use tile::Tile;
 
 // Promote Generation type to public within this module
 pub type Generation = tile::Generation;
-use constants::{BOARD_DIMENSION, NUMBER_BLOCKS_PER_LINE};
+use constants::{BOARD_DIMENSION, NUMBER_TILES_PER_LINE, NUMBER_TILES_RANGE};
 
 type Row = [tile::Tile; BOARD_DIMENSION];
 
 #[derive(Clone)]
 pub struct Board {
     rows: [Row; BOARD_DIMENSION],
-    open_blocks: u64,
+    open_tiles: u64,
     score: u64,
-    max_block: u64,
+    max_tile: u64,
 }
 
 #[derive(PartialEq, Eq, Clone, Copy)]
@@ -85,7 +85,7 @@ impl Board {
     }
 
     pub fn has_space(&self) -> bool {
-        self.open_blocks != 0
+        self.open_tiles != 0
     }
 
     /// Draw board display
@@ -104,9 +104,9 @@ impl Board {
                 let previous: &Tile = &self.rows[r0][c0];
                 if let Tile::Number(m, _) = previous {
                     if *m != n {
-                        self.open_blocks += 1;
+                        self.open_tiles += 1;
                         self.score += 1 << u64::from(n);
-                        self.max_block = std::cmp::max(self.max_block, n);
+                        self.max_tile = std::cmp::max(self.max_tile, n);
                     }
                 }
                 self.rows[r0][c0] = Tile::Empty();
@@ -120,8 +120,6 @@ impl Board {
     // Carry out an action on the board
     #[inline]
     pub fn update(&mut self, direction: Direction, gen: tile::Generation) {
-        const RANGE: ops::Range<usize> = 1..BOARD_DIMENSION;
-
         // Determine if we have iterated over the entire board without any updates
         // And also if the board has been changed over the course of this move
         let mut again;
@@ -130,8 +128,8 @@ impl Board {
         match direction {
             Direction::Down | Direction::Left => loop {
                 again = false;
-                for r in RANGE {
-                    for c in RANGE {
+                for r in NUMBER_TILES_RANGE {
+                    for c in NUMBER_TILES_RANGE {
                         again |= self.merge(r, c, direction, gen);
                     }
                 }
@@ -141,8 +139,8 @@ impl Board {
             },
             Direction::Up | Direction::Right => loop {
                 again = false;
-                for r in RANGE.rev() {
-                    for c in RANGE.rev() {
+                for r in NUMBER_TILES_RANGE.rev() {
+                    for c in NUMBER_TILES_RANGE.rev() {
                         again |= self.merge(r, c, direction, gen);
                     }
                 }
@@ -160,13 +158,13 @@ impl Board {
             return false;
         }
 
-        const CHANCE_OF_FOUR_BLOCK: u32 = 4;
-        assert_ne!(self.open_blocks, 0);
+        const CHANCE_OF_FOUR_TILES: u32 = 4;
+        assert_ne!(self.open_tiles, 0);
 
         // Collect random numbers
         // Note: use u32 for backwards compatability
-        let insert_index = fastrand::u32(..self.open_blocks as u32);
-        let insert_value = if fastrand::u32(..CHANCE_OF_FOUR_BLOCK) == (CHANCE_OF_FOUR_BLOCK - 1) {
+        let insert_index = fastrand::u32(..self.open_tiles as u32);
+        let insert_value = if fastrand::u32(..CHANCE_OF_FOUR_TILES) == (CHANCE_OF_FOUR_TILES - 1) {
             2 // '4' tile
         } else {
             1 // '2' tile
@@ -175,13 +173,13 @@ impl Board {
         let mut current_index = 0;
 
         // Brute force isn't great, but it's an exceptionally small board (about 16 ops maximum)
-        for r in 1..BOARD_DIMENSION {
-            for c in 1..BOARD_DIMENSION {
+        for r in NUMBER_TILES_RANGE {
+            for c in NUMBER_TILES_RANGE {
                 if self.rows[r][c] == Tile::Empty() {
                     if current_index == insert_index {
                         self.rows[r][c] = Tile::Number(insert_value, gen);
-                        self.open_blocks -= 1;
-                        self.max_block = max(insert_value, self.max_block);
+                        self.open_tiles -= 1;
+                        self.max_tile = cmp::max(insert_value, self.max_tile);
                         // Early exit
                         return true;
                     }
@@ -194,11 +192,11 @@ impl Board {
 
     pub fn draw_score(&self, buffer: &mut String) -> fmt::Result {
         let space = constants::LEFT_SPACE;
-        let score_colour = Colour::from_power(self.max_block);
+        let score_colour = Colour::from_power(self.max_tile);
         let score_text = constants::SCORE_TEXT;
         let length = constants::DISPLAY_LINE_LENGTH;
         let no_colour = Colour::default();
-        let header = if self.max_block >= constants::WIN_POWER {
+        let header = if self.max_tile >= constants::WIN_POWER {
             constants::WIN_MESSAGE
         } else {
             "\r\n"
@@ -220,17 +218,17 @@ impl Board {
             format_args!(
                 "{}{}{:<colour_len$}{}\r\n\n",
                 constants::LEFT_SPACE,
-                Colour::from_power(self.max_block),
+                Colour::from_power(self.max_tile),
                 "",
                 Colour::default(),
-                colour_len = (NUMBER_BLOCKS_PER_LINE * constants::BLOCK_WIDTH)
+                colour_len = (NUMBER_TILES_PER_LINE * constants::TILES_WIDTH)
                     + (2 * constants::LR_EDGE_WIDTH)
                     + constants::LEFT_SPACE.len()
             )
         )
     }
 
-    fn draw_blocks(&self, buffer: &mut String) -> fmt::Result {
+    fn draw_tiles(&self, buffer: &mut String) -> fmt::Result {
         // Allow bounds-checking elision
         assert_eq!(self.rows.len(), BOARD_DIMENSION);
         assert_eq!(self.rows[0].len(), BOARD_DIMENSION);
