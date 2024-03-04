@@ -46,7 +46,6 @@ pub(super) const DISPLAY_BUFFER_SIZE: usize = (BOARD_DIMENSION + 6) * (BOARD_DIM
 // Public constants
 pub const LEFT_SPACE: &str = "\r      ";
 pub const GAME_OVER: &str = "- - - - game over - - - -\r\n";
-pub const GOODBYE: &str = "- - - - goodbye now - - -\r\n";
 pub const GAME_FAILURE_MESSAGE: &str = " an ongoing game problem \r\n";
 pub const END_OF_GAME_CHARACTER: u8 = '\u{3}' as u8;
 pub const DISPLAY_LINE_LENGTH: usize =

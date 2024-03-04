@@ -85,9 +85,6 @@ pub fn play(input: &Input) -> Result<(), ()> {
     // Runtime storage
     let board = sync::Arc::new(sync::RwLock::new(DEFAULT_BOARD.clone()));
     let mut gen: board::Generation = 0;
-    let mut merged = true;
-    let mut moved = true;
-    let mut has_space = true;
     let mut action: Action;
 
     // Pre-setup for slice input
@@ -103,7 +100,7 @@ pub fn play(input: &Input) -> Result<(), ()> {
     let (fd, termios) = startup(input);
 
     // Closure for ending the game
-    let goodbye = || {
+    let shutdown = || {
         // Buffer final score
         if cfg!(fuzzing) {
             fuzz_cleanup(&board.read().unwrap())?;
@@ -135,28 +132,20 @@ pub fn play(input: &Input) -> Result<(), ()> {
     // We need the handle seperately
     let draw_thread = draw_thread_joiner.thread();
 
+    // Do we need to redraw the board?
+    let mut redraw = true;
+
     loop {
-        // If updated previously, draw the board
-        if moved {
+        // If there was any update, draw the board
+        if redraw {
             draw_thread.unpark();
         }
 
-        // Has the player already used their last move?
-        if !merged && !has_space {
-            print!(
-                "{}{}",
-                board::constants::LEFT_SPACE,
-                board::constants::GAME_OVER
-            );
-            goodbye()?;
-            break;
-        }
-
-        // Reset for the next move
-        (merged, moved) = (false, false);
-
         // Increment generation
         gen += 1;
+
+        // First assume no re-draw
+        redraw = false;
 
         action = match input {
             Input::Slice(_) => Action::parse(*iter.next().unwrap_or(&END_OF_GAME_CHARACTER)),
@@ -166,30 +155,21 @@ pub fn play(input: &Input) -> Result<(), ()> {
         // Read input and take action
         match action {
             Action::Direction(direction) => {
-                moved = true;
-                merged = board.write().unwrap().update(direction, gen);
+                board.write().unwrap().update(direction, gen);
+                redraw = true;
             }
             Action::Continue => {
                 continue;
             }
             Action::Shutdown => {
-                print!(
-                    "{}{}",
-                    board::constants::LEFT_SPACE,
-                    board::constants::GOODBYE
-                );
-                // Handle graceful shutdown
-                goodbye()?;
                 break;
             }
         };
 
         // Add new starting tile if possible
-        // Note that this value is used next iteration
-        has_space = board.read().unwrap().has_space();
-
-        if has_space {
-            board.write().unwrap().create_new_tile(gen);
+        // Has the player already used their last move?
+        if !board.write().unwrap().create_new_tile(gen) {
+            break;
         }
     }
 
@@ -198,5 +178,13 @@ pub fn play(input: &Input) -> Result<(), ()> {
     draw_thread.unpark();
     draw_thread_joiner.join().unwrap();
 
-    Ok(())
+    // Print end-of-game message
+    print!(
+        "{}{}",
+        board::constants::LEFT_SPACE,
+        board::constants::GAME_OVER
+    );
+
+    // Handle graceful shutdown
+    shutdown()
 }

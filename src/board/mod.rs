@@ -74,11 +74,6 @@ impl Action {
     }
 }
 
-struct UpdateStatus {
-    made_move: bool,
-    go_again: bool,
-}
-
 impl Board {
     // Clear screen
     pub fn draw_clear(&self, output: &mut String) -> fmt::Result {
@@ -95,14 +90,7 @@ impl Board {
 
     /// Draw board display
     #[inline]
-    fn merge(
-        &mut self,
-        row: usize,
-        column: usize,
-        direction: Direction,
-        gen: u64,
-        status: UpdateStatus,
-    ) -> UpdateStatus {
+    fn merge(&mut self, row: usize, column: usize, direction: Direction, gen: u64) -> bool {
         let (r0, r1, c0, c1) = match direction {
             Direction::Down => (row - 1, row, column, column),
             Direction::Up => (row, row - 1, column, column),
@@ -111,7 +99,7 @@ impl Board {
         };
 
         let merged: Option<Tile> = self.rows[r0][c0].merge(&self.rows[r1][c1], gen);
-        let result = match merged {
+        match merged {
             Some(Tile::Number(n, _)) => {
                 let previous: &Tile = &self.rows[r0][c0];
                 if let Tile::Number(m, _) = previous {
@@ -126,63 +114,52 @@ impl Board {
                 true
             }
             _ => false,
-        };
-
-        UpdateStatus {
-            go_again: status.go_again | result,
-            made_move: status.made_move | result,
         }
     }
 
     // Carry out an action on the board
     #[inline]
-    pub fn update(&mut self, direction: Direction, gen: tile::Generation) -> bool {
+    pub fn update(&mut self, direction: Direction, gen: tile::Generation) {
         const RANGE: ops::Range<usize> = 1..BOARD_DIMENSION;
 
         // Determine if we have iterated over the entire board without any updates
         // And also if the board has been changed over the course of this move
-        let mut status = UpdateStatus {
-            // We start without having moved the board
-            made_move: false,
-            // We always need a first iteration
-            go_again: true,
-        };
+        let mut again;
 
-        let reverse;
         // Take appropriate action
         match direction {
-            Direction::Down | Direction::Left => {
-                reverse = false;
-            }
-            Direction::Up | Direction::Right => {
-                reverse = true;
-            }
-        }
-
-        if reverse {
-            while status.go_again {
-                status.go_again = false;
-                for r in RANGE.rev() {
-                    for c in RANGE.rev() {
-                        status = self.merge(r, c, direction, gen, status);
-                    }
-                }
-            }
-        } else {
-            while status.go_again {
-                status.go_again = false;
+            Direction::Down | Direction::Left => loop {
+                again = false;
                 for r in RANGE {
                     for c in RANGE {
-                        status = self.merge(r, c, direction, gen, status);
+                        again |= self.merge(r, c, direction, gen);
                     }
                 }
-            }
+                if !again {
+                    break;
+                }
+            },
+            Direction::Up | Direction::Right => loop {
+                again = false;
+                for r in RANGE.rev() {
+                    for c in RANGE.rev() {
+                        again |= self.merge(r, c, direction, gen);
+                    }
+                }
+                if !again {
+                    break;
+                }
+            },
         }
-        status.made_move
     }
 
     // Create a new '2' or '4' starting number tile
-    pub fn create_new_tile(&mut self, gen: tile::Generation) {
+    #[inline]
+    pub fn create_new_tile(&mut self, gen: tile::Generation) -> bool {
+        if !self.has_space() {
+            return false;
+        }
+
         const CHANCE_OF_FOUR_BLOCK: u32 = 4;
         assert_ne!(self.open_blocks, 0);
 
@@ -206,12 +183,13 @@ impl Board {
                         self.open_blocks -= 1;
                         self.max_block = max(insert_value, self.max_block);
                         // Early exit
-                        return;
+                        return true;
                     }
                     current_index += 1;
                 }
             }
         }
+        unreachable!();
     }
 
     pub fn draw_score(&self, buffer: &mut String) -> fmt::Result {
