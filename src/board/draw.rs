@@ -23,13 +23,13 @@
 use std::{
     fmt,
     io::Write,
-    sync::{atomic, Arc, RwLock},
+    sync::{atomic, Arc, Mutex},
     thread, time,
 };
 
 use super::{constants, Board};
 
-pub fn draw(board: Arc<RwLock<Board>>, done: &Arc<atomic::AtomicBool>) -> fmt::Result {
+pub fn draw(board: Arc<Mutex<Board>>, done: &Arc<atomic::AtomicBool>) -> fmt::Result {
     // When fuzzing, this fn is a no-op
     if cfg!(fuzzing) {
         return Ok(());
@@ -70,7 +70,7 @@ pub fn draw(board: Arc<RwLock<Board>>, done: &Arc<atomic::AtomicBool>) -> fmt::R
         // Limit scope to avoid holding the lock
         {
             // Alias for reading
-            let board = board.read().unwrap();
+            let board = board.lock().unwrap();
 
             // Write out to string
             board.draw_clear(buffer)?;

@@ -62,6 +62,7 @@ pub(super) enum Action {
 }
 
 impl Action {
+    #[inline(always)]
     pub(super) const fn parse(input: u8) -> Self {
         match input as char {
             'w' => Action::Direction(Direction::Up),
@@ -90,7 +91,7 @@ impl Board {
 
     /// Draw board display
     #[inline]
-    fn merge(&mut self, row: usize, column: usize, direction: Direction, gen: u64) -> bool {
+    fn merge(&mut self, row: usize, column: usize, direction: Direction, gen: Generation) -> bool {
         let (r0, r1, c0, c1) = match direction {
             Direction::Down => (row - 1, row, column, column),
             Direction::Up => (row, row - 1, column, column),
@@ -117,8 +118,8 @@ impl Board {
         }
     }
 
-    // Carry out an action on the board
-    #[inline]
+    // Update the board based on a directional move
+    #[inline(always)]
     pub fn update(&mut self, direction: Direction, gen: tile::Generation) {
         // Determine if we have iterated over the entire board without any updates
         // And also if the board has been changed over the course of this move
@@ -151,7 +152,7 @@ impl Board {
         }
     }
 
-    // Create a new '2' or '4' starting number tile
+    // Create a new '2' or '4' number tile in a blank space
     #[inline]
     pub fn create_new_tile(&mut self, gen: tile::Generation) -> bool {
         if !self.has_space() {

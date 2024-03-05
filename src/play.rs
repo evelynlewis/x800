@@ -23,7 +23,7 @@
 use std::{
     io::{self, Read},
     mem,
-    sync::{atomic, Arc, RwLock},
+    sync::{atomic, Arc, Mutex},
     thread,
 };
 
@@ -80,12 +80,11 @@ pub enum Input<'a> {
     Interactive(fn() -> Action),
 }
 
-#[inline]
+#[inline(always)]
 pub fn play(input: &Input) -> Result<(), ()> {
     // Runtime storage
-    let board = Arc::new(RwLock::new(DEFAULT_BOARD.clone()));
+    let board = Arc::new(Mutex::new(DEFAULT_BOARD.clone()));
     let mut gen: board::Generation = 0;
-    let mut action: Action;
 
     // Pre-setup for slice input
     let mut iter = Default::default();
@@ -103,7 +102,7 @@ pub fn play(input: &Input) -> Result<(), ()> {
     let shutdown = || {
         // Buffer final score
         if cfg!(fuzzing) {
-            fuzz_cleanup(&board.read().unwrap())?;
+            fuzz_cleanup(&board.lock().unwrap())?;
         }
 
         // Restore initial board state
@@ -116,7 +115,7 @@ pub fn play(input: &Input) -> Result<(), ()> {
 
     // Clear screen and draw intial board
     for _ in 0..INITIAL_TILES_COUNT {
-        board.write().unwrap().create_new_tile(gen);
+        board.lock().unwrap().create_new_tile(gen);
     }
 
     // Bookeeping for board-drawing thread
@@ -132,45 +131,41 @@ pub fn play(input: &Input) -> Result<(), ()> {
     // We need the handle seperately
     let draw_thread = draw_thread_joiner.thread();
 
-    // Do we need to redraw the board?
-    let mut redraw = true;
+    // Draw the board initially
+    draw_thread.unpark();
 
     loop {
-        // If there was any update, draw the board
-        if redraw {
-            draw_thread.unpark();
+        {
+            let action = match input {
+                Input::Slice(_) => Action::parse(*iter.next().unwrap_or(&END_OF_GAME_CHARACTER)),
+                Input::Interactive(f) => f(),
+            };
+
+            // Read input and take action
+            match action {
+                Action::Direction(direction) => {
+                    board.lock().unwrap().update(direction, gen);
+                }
+                Action::Continue => {
+                    continue;
+                }
+                Action::Shutdown => {
+                    break;
+                }
+            };
         }
 
-        // Increment generation
-        gen += 1;
-
-        // First assume no re-draw
-        redraw = false;
-
-        action = match input {
-            Input::Slice(_) => Action::parse(*iter.next().unwrap_or(&END_OF_GAME_CHARACTER)),
-            Input::Interactive(f) => f(),
-        };
-
-        // Read input and take action
-        match action {
-            Action::Direction(direction) => {
-                board.write().unwrap().update(direction, gen);
-                redraw = true;
-            }
-            Action::Continue => {
-                continue;
-            }
-            Action::Shutdown => {
-                break;
-            }
-        };
+        // If there was any update, draw the board
+        draw_thread.unpark();
 
         // Add new starting tile if possible
         // Has the player already used their last move?
-        if !board.write().unwrap().create_new_tile(gen) {
+        if !board.lock().unwrap().create_new_tile(gen) {
             break;
         }
+
+        // Swap generation
+        gen += 1;
     }
 
     // Signal and join board-drawing thread
