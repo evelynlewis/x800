@@ -31,7 +31,7 @@ use super::BOARD_DIMENSION;
 use crate::colour::Colour;
 use std::fmt;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub(super) enum Tile {
     Empty(),
     Number(Power, Generation),
@@ -39,7 +39,7 @@ pub(super) enum Tile {
     Corner(CornerSide),
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub(super) enum EdgeSide {
     Top,
     Bottom,
@@ -47,7 +47,7 @@ pub(super) enum EdgeSide {
     Right,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub(super) enum CornerSide {
     TopLeft,
     TopRight,

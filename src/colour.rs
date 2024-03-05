@@ -31,16 +31,17 @@
 /// and across the top.
 use std::fmt;
 
-#[derive(Clone, Debug, PartialEq, Eq, Default)]
+#[derive(Debug, PartialEq, Eq, Default)]
 pub struct Colour {
     pub row: u64,
     pub column: u64,
 }
 
 impl Colour {
-    pub fn from_power(power: u64) -> Self {
+    pub const fn from_power(power: u64) -> Self {
         match power {
-            0 => Colour::default(),
+            // Blank colour
+            0 => Colour { row: 0, column: 0 },
             // first, left-most column, upwards (ie. /|\)
             1..=3 => Colour {
                 row: 5 - ((power - 1) * 2),

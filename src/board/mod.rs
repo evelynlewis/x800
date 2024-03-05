@@ -46,7 +46,7 @@ pub struct Board {
     max_tile: u64,
 }
 
-#[derive(PartialEq, Eq, Clone, Copy)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub(super) enum Direction {
     Up,
     Down,
