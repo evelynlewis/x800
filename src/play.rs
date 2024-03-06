@@ -33,7 +33,7 @@ use crate::board::{
 };
 use board::{Action, Board};
 
-const INITIAL_TILES_COUNT: u64 = 2;
+const INITIAL_TILES_COUNT: u32 = 2;
 
 #[allow(dead_code)]
 pub fn stdin_reader() -> Action {
@@ -45,17 +45,29 @@ pub fn stdin_reader() -> Action {
     Action::parse(buffer[0])
 }
 
-fn fuzz_cleanup(board: &Board) -> Result<(), ()> {
+fn fuzz_shutdown(board: &Board) {
+    assert!(cfg!(fuzzing));
     let mut output = String::with_capacity(constants::DISPLAY_LINE_LENGTH);
-    if let Err(_) = board.draw_score(&mut output) {
-        return Err(());
-    }
-    // Write final score to terminal
+    board.draw_score(&mut output).expect("could not draw score");
     print!("{}", output);
-    Ok(())
 }
 
-fn startup(input: &Input) -> (i32, libc::termios) {
+fn interactive_shutdown(io: &Io) {
+    assert!(!cfg!(fuzzing));
+    // Buffer final score
+    // Restore initial board state
+    unsafe {
+        libc::tcsetattr(io.0, libc::TCSANOW, &io.1);
+    }
+}
+
+fn startup(input: &Input) -> Option<Io> {
+    // Early exit
+    if cfg!(fuzzing) {
+        return None;
+    }
+
+    // In case of not fuzzing, we must return Some(_)
     let fd = libc::STDIN_FILENO;
     let return_ios: libc::termios;
     unsafe {
@@ -71,7 +83,7 @@ fn startup(input: &Input) -> (i32, libc::termios) {
             libc::tcsetattr(fd, libc::TCSANOW, &ios);
         }
     }
-    (fd, return_ios)
+    Some(Io(fd, return_ios))
 }
 
 #[allow(dead_code)]
@@ -79,6 +91,8 @@ pub enum Input<'a> {
     Slice(&'a [u8]),
     Interactive(fn() -> Action),
 }
+
+struct Io(libc::c_int, libc::termios);
 
 #[inline(always)]
 pub fn play(input: &Input) -> Result<(), ()> {
@@ -95,83 +109,69 @@ pub fn play(input: &Input) -> Result<(), ()> {
         _ => {}
     }
 
-    // Startup
-    let (fd, termios) = startup(input);
-
-    // Closure for ending the game
-    let shutdown = || {
-        // Buffer final score
-        if cfg!(fuzzing) {
-            fuzz_cleanup(&board.lock().unwrap())?;
-        }
-
-        // Restore initial board state
-        unsafe {
-            libc::tcsetattr(fd, libc::TCSANOW, &termios);
-        }
-
-        Ok(())
-    };
+    let io: Option<Io> = startup(input);
+    // Ensure the postcondition holds
+    if !cfg!(fuzzing) {
+        assert!(io.is_some());
+    }
 
     // Clear screen and draw intial board
     for _ in 0..INITIAL_TILES_COUNT {
-        board.lock().unwrap().create_new_tile(gen);
+        board.lock().unwrap().spawn_tile(gen);
     }
 
     // Bookeeping for board-drawing thread
     let draw_board = Arc::clone(&board);
-    let draw_done_reader = Arc::new(atomic::AtomicBool::new(false));
-    let draw_done_writer = Arc::clone(&draw_done_reader);
+    let draw_quit = Arc::new(atomic::AtomicBool::new(false));
 
     // Spawn board-drawing thread
-    let draw_thread_joiner = thread::spawn(move || {
-        board::draw(draw_board, &draw_done_reader).expect(constants::GAME_FAILURE_MESSAGE);
+    let draw_quit_arg = Arc::clone(&draw_quit);
+    let draw_join = thread::spawn(move || {
+        board::draw(draw_board, &draw_quit_arg).expect(constants::GAME_FAILURE_MESSAGE);
     });
 
     // We need the handle seperately
-    let draw_thread = draw_thread_joiner.thread();
+    let draw_thread = draw_join.thread();
 
     // Draw the board initially
     draw_thread.unpark();
 
     loop {
-        {
-            let action = match input {
-                Input::Slice(_) => Action::parse(*iter.next().unwrap_or(&END_OF_GAME_CHARACTER)),
-                Input::Interactive(f) => f(),
-            };
+        let action = match input {
+            Input::Slice(_) => Action::parse(*iter.next().unwrap_or(&END_OF_GAME_CHARACTER)),
+            Input::Interactive(f) => f(),
+        };
 
-            // Read input and take action
-            match action {
-                Action::Direction(direction) => {
-                    board.lock().unwrap().update(direction, gen);
-                }
-                Action::Continue => {
-                    continue;
-                }
-                Action::Shutdown => {
-                    break;
-                }
-            };
-        }
+        // Read input and take action
+        match action {
+            Action::Direction(direction) => {
+                board.lock().unwrap().update(direction, gen);
+            }
+            Action::Continue => {
+                continue;
+            }
+            Action::Shutdown => {
+                break;
+            }
+        };
 
         // If there was any update, draw the board
         draw_thread.unpark();
 
         // Add new starting tile if possible
         // Has the player already used their last move?
-        if !board.lock().unwrap().create_new_tile(gen) {
+        if !board.lock().unwrap().spawn_tile(gen) {
             break;
         }
 
-        // Swap generation
+        // Increment generation
         gen += 1;
     }
 
     // Signal and join board-drawing thread
-    draw_done_writer.store(true, atomic::Ordering::Relaxed);
+    draw_quit.store(true, atomic::Ordering::Relaxed);
     draw_thread.unpark();
-    draw_thread_joiner.join().unwrap();
+    draw_join.join().unwrap();
 
     // Print end-of-game message
     print!(
@@ -181,5 +181,11 @@ pub fn play(input: &Input) -> Result<(), ()> {
     );
 
     // Handle graceful shutdown
-    shutdown()
+    if cfg!(fuzzing) {
+        fuzz_shutdown(&board.lock().unwrap());
+    } else {
+        interactive_shutdown(&io.expect("shutdown failed"));
+    }
+
+    Ok(())
 }

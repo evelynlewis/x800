@@ -22,6 +22,7 @@
 
 use super::tile::{CornerSide, EdgeSide, Tile};
 use super::Board;
+use super::Power;
 
 // Internal constants
 pub(super) const EMPTY_TILE: &str = "      ";
@@ -37,7 +38,7 @@ pub(super) const TOP_LEFT_CORNER: &str = "┌";
 pub(super) const LR_EDGE_WIDTH: usize = 1;
 pub(super) const SCORE_TEXT: &str = "score is ";
 pub(super) const WIN_MESSAGE: &str = "- - - - you win!! - - - -\r\n";
-pub(super) const WIN_POWER: u64 = 11_u64;
+pub(super) const WIN_POWER: Power = 11;
 pub(super) const TILES_WIDTH: usize = 4;
 pub(super) const NUMBER_TILES_PER_LINE: usize = 4;
 pub(super) const BOARD_DIMENSION: usize = NUMBER_TILES_PER_LINE + 2;

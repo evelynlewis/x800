@@ -20,6 +20,7 @@
   SOFTWARE.
 */
 
+use super::board::Power;
 /// Simple terminal colours for x800
 ///
 /// Uses 256 colour ANSI escape codes. See:
@@ -33,12 +34,12 @@ use std::fmt;
 
 #[derive(Debug, PartialEq, Eq, Default)]
 pub struct Colour {
-    pub row: u64,
-    pub column: u64,
+    pub row: Power,
+    pub column: Power,
 }
 
 impl Colour {
-    pub const fn from_power(power: u64) -> Self {
+    pub const fn from_power(power: Power) -> Self {
         match power {
             // Blank colour
             0 => Colour { row: 0, column: 0 },
@@ -68,8 +69,8 @@ impl Colour {
     }
 }
 
-const COLOUR_LEFT_COLUMN: u64 = 34 - 16;
-const COLOUR_RIGHT_COLUMN: u64 = COLOUR_LEFT_COLUMN + 5;
+const COLOUR_LEFT_COLUMN: Power = 34 - 16;
+const COLOUR_RIGHT_COLUMN: Power = COLOUR_LEFT_COLUMN + 5;
 
 #[test]
 fn power_to_colour_zero_test() {
@@ -80,8 +81,8 @@ fn power_to_colour_zero_test() {
 fn power_to_colour_cycle_test() {
     for power in 0..=255_u8 {
         assert_eq!(
-            Colour::from_power(power as u64),
-            Colour::from_power(power as u64 % 13)
+            Colour::from_power(power as Power),
+            Colour::from_power(power as Power % 13)
         );
     }
 }
@@ -89,11 +90,11 @@ fn power_to_colour_cycle_test() {
 impl fmt::Display for Colour {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let (bg, fg) = if *self == Self::default() {
-            (0_u64, 15_u64)
+            (0_u32, 15_u32)
         } else {
             (
-                16_u64 + self.column as u64 + (self.row as u64 * 36_u64),
-                0_u64,
+                16_u32 + self.column as u32 + (self.row as u32 * 36_u32),
+                0_u32,
             )
         };
 

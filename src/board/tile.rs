@@ -20,8 +20,8 @@
   SOFTWARE.
 */
 
-pub(super) type Generation = u64;
-pub(super) type Power = u64;
+pub(super) type Generation = u32;
+pub(super) type Power = u32;
 
 use super::constants::{
     BOTTOM_EDGE, BOTTOM_LEFT_CORNER, BOTTOM_RIGHT_CORNER, BOTTOM_RIGHT_CORNER_SPACE, EMPTY_TILE,
@@ -78,7 +78,7 @@ impl fmt::Display for Tile {
                     f,
                     "{}{:^width$}{}",
                     Colour::from_power(*num),
-                    u64::pow(2, *num as u32),
+                    u32::pow(2, *num),
                     Colour::default(),
                     width = BOARD_DIMENSION,
                 )

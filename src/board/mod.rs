@@ -29,11 +29,15 @@ pub use draw::draw;
 mod draw;
 mod tile;
 
+use crate::board::constants::GAME_FAILURE_MESSAGE;
+
 use super::colour::Colour;
 use tile::Tile;
 
-// Promote Generation type to public within this module
+// Promote Generation and Power types to public within this module
 pub type Generation = tile::Generation;
+pub type Power = tile::Power;
+
 use constants::{BOARD_DIMENSION, NUMBER_TILES_PER_LINE, NUMBER_TILES_RANGE};
 
 type Row = [tile::Tile; BOARD_DIMENSION];
@@ -41,9 +45,9 @@ type Row = [tile::Tile; BOARD_DIMENSION];
 #[derive(Clone)]
 pub struct Board {
     rows: [Row; BOARD_DIMENSION],
-    open_tiles: u64,
-    score: u64,
-    max_tile: u64,
+    score: u32,
+    open_tiles: u32,
+    max_tile: Power,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -106,11 +110,12 @@ impl Board {
                 if let Tile::Number(m, _) = previous {
                     if *m != n {
                         self.open_tiles += 1;
-                        self.score += 1 << u64::from(n);
+                        self.score += 1 << n;
                         self.max_tile = std::cmp::max(self.max_tile, n);
                     }
                 }
                 self.rows[r0][c0] = Tile::Empty();
+                // In this branch, merged is Some()
                 self.rows[r1][c1] = merged.unwrap();
                 true
             }
@@ -154,7 +159,7 @@ impl Board {
 
     // Create a new '2' or '4' number tile in a blank space
     #[inline]
-    pub fn create_new_tile(&mut self, gen: tile::Generation) -> bool {
+    pub fn spawn_tile(&mut self, gen: tile::Generation) -> bool {
         if !self.has_space() {
             return false;
         }
@@ -171,24 +176,24 @@ impl Board {
             1 // '2' tile
         };
 
-        let mut current_index = 0;
+        let mut cursor = 0;
 
         // Brute force isn't great, but it's an exceptionally small board (about 16 ops maximum)
         for r in NUMBER_TILES_RANGE {
             for c in NUMBER_TILES_RANGE {
                 if self.rows[r][c] == Tile::Empty() {
-                    if current_index == insert_index {
+                    if cursor == insert_index {
                         self.rows[r][c] = Tile::Number(insert_value, gen);
                         self.open_tiles -= 1;
                         self.max_tile = cmp::max(insert_value, self.max_tile);
                         // Early exit
                         return true;
                     }
-                    current_index += 1;
+                    cursor += 1;
                 }
             }
         }
-        unreachable!();
+        unreachable!("{}", GAME_FAILURE_MESSAGE);
     }
 
     pub fn draw_score(&self, buffer: &mut String) -> fmt::Result {

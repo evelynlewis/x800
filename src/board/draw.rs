@@ -80,7 +80,7 @@ pub fn draw(board: Arc<Mutex<Board>>, done: &Arc<atomic::AtomicBool>) -> fmt::Re
         }
 
         // Write out framebuffer
-        write!(std::io::stdout(), "{}", buffer).expect("failed to write to screen");
+        write!(std::io::stdout(), "{}", buffer).expect("failed to render");
         buffer.clear();
 
         // Leave the loop
