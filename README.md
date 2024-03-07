@@ -98,19 +98,15 @@ See-also the development shell scripts in the `util/` directory.
 
 Since `x800` takes input from standard input, or `stdin`, and exits at the completion of a game, random games can be played by sending a stream of random moves to `stdin`. Monitoring the speed of characters being read from standard input and the typical time required to finish a game provides a reasonable performance benchmark.
 
-### Notes on benchmark results and their interpretation
-
-  1. The `pv` tool output of `[ n MiB/s]` corresponds to `n × 1024²`, or `n × 1048576` discrete directional moves processed by `x800` in a given second. In the measurements below, the first number is the instantaneous rate, and the second the average. Measurements were taken until the the average rate had stabilized for at least several seconds.
-
-  2. The `hyperfine` latency numbers correspond to the duration of a complete randomly-run game, beginning-to-end. Statistical reasoning of the number of moves this typically corresponds to is left as an exercise for the reader.
-
 ### Mini-benchmarks using the `hyperfine` tool
 
 `hyperfine` is [described](https://nnethercote.github.io/perf-book/benchmarking.html) by *The Rust Performance Book* as "an excellent general-purpose benchmarking tool." It seems to deliver.
 
-These benchmarks require GNU `base32`, `tr`, `pv`, and a recent version of [`hyperfine`](https://github.com/sharkdp/hyperfine).
+The `hyperfine` latency numbers correspond to the duration of a complete randomly-run game, beginning-to-end. Statistical reasoning of the number of moves this typically corresponds to is left as an exercise for the reader.
 
-> Note: The `hyperfine` binary can be installed via your system package manager or with `cargo install hyperfine`. Your package manager's version may be too old.
+These benchmarks require GNU `base32`, `tr`, `dd`, and a recent version of [`hyperfine`](https://github.com/sharkdp/hyperfine).
+
+> On most Linux systems the required GNU shell tools will be preinstalled. The `hyperfine` binary can be installed via your system package manager or with `cargo install hyperfine`. Your package manager's version may be too old.
 
 #### `hyperfine` benchmark: Intel Pentium G3220T at 2.60GHz with Linux 6.5
 
