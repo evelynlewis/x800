@@ -24,11 +24,19 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Benchmarks
-      run: cargo install --quiet hyperfine && ./util/bench.sh
+      run: |
+        cargo install --quiet hyperfine
+        ./util/bench.sh
 
   fuzz:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - name: Fuzz
-      run: cargo install --quiet cargo-fuzz && cargo fuzz run roger --sanitizer none --release -- -runs=0 > /dev/null
+    - name: Fuzz test
+      run: |
+        cargo install --quiet cargo-fuzz
+        cargo fuzz run roger --sanitizer none --release -- -runs=0 > /dev/null
+    - name: Fuzz coverage
+      run: |
+        rustup component add llvm-tools-preview
+        ./util/coverage.sh
