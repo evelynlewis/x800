@@ -29,6 +29,7 @@ pedantic = "deny"
 
 [profile.release]
 codegen-units = 1
+lto = "fat"
 panic = "abort"
 strip = "debuginfo"
 
