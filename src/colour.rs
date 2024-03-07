@@ -39,6 +39,7 @@ pub struct Colour {
 }
 
 impl Colour {
+    #[inline(always)]
     pub const fn from_power(power: Power) -> Self {
         match power {
             // Blank colour
