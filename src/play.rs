@@ -101,13 +101,10 @@ pub fn play(input: &Input) -> Result<(), ()> {
     let mut gen: board::Generation = 0;
 
     // Pre-setup for slice input
-    let mut iter = Default::default();
-    match input {
-        Input::Slice(slice) => {
-            iter = slice.iter();
-        }
-        _ => {}
-    }
+    let mut iter = match input {
+        Input::Slice(slice) => slice.iter(),
+        _ => Default::default(),
+    };
 
     let io: Option<Io> = startup(input);
     // Ensure the postcondition holds
@@ -116,19 +113,25 @@ pub fn play(input: &Input) -> Result<(), ()> {
     }
 
     // Clear screen and draw intial board
-    for _ in 0..INITIAL_TILES_COUNT {
-        board.lock().unwrap().spawn_tile(gen);
+    {
+        let mut unlocked = board.lock().unwrap();
+        for _ in 0..INITIAL_TILES_COUNT {
+            unlocked.spawn_tile(gen);
+        }
     }
 
     // Bookeeping for board-drawing thread
-    let draw_board = Arc::clone(&board);
     let draw_quit = Arc::new(atomic::AtomicBool::new(false));
+    let draw_join;
 
     // Spawn board-drawing thread
-    let draw_quit_arg = Arc::clone(&draw_quit);
-    let draw_join = thread::spawn(move || {
-        board::draw(draw_board, &draw_quit_arg).expect(constants::GAME_FAILURE_MESSAGE);
-    });
+    {
+        let board_arg = Arc::clone(&board);
+        let quit_arg = Arc::clone(&draw_quit);
+        draw_join = thread::spawn(move || {
+            board::draw(board_arg, &quit_arg).expect(constants::GAME_FAILURE_MESSAGE);
+        });
+    }
 
     // We need the handle seperately
     let draw_thread = draw_join.thread();
