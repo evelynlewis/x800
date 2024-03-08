@@ -80,6 +80,7 @@ impl Action {
 
 impl Board {
     // Clear screen
+    #[inline(always)]
     pub fn draw_clear(&self, output: &mut String) -> fmt::Result {
         write!(
             output,
@@ -88,11 +89,13 @@ impl Board {
         )
     }
 
+    #[inline(always)]
     pub fn has_space(&self) -> bool {
         self.open_tiles != 0
     }
 
     /// Draw board display
+    #[inline(always)]
     fn merge(&mut self, row: usize, column: usize, direction: Direction, gen: Generation) -> bool {
         let (r0, r1, c0, c1) = match direction {
             Direction::Down => (row - 1, row, column, column),

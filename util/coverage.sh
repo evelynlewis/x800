@@ -36,11 +36,7 @@ ARGS="--release --sanitizer none --no-cfg-fuzzing roger"
 # shellcheck disable=SC2086
 cargo install --quiet ${DEPS}
 
-# Build fuzz target
-# shellcheck disable=SC2086
-cargo fuzz build ${ARGS}
-
-# Generate coverage
+# Build fuzz target and generate coverage
 # shellcheck disable=SC2086
 cargo fuzz coverage ${ARGS} fuzz/corpus/roger/ -- -use_value_profile=1 >/dev/null
 

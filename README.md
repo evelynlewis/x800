@@ -4,7 +4,7 @@ x800: [ɛks eɪt ˈhʌndrəd]
 
 ## Introduction
 
-How fast? A sustained update rate of 6.0 million moves per second on a 4th Generation Intel Pentium from 2013 (see methodology [below](#shell-benchmark-intel-pentium-g3220t-at-260ghz-with-linux-65)).
+How fast? A sustained update rate of 6.3 million moves per second on a 4th Generation Intel Pentium from 2013 (see methodology [below](#shell-benchmark-intel-pentium-g3220t-at-260ghz-with-linux-65)).
 
 The project has few external dependencies. It doesn't use ncurses, or a Rust terminal library such as [ratatui](https://crates.io/crates/ratatui). It instead relies on simple frame-buffering and standard [ANSI escape codes](https://en.wikipedia.org/wiki/ANSI_escape_code). The only build dependency aside from the Rust Standard Library is the [`fastrand`](https://crates.io/crates/fastrand) Crate, a simple PRNG without child dependencies. The program also requires a POSIX-compatible `libc` crate, which is included in Rust's `std` when building for POSIX targets.
 
@@ -149,7 +149,7 @@ cat /dev/urandom \
     | base32 \
     | dd conv=lcase 2> /dev/null \
     | tr -dC 'asdw' \
-    | dd bs=2048 count=16k \
+    | dd bs=2048 count=96K status=progress \
     | sh -c 'while true; do ./target/release/x800; done' > /dev/null
 ```
 
@@ -160,11 +160,12 @@ cat /dev/urandom \
     | base32 \
     | dd conv=lcase 2> /dev/null \
     | tr -dC 'asdw' \
-    | dd bs=2048 count=16k \
+    | dd bs=2048 count=96K status=progress \
     | sh -c 'while true; do ./target/release/x800; done' > /dev/null
-16384+0 records in
-16384+0 records out
-33554432 bytes (34 MB, 32 MiB) copied, 5.63544 s, 6.0 MB/s
+200898560 bytes (201 MB, 192 MiB) copied, 32 s, 6.3 MB/s
+98304+0 records in
+98304+0 records out
+201326592 bytes (201 MB, 192 MiB) copied, 32.0697 s, 6.3 MB/s
 ```
 
 ### Shell benchmark: M1 MacBook Air with MacOS
@@ -176,11 +177,12 @@ cat /dev/urandom \
     | gbase32 \
     | gdd conv=lcase 2> /dev/null \
     | gtr -dC 'asdw' \
-    | gdd bs=2048 count=16k \
+    | gdd bs=2048 count=96k status=progress \
     | sh -c 'while true; do ./target/release/x800; done' > /dev/null
-16384+0 records in
-16384+0 records out
-33554432 bytes (34 MB, 32 MiB) copied, 5.55141 s, 6.0 MB/s
+200140800 bytes (200 MB, 191 MiB) copied, 33 s, 6.1 MB/s
+98304+0 records in
+98304+0 records out
+201326592 bytes (201 MB, 192 MiB) copied, 33.1954 s, 6.1 MB/s
 ```
 
 ## Fuzzing

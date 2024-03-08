@@ -35,32 +35,7 @@ use board::{Action, Board};
 
 const INITIAL_TILES_COUNT: u32 = 2;
 
-#[allow(dead_code)]
-pub fn stdin_reader() -> Action {
-    // Read a byte from stdin
-    let mut buffer = [0_u8; 1];
-    if let Err(_) = io::stdin().read_exact(&mut buffer) {
-        return Action::Shutdown;
-    }
-    Action::parse(buffer[0])
-}
-
-fn fuzz_shutdown(board: &Board) {
-    assert!(cfg!(fuzzing));
-    let mut output = String::with_capacity(constants::DISPLAY_LINE_LENGTH);
-    board.draw_score(&mut output).expect("could not draw score");
-    print!("{}", output);
-}
-
-fn interactive_shutdown(io: &Io) {
-    assert!(!cfg!(fuzzing));
-    // Buffer final score
-    // Restore initial board state
-    unsafe {
-        libc::tcsetattr(io.0, libc::TCSANOW, &io.1);
-    }
-}
-
+#[inline(always)]
 fn startup(input: &Input) -> Option<Io> {
     // Early exit
     if cfg!(fuzzing) {
@@ -78,7 +53,7 @@ fn startup(input: &Input) -> Option<Io> {
         return_ios = ios;
 
         // Enable and set raw mode in case of terminal
-        if let Input::Interactive(_) = input {
+        if let Input::Interactive = input {
             libc::cfmakeraw(&mut ios);
             libc::tcsetattr(fd, libc::TCSANOW, &ios);
         }
@@ -89,7 +64,7 @@ fn startup(input: &Input) -> Option<Io> {
 #[allow(dead_code)]
 pub enum Input<'a> {
     Slice(&'a [u8]),
-    Interactive(fn() -> Action),
+    Interactive,
 }
 
 struct Io(libc::c_int, libc::termios);
@@ -99,6 +74,16 @@ pub fn play(input: &Input) -> Result<(), ()> {
     // Runtime storage
     let board = Arc::new(Mutex::new(DEFAULT_BOARD.clone()));
     let mut gen: board::Generation = 0;
+
+    // Closure called for program input
+    let stdin_reader = || -> Action {
+        // Read a byte from stdin
+        let mut buffer = [0_u8; 1];
+        if let Err(_) = io::stdin().read_exact(&mut buffer) {
+            return Action::Shutdown;
+        }
+        Action::parse(buffer[0])
+    };
 
     // Pre-setup for slice input
     let mut iter = match input {
@@ -142,7 +127,7 @@ pub fn play(input: &Input) -> Result<(), ()> {
     loop {
         let action = match input {
             Input::Slice(_) => Action::parse(*iter.next().unwrap_or(&END_OF_GAME_CHARACTER)),
-            Input::Interactive(f) => f(),
+            Input::Interactive => stdin_reader(),
         };
 
         // Read input and take action
@@ -182,6 +167,22 @@ pub fn play(input: &Input) -> Result<(), ()> {
         board::constants::LEFT_SPACE,
         board::constants::GAME_OVER
     );
+
+    let fuzz_shutdown = |board: &Board| {
+        assert!(cfg!(fuzzing));
+        let mut output = String::with_capacity(constants::DISPLAY_LINE_LENGTH);
+        board.draw_score(&mut output).expect("could not draw score");
+        print!("{}", output);
+    };
+
+    let interactive_shutdown = |io: &Io| {
+        assert!(!cfg!(fuzzing));
+        // Buffer final score
+        // Restore initial board state
+        unsafe {
+            libc::tcsetattr(io.0, libc::TCSANOW, &io.1);
+        }
+    };
 
     // Handle graceful shutdown
     if cfg!(fuzzing) {

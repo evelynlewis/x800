@@ -34,8 +34,8 @@ use std::fmt;
 
 #[derive(Debug, PartialEq, Eq, Default)]
 pub struct Colour {
-    pub row: Power,
-    pub column: Power,
+    row: Power,
+    column: Power,
 }
 
 impl Colour {

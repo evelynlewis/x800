@@ -27,10 +27,10 @@ mod play;
 use libc;
 use std::process;
 
-use play::{play, stdin_reader, Input};
+use play::{play, Input};
 
 fn main() {
-    match play(&Input::Interactive(stdin_reader)) {
+    match play(&Input::Interactive) {
         Err(_) => {
             eprintln!("{}", board::constants::GAME_FAILURE_MESSAGE);
             process::exit(libc::EXIT_FAILURE);
