@@ -27,6 +27,7 @@ jobs:
       run: |
         cargo install --quiet hyperfine
         ./util/bench.sh
+        ./util/bench-stdin.sh
 
   fuzz:
     runs-on: ubuntu-latest

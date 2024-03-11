@@ -4,7 +4,7 @@ x800: [ɛks eɪt ˈhʌndrəd]
 
 ## Introduction
 
-How fast? A sustained update rate of 6.3 million moves per second on a 4th Generation Intel Pentium from 2013 (see methodology [below](#shell-benchmark-intel-pentium-g3220t-at-260ghz-with-linux-65)).
+How fast? A sustained update rate of 7.1 million moves per second on a 4th Generation Intel Pentium from 2013 (see methodology [below](#shell-benchmark-intel-pentium-g3220t-at-260ghz-with-linux-65)).
 
 The project has few external dependencies. It doesn't use ncurses, or a Rust terminal library such as [ratatui](https://crates.io/crates/ratatui). It instead relies on simple frame-buffering and standard [ANSI escape codes](https://en.wikipedia.org/wiki/ANSI_escape_code). The only build dependency aside from the Rust Standard Library is the [`fastrand`](https://crates.io/crates/fastrand) Crate, a simple PRNG without child dependencies. The program also requires a POSIX-compatible `libc` crate, which is included in Rust's `std` when building for POSIX targets.
 
@@ -142,30 +142,20 @@ Benchmark 1: ./target/release/x800
 
 Requires POSIX `sh`, and GNU `base32`, `dd`, `tr`, and `grep`.
 
-> Note that these benchmarks are close to the performance limit for the shell tools themselves in this configuration.
+> Note that in this configuration, these benchmarks may be close to the performance limit for the shell tools themselves.
 
 ```sh
-cat /dev/urandom \
-    | base32 \
-    | dd conv=lcase 2> /dev/null \
-    | tr -dC 'asdw' \
-    | dd bs=2048 count=96K status=progress \
-    | sh -c 'while true; do ./target/release/x800; done' > /dev/null
+./util/bench-stdin.sh
 ```
 
 ### Shell benchmark: Intel Pentium G3220T at 2.60GHz with Linux 6.5
 
 ```sh
-cat /dev/urandom \
-    | base32 \
-    | dd conv=lcase 2> /dev/null \
-    | tr -dC 'asdw' \
-    | dd bs=2048 count=96K status=progress \
-    | sh -c 'while true; do ./target/release/x800; done' > /dev/null
-200898560 bytes (201 MB, 192 MiB) copied, 32 s, 6.3 MB/s
-98304+0 records in
-98304+0 records out
-201326592 bytes (201 MB, 192 MiB) copied, 32.0697 s, 6.3 MB/s
+./util/bench-stdin.sh
+Building x800 executable.
+    Finished release [optimized] target(s) in 0.01s
+Running benchmark for 16 seconds.
+114190336 bytes (114 MB, 109 MiB) copied, 16 s, 7.1 MB/s
 ```
 
 ### Shell benchmark: M1 MacBook Air with MacOS
@@ -173,16 +163,11 @@ cat /dev/urandom \
 > Note: tool names on MacOS are modified slightly, as provided below.
 
 ```sh
-cat /dev/urandom \
-    | gbase32 \
-    | gdd conv=lcase 2> /dev/null \
-    | gtr -dC 'asdw' \
-    | gdd bs=2048 count=96k status=progress \
-    | sh -c 'while true; do ./target/release/x800; done' > /dev/null
-200140800 bytes (200 MB, 191 MiB) copied, 33 s, 6.1 MB/s
-98304+0 records in
-98304+0 records out
-201326592 bytes (201 MB, 192 MiB) copied, 33.1954 s, 6.1 MB/s
+./util/bench-stdin.sh
+Building x800 executable.
+    Finished release [optimized] target(s) in 0.00s
+Running benchmark for 16 seconds.
+99493888 bytes (99 MB, 95 MiB) copied, 16 s, 6.2 MB/s
 ```
 
 ## Fuzzing
