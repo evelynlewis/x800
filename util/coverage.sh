@@ -23,14 +23,15 @@
 # SOFTWARE.
 
 # Errors are fatal, and trace execution
-set -ex
+set -e
 
 # Ensure correct working directory
 test -d ./util/
 test -d ./fuzz/
 
 DEPS="rustfilt cargo-fuzz"
-ARGS="--release --sanitizer none --no-cfg-fuzzing roger"
+FUZZ_ARGS="--release --sanitizer none --no-cfg-fuzzing roger"
+COV_ARGS='-Xdemangler=rustfilt -ignore-filename-regex='.cargo' -ignore-filename-regex='/rustc/.+' -use-color -instr-profile=fuzz/coverage/roger/coverage.profdata'
 
 # Install dependencies
 # shellcheck disable=SC2086
@@ -38,13 +39,12 @@ cargo install --quiet ${DEPS}
 
 # Build fuzz target and generate coverage
 # shellcheck disable=SC2086
-cargo fuzz coverage ${ARGS} fuzz/corpus/roger/ -- -use_value_profile=1 >/dev/null
+cargo fuzz coverage ${FUZZ_ARGS} fuzz/corpus/roger/ -- -use_value_profile=1 >/dev/null
+
+# Show coverage
+# shellcheck disable=SC2086
+"$(rustc --print=target-libdir)/../bin/llvm-cov" show "$(find target -name roger | grep coverage)" ${COV_ARGS}
 
 # Generate report
-"$(rustc --print=target-libdir)/../bin/llvm-cov" report "$(find target -name roger | grep coverage)" \
-    -Xdemangler=rustfilt \
-    --ignore-filename-regex=.cargo \
-    --ignore-filename-regex='/rustc/.+' \
-    --use-color \
-    -instr-profile=fuzz/coverage/roger/coverage.profdata
-
+# shellcheck disable=SC2086
+"$(rustc --print=target-libdir)/../bin/llvm-cov" report "$(find target -name roger | grep coverage)" ${COV_ARGS}
