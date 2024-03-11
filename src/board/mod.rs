@@ -31,6 +31,8 @@ mod tile;
 
 use crate::board::constants::GAME_FAILURE_MESSAGE;
 
+use self::constants::END_OF_GAME_CHARACTER;
+
 use super::colour::Colour;
 use tile::Tile;
 
@@ -67,12 +69,12 @@ pub(super) enum Action {
 
 impl Action {
     pub(super) const fn parse(input: u8) -> Self {
-        match input as char {
-            'w' => Action::Direction(Direction::Up),
-            'a' => Action::Direction(Direction::Left),
-            'd' => Action::Direction(Direction::Right),
-            's' => Action::Direction(Direction::Down),
-            '\u{3}' => Action::Shutdown,
+        match input {
+            b'w' => Action::Direction(Direction::Up),
+            b'a' => Action::Direction(Direction::Left),
+            b'd' => Action::Direction(Direction::Right),
+            b's' => Action::Direction(Direction::Down),
+            END_OF_GAME_CHARACTER => Action::Shutdown,
             _ => Action::Continue,
         }
     }
@@ -178,7 +180,7 @@ impl Board {
 
         let mut cursor = 0;
 
-        // Brute force isn't great, but it's an exceptionally small board (about 16 ops maximum)
+        // Brute force isn't great, but it's an exceptionally small board (about 16 loops maximum)
         for r in NUMBER_TILES_RANGE {
             for c in NUMBER_TILES_RANGE {
                 if self.rows[r][c] == Tile::Empty() {
