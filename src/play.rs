@@ -93,7 +93,7 @@ pub fn play(input: &Input) -> Result<(), ()> {
 
     let io: Option<Io> = startup(input);
     // Ensure the postcondition holds
-    if !cfg!(fuzzing) {
+    if cfg!(not(fuzzing)) {
         assert!(io.is_some());
     }
 
@@ -176,7 +176,7 @@ pub fn play(input: &Input) -> Result<(), ()> {
     };
 
     let interactive_shutdown = |io: &Io| {
-        assert!(!cfg!(fuzzing));
+        assert!(cfg!(not(fuzzing)));
         // Buffer final score
         // Restore initial board state
         unsafe {
