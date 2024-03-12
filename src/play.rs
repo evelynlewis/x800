@@ -121,7 +121,7 @@ pub fn play(input: &Input) -> Result<(), ()> {
     // We need the handle seperately
     let draw_thread = draw_join.thread();
 
-    // Draw the board initially
+    // Initially draw the board
     draw_thread.unpark();
 
     loop {
@@ -143,14 +143,14 @@ pub fn play(input: &Input) -> Result<(), ()> {
             }
         };
 
-        // If there was any update, draw the board
-        draw_thread.unpark();
-
         // Add new starting tile if possible
         // Has the player already used their last move?
         if !board.lock().unwrap().spawn_tile(gen) {
             break;
         }
+
+        // In case of an update, draw the board
+        draw_thread.unpark();
 
         // Increment generation
         gen += 1;
