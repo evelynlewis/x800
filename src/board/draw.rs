@@ -30,10 +30,8 @@ use std::{
 use super::{constants, Board};
 
 pub fn draw(board: Arc<Mutex<Board>>, done: &Arc<atomic::AtomicBool>) -> fmt::Result {
-    // When fuzzing, this fn is a no-op
-    if cfg!(fuzzing) {
-        return Ok(());
-    }
+    // When fuzzing, this fn should not be called
+    assert!(cfg!(not(fuzzing)));
 
     // Use one buffer for program duration
     let buffer = &mut String::with_capacity(constants::DISPLAY_BUFFER_SIZE);

@@ -31,9 +31,10 @@ use crate::board::{
     self,
     constants::{self, DEFAULT_BOARD, END_OF_GAME_CHARACTER},
 };
-use board::{Action, Board};
+use board::Action;
 
 const INITIAL_TILES_COUNT: u32 = 2;
+const EXPECT_NOT_FUZZING: &str = "Expected cfg!(not(fuzzing))";
 
 #[inline(always)]
 fn startup(input: &Input) -> Option<Io> {
@@ -93,9 +94,7 @@ pub fn play(input: &Input) -> Result<(), ()> {
 
     let io: Option<Io> = startup(input);
     // Ensure the postcondition holds
-    if cfg!(not(fuzzing)) {
-        assert!(io.is_some());
-    }
+    assert_eq!(cfg!(not(fuzzing)), io.is_some());
 
     // Clear screen and draw intial board
     {
@@ -108,22 +107,32 @@ pub fn play(input: &Input) -> Result<(), ()> {
     // Bookeeping for board-drawing thread
     let draw_quit = Arc::new(atomic::AtomicBool::new(false));
     let draw_join;
+    let draw_thread;
 
-    // Spawn board-drawing thread
-    {
+    // Provision zero or one drawing threads
+    if cfg!(fuzzing) {
+        // Empty in case of fuzzing
+        draw_join = None;
+        draw_thread = None;
+    } else {
+        // The usual case
+        assert!(cfg!(not(fuzzing)));
+
+        // Spawn board-drawing thread
         let board_arg = Arc::clone(&board);
         let quit_arg = Arc::clone(&draw_quit);
-        draw_join = thread::spawn(move || {
+        draw_join = Some(thread::spawn(move || {
             board::draw(board_arg, &quit_arg).expect(constants::GAME_FAILURE_MESSAGE);
-        });
+        }));
+
+        // We need the thread handle seperately
+        draw_thread = Some(draw_join.as_ref().expect(EXPECT_NOT_FUZZING).thread());
+
+        // Initially draw the board
+        draw_thread.as_ref().expect(EXPECT_NOT_FUZZING).unpark();
     }
 
-    // We need the handle seperately
-    let draw_thread = draw_join.thread();
-
-    // Initially draw the board
-    draw_thread.unpark();
-
+    // The main event loop
     loop {
         let action = match input {
             Input::Slice(_) => Action::parse(*iter.next().unwrap_or(&END_OF_GAME_CHARACTER)),
@@ -149,46 +158,34 @@ pub fn play(input: &Input) -> Result<(), ()> {
             break;
         }
 
-        // In case of an update, draw the board
-        draw_thread.unpark();
+        // In case of update while not fuzzing, draw the board
+        if cfg!(not(fuzzing)) {
+            draw_thread.as_ref().expect(EXPECT_NOT_FUZZING).unpark();
+        }
 
         // Increment generation
         gen += 1;
     }
 
-    // Signal and join board-drawing thread
-    draw_quit.store(true, atomic::Ordering::Relaxed);
-    draw_thread.unpark();
-    draw_join.join().unwrap();
+    // Handle graceful shutdown
+    if cfg!(not(fuzzing)) {
+        // Signal and join board-drawing thread, if it exists
+        draw_quit.store(true, atomic::Ordering::Relaxed);
+        draw_thread.as_ref().expect(EXPECT_NOT_FUZZING).unpark();
+        draw_join.unwrap().join().unwrap();
 
-    // Print end-of-game message
-    print!(
-        "{}{}",
-        board::constants::LEFT_SPACE,
-        board::constants::GAME_OVER
-    );
+        // Print end-of-game message
+        print!(
+            "{}{}",
+            board::constants::LEFT_SPACE,
+            board::constants::GAME_OVER
+        );
 
-    let fuzz_shutdown = |board: &Board| {
-        assert!(cfg!(fuzzing));
-        let mut output = String::with_capacity(constants::DISPLAY_LINE_LENGTH);
-        board.draw_score(&mut output).expect("could not draw score");
-        print!("{}", output);
-    };
-
-    let interactive_shutdown = |io: &Io| {
-        assert!(cfg!(not(fuzzing)));
-        // Buffer final score
-        // Restore initial board state
+        // Reset terminal
+        let io = io.expect("shutdown failed");
         unsafe {
             libc::tcsetattr(io.0, libc::TCSANOW, &io.1);
         }
-    };
-
-    // Handle graceful shutdown
-    if cfg!(fuzzing) {
-        fuzz_shutdown(&board.lock().unwrap());
-    } else {
-        interactive_shutdown(&io.expect("shutdown failed"));
     }
 
     Ok(())
