@@ -21,7 +21,7 @@
 */
 
 use core::fmt;
-use std::{cmp, fmt::Write};
+use std::{cmp, collections::BTreeSet, fmt::Write};
 
 pub mod constants;
 pub use draw::draw;
@@ -29,24 +29,19 @@ pub use draw::draw;
 mod draw;
 mod tile;
 
-use crate::board::constants::GAME_FAILURE_MESSAGE;
-
 use self::constants::END_OF_GAME_CHARACTER;
 
 use super::colour::Colour;
 use tile::Tile;
 
-// Promote Generation and Power types to public within this module
-pub type Generation = tile::Generation;
+// Promote Power type to public within this module
 pub type Power = tile::Power;
 
-use constants::{BOARD_DIMENSION, NUMBER_TILES_PER_LINE, NUMBER_TILES_RANGE};
-
-type Row = [tile::Tile; BOARD_DIMENSION];
+use constants::{BOARD_DIMENSION, NUMBER_TILES_RANGE};
 
 #[derive(Clone)]
 pub struct Board {
-    rows: [Row; BOARD_DIMENSION],
+    tiles: tile::Tiles,
     score: u32,
     open_tiles: u32,
     max_tile: Power,
@@ -96,83 +91,140 @@ impl Board {
         self.open_tiles != 0
     }
 
-    /// Draw board display
-    #[inline(always)]
-    fn merge(&mut self, row: usize, column: usize, direction: Direction, gen: Generation) -> bool {
-        let (r0, r1, c0, c1) = match direction {
-            Direction::Down => (row - 1, row, column, column),
-            Direction::Up => (row, row - 1, column, column),
-            Direction::Right => (row, row, column - 1, column),
-            Direction::Left => (row, row, column, column - 1),
-        };
-
-        let merged: Option<Tile> = self.rows[r0][c0].merge(&self.rows[r1][c1], gen);
-        match merged {
-            Some(Tile::Number(n, _)) => {
-                let previous: &Tile = &self.rows[r0][c0];
-                if let Tile::Number(m, _) = previous {
-                    if *m != n {
-                        self.open_tiles += 1;
-                        self.score += 1 << n;
-                        self.max_tile = std::cmp::max(self.max_tile, n);
-                    }
-                }
-                self.rows[r0][c0] = Tile::Empty();
-                // In this branch, merged is Some()
-                self.rows[r1][c1] = merged.unwrap();
-                true
-            }
-            _ => false,
+    fn pair(major: usize, minor: usize, direction: Direction) -> ((usize, usize), (usize, usize)) {
+        match direction {
+            Direction::Left => ((major, minor), (major, minor + 1)),
+            Direction::Right => ((major, minor), (major, minor - 1)),
+            Direction::Up => ((minor, major), (minor + 1, major)),
+            Direction::Down => ((minor, major), (minor - 1, major)),
         }
     }
 
-    // Update the board based on a directional move
     #[inline(always)]
-    pub fn update(&mut self, direction: Direction, gen: tile::Generation) {
-        // Determine if we have iterated over the entire board without any updates
-        // And also if the board has been changed over the course of this move
-        let mut again;
+    fn collect(
+        &mut self,
+        major: usize,
+        minor: usize,
+        direction: Direction,
+        set: &mut BTreeSet<(usize, usize)>,
+    ) -> bool {
+        let current = Self::pair(major, minor, direction).0;
+        let mut moved = false;
 
-        // Take appropriate action
-        match direction {
-            Direction::Down | Direction::Left => loop {
-                again = false;
-                for r in NUMBER_TILES_RANGE {
-                    for c in NUMBER_TILES_RANGE {
-                        again |= self.merge(r, c, direction, gen);
+        match self.tiles[current] {
+            Tile::Empty() => {
+                set.insert(current);
+            }
+            Tile::Number(_) => {
+                if !set.is_empty() {
+                    let index = match direction {
+                        Direction::Up | Direction::Left => set.pop_first(),
+                        Direction::Down | Direction::Right => set.pop_last(),
                     }
+                    .expect("Malformed set");
+
+                    self.tiles[index] = self.tiles[current];
+                    self.tiles[current] = Tile::Empty();
+                    set.insert(current);
+                    moved = true;
                 }
-                if !again {
-                    break;
-                }
-            },
-            Direction::Up | Direction::Right => loop {
-                again = false;
-                for r in NUMBER_TILES_RANGE.rev() {
-                    for c in NUMBER_TILES_RANGE.rev() {
-                        again |= self.merge(r, c, direction, gen);
-                    }
-                }
-                if !again {
-                    break;
-                }
-            },
+            }
+            Tile::Corner(_) | Tile::Edge(_) => {}
         }
+        moved
+    }
+
+    #[inline(always)]
+    fn merge(
+        &mut self,
+        major: usize,
+        minor: usize,
+        direction: Direction,
+        set: &mut BTreeSet<(usize, usize)>,
+        merged: bool,
+    ) -> bool {
+        let (current, next) = Self::pair(major, minor, direction);
+
+        match (self.tiles[current], self.tiles[next]) {
+            (Tile::Number(n), Tile::Number(m)) => {
+                if n == m && !merged {
+                    self.score += 1 << (n + 1);
+                    self.max_tile = cmp::max(self.max_tile, n + 1);
+                    self.tiles[current] = Tile::Number(n + 1);
+                    self.tiles[next] = Tile::Empty();
+                    set.insert(next);
+                    self.open_tiles += 1;
+                    return true;
+                }
+            }
+            (Tile::Empty(), Tile::Number(n)) => {
+                set.insert(current);
+                self.tiles[next] = Tile::Empty();
+                let index = match direction {
+                    Direction::Up | Direction::Left => set.pop_first().unwrap(),
+                    Direction::Down | Direction::Right => set.pop_last().unwrap(),
+                };
+                self.tiles[index] = Tile::Number(n);
+            }
+            (Tile::Edge(_), _)
+            | (Tile::Corner(_), _)
+            | (_, Tile::Empty())
+            | (_, Tile::Edge(_))
+            | (_, Tile::Corner(_)) => {}
+        }
+        merged
+    }
+
+    #[inline(always)]
+    pub fn update(&mut self, direction: Direction, set: &mut BTreeSet<(usize, usize)>) -> bool {
+        let mut moved = false;
+        let mut merged;
+
+        // Iterate in row or column major order. First scan removes slack; second does one merge
+        match direction {
+            Direction::Left | Direction::Up => {
+                for major in NUMBER_TILES_RANGE {
+                    merged = false;
+                    set.clear();
+
+                    for minor in NUMBER_TILES_RANGE {
+                        moved |= self.collect(major, minor, direction, set);
+                    }
+                    for minor in NUMBER_TILES_RANGE {
+                        merged |= self.merge(major, minor, direction, set, merged);
+                        moved |= merged;
+                    }
+                }
+            }
+            Direction::Right | Direction::Down => {
+                for major in NUMBER_TILES_RANGE.rev() {
+                    merged = false;
+                    set.clear();
+
+                    for minor in NUMBER_TILES_RANGE.rev() {
+                        moved |= self.collect(major, minor, direction, set);
+                    }
+                    for minor in NUMBER_TILES_RANGE.rev() {
+                        merged |= self.merge(major, minor, direction, set, merged);
+                        moved |= merged;
+                    }
+                }
+            }
+        }
+        moved
     }
 
     // Create a new '2' or '4' number tile in a blank space
-    pub fn spawn_tile(&mut self, gen: tile::Generation) -> bool {
+    #[inline]
+    pub fn spawn_tile(&mut self) -> bool {
         if !self.has_space() {
             return false;
         }
 
-        const CHANCE_OF_FOUR_TILES: u32 = 4;
-        assert_ne!(self.open_tiles, 0);
-
         // Collect random numbers
-        // Note: use u32 for backwards compatability
-        let insert_index = fastrand::u32(..self.open_tiles as u32);
-        let insert_value = if fastrand::u32(..CHANCE_OF_FOUR_TILES) == (CHANCE_OF_FOUR_TILES - 1) {
+        const CHANCE_OF_FOUR_TILES: u64 = 4;
+        let insert_index = fastrand::u64(..self.open_tiles as u64);
+        let insert_value = if fastrand::u64(..CHANCE_OF_FOUR_TILES) == (CHANCE_OF_FOUR_TILES - 1) {
             2 // '4' tile
         } else {
             1 // '2' tile
@@ -183,70 +235,18 @@ impl Board {
         // Brute force isn't great, but it's an exceptionally small board (about 16 loops maximum)
         for r in NUMBER_TILES_RANGE {
             for c in NUMBER_TILES_RANGE {
-                if self.rows[r][c] == Tile::Empty() {
+                if (self.tiles[(r, c)]) == Tile::Empty() {
                     if cursor == insert_index {
-                        self.rows[r][c] = Tile::Number(insert_value, gen);
+                        self.tiles[(r, c)] = Tile::Number(insert_value);
                         self.open_tiles -= 1;
                         self.max_tile = cmp::max(insert_value, self.max_tile);
-                        // Early exit
+                        // Return early
                         return true;
                     }
                     cursor += 1;
                 }
             }
         }
-        unreachable!("{}", GAME_FAILURE_MESSAGE);
-    }
-
-    pub fn draw_score(&self, buffer: &mut String) -> fmt::Result {
-        let space = constants::LEFT_SPACE;
-        let score_colour = Colour::from_power(self.max_tile);
-        let score_text = constants::SCORE_TEXT;
-        let length = constants::DISPLAY_LINE_LENGTH;
-        let no_colour = Colour::default();
-        let header = if self.max_tile >= constants::WIN_POWER {
-            constants::WIN_MESSAGE
-        } else {
-            "\r\n"
-        };
-
-        write!(
-            buffer,
-            "{before}{score:<length$}{after}",
-            score = self.score,
-            before = format_args!("{space}{header}{space}{score_colour}{score_text}"),
-            after = format_args!("{no_colour}\r\n"),
-        )
-    }
-
-    fn draw_header(&self, buffer: &mut String) -> fmt::Result {
-        write!(
-            buffer,
-            "{}",
-            format_args!(
-                "{}{}{:<colour_len$}{}\r\n\n",
-                constants::LEFT_SPACE,
-                Colour::from_power(self.max_tile),
-                "",
-                Colour::default(),
-                colour_len = (NUMBER_TILES_PER_LINE * constants::TILES_WIDTH)
-                    + (2 * constants::LR_EDGE_WIDTH)
-                    + constants::LEFT_SPACE.len()
-            )
-        )
-    }
-
-    fn draw_tiles(&self, buffer: &mut String) -> fmt::Result {
-        // Allow bounds-checking elision
-        assert_eq!(self.rows.len(), BOARD_DIMENSION);
-        assert_eq!(self.rows[0].len(), BOARD_DIMENSION);
-
-        // Iterate over each row and column, then print
-        for i in 0..BOARD_DIMENSION {
-            for j in 0..BOARD_DIMENSION {
-                write!(buffer, "{}", self.rows[i][j])?;
-            }
-        }
-        Ok(())
+        unreachable!("Failed to spawn tile");
     }
 }

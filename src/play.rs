@@ -21,6 +21,7 @@
 */
 
 use std::{
+    collections::BTreeSet,
     io::{self, Read},
     mem,
     sync::{atomic, Arc, Mutex},
@@ -74,7 +75,6 @@ struct Io(libc::c_int, libc::termios);
 pub fn play(input: &Input) -> Result<(), ()> {
     // Runtime storage
     let board = Arc::new(Mutex::new(DEFAULT_BOARD.clone()));
-    let mut gen: board::Generation = 0;
 
     // Closure called for program input
     let stdin_reader = || -> Action {
@@ -96,15 +96,15 @@ pub fn play(input: &Input) -> Result<(), ()> {
     // Ensure the postcondition holds
     assert_eq!(cfg!(not(fuzzing)), io.is_some());
 
-    // Clear screen and draw intial board
+    // Clear screen and draw initial board
     {
         let mut unlocked = board.lock().unwrap();
         for _ in 0..INITIAL_TILES_COUNT {
-            unlocked.spawn_tile(gen);
+            unlocked.spawn_tile();
         }
     }
 
-    // Bookeeping for board-drawing thread
+    // Bookkeeping for board-drawing thread
     let draw_quit = Arc::new(atomic::AtomicBool::new(false));
     let draw_join;
     let draw_thread;
@@ -125,12 +125,15 @@ pub fn play(input: &Input) -> Result<(), ()> {
             board::draw(board_arg, &quit_arg).expect(constants::GAME_FAILURE_MESSAGE);
         }));
 
-        // We need the thread handle seperately
+        // We need the thread handle separately
         draw_thread = Some(draw_join.as_ref().expect(EXPECT_NOT_FUZZING).thread());
 
         // Initially draw the board
         draw_thread.as_ref().expect(EXPECT_NOT_FUZZING).unpark();
     }
+
+    let mut moved;
+    let mut empty_set = BTreeSet::new();
 
     // The main event loop
     loop {
@@ -142,7 +145,20 @@ pub fn play(input: &Input) -> Result<(), ()> {
         // Read input and take action
         match action {
             Action::Direction(direction) => {
-                board.lock().unwrap().update(direction, gen);
+                let mut unlocked = board.lock().unwrap();
+                moved = unlocked.update(direction, &mut empty_set);
+
+                // If the move had no effect on a non-full board,
+                // skip adding a new tile
+                if !moved && unlocked.has_space() {
+                    continue;
+                }
+
+                // Add new starting tile if possible
+                // Has the player already used their last move?
+                if !unlocked.spawn_tile() {
+                    break;
+                }
             }
             Action::Continue => {
                 continue;
@@ -152,19 +168,10 @@ pub fn play(input: &Input) -> Result<(), ()> {
             }
         };
 
-        // Add new starting tile if possible
-        // Has the player already used their last move?
-        if !board.lock().unwrap().spawn_tile(gen) {
-            break;
-        }
-
         // In case of update while not fuzzing, draw the board
         if cfg!(not(fuzzing)) {
             draw_thread.as_ref().expect(EXPECT_NOT_FUZZING).unpark();
         }
-
-        // Increment generation
-        gen += 1;
     }
 
     // Handle graceful shutdown

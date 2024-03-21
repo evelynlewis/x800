@@ -20,14 +20,16 @@
   SOFTWARE.
 */
 
+use super::super::colour::Colour;
+use super::constants::{self, BOARD_DIMENSION, NUMBER_TILES_PER_LINE};
+use super::Board;
 use std::{
     fmt,
+    fmt::Write as FmtWrite,
     io::Write,
     sync::{atomic, Arc, Mutex},
     thread, time,
 };
-
-use super::{constants, Board};
 
 pub fn draw(board: Arc<Mutex<Board>>, done: &Arc<atomic::AtomicBool>) -> fmt::Result {
     // When fuzzing, this fn should not be called
@@ -56,7 +58,7 @@ pub fn draw(board: Arc<Mutex<Board>>, done: &Arc<atomic::AtomicBool>) -> fmt::Re
             force_draw = true;
         }
 
-        // Continue waiting if time has not elaped and a draw is not required
+        // Continue waiting if time has not elapsed and a draw is not required
         // Note that we use the monotonic timestamp, time::Instant()
         if !force_draw && (time::Instant::now() - timestamp) < DRAW_DURATION {
             continue;
@@ -88,4 +90,57 @@ pub fn draw(board: Arc<Mutex<Board>>, done: &Arc<atomic::AtomicBool>) -> fmt::Re
     }
 
     Ok(())
+}
+
+impl Board {
+    pub fn draw_score(&self, buffer: &mut String) -> fmt::Result {
+        let space = constants::LEFT_SPACE;
+        let score_colour = Colour::from_power(self.max_tile);
+        let score_text = constants::SCORE_TEXT;
+        let length = constants::DISPLAY_LINE_LENGTH;
+        let no_colour = Colour::default();
+        let header = if self.max_tile >= constants::WIN_POWER {
+            constants::WIN_MESSAGE
+        } else {
+            "\r\n"
+        };
+
+        write!(
+            buffer,
+            "{before}{score:<length$}{after}",
+            score = self.score,
+            before = format_args!("{space}{header}{space}{score_colour}{score_text}"),
+            after = format_args!("{no_colour}\r\n"),
+        )
+    }
+
+    fn draw_header(&self, buffer: &mut String) -> fmt::Result {
+        write!(
+            buffer,
+            "{}",
+            format_args!(
+                "{}{}{:<colour_len$}{}\r\n\n",
+                constants::LEFT_SPACE,
+                Colour::from_power(self.max_tile),
+                "",
+                Colour::default(),
+                colour_len = (NUMBER_TILES_PER_LINE * constants::TILES_WIDTH)
+                    + (2 * constants::LR_EDGE_WIDTH)
+                    + constants::LEFT_SPACE.len()
+            )
+        )
+    }
+
+    fn draw_tiles(&self, buffer: &mut String) -> fmt::Result {
+        // Allow bounds-checking elision
+        assert_eq!(self.tiles.0.len(), BOARD_DIMENSION * BOARD_DIMENSION);
+
+        // Iterate over each row and column, then print
+        for i in 0..BOARD_DIMENSION {
+            for j in 0..BOARD_DIMENSION {
+                write!(buffer, "{}", self.tiles[(i, j)])?;
+            }
+        }
+        Ok(())
+    }
 }

@@ -20,7 +20,7 @@
   SOFTWARE.
 */
 
-use super::tile::{CornerSide, EdgeSide, Tile};
+use super::tile::{CornerSide, EdgeSide, Tile, Tiles};
 use super::Board;
 use super::Power;
 
@@ -40,13 +40,13 @@ pub(super) const SCORE_TEXT: &str = "score is ";
 pub(super) const WIN_MESSAGE: &str = "- - - - you win!! - - - -\r\n";
 pub(super) const WIN_POWER: Power = 11;
 pub(super) const TILES_WIDTH: usize = 4;
-pub(super) const NUMBER_TILES_PER_LINE: usize = 4;
-pub(super) const BOARD_DIMENSION: usize = NUMBER_TILES_PER_LINE + 2;
+pub(super) const BOARD_DIMENSION: usize = NUMBER_TILES_PER_LINE + 2 * LR_EDGE_WIDTH;
 pub(super) const DISPLAY_BUFFER_SIZE: usize = (BOARD_DIMENSION + 6) * (BOARD_DIMENSION + 4);
 pub(super) const NUMBER_TILES_RANGE: std::ops::Range<usize> =
     LR_EDGE_WIDTH..(LR_EDGE_WIDTH + NUMBER_TILES_PER_LINE);
 
 // Public constants
+pub const NUMBER_TILES_PER_LINE: usize = 4;
 pub const LEFT_SPACE: &str = "\r      ";
 pub const GAME_OVER: &str = "- - - - game over - - - -\r\n";
 pub const GAME_FAILURE_MESSAGE: &str = " an ongoing game problem \r\n";
@@ -56,56 +56,44 @@ pub const DISPLAY_LINE_LENGTH: usize =
         - SCORE_TEXT.len();
 
 pub const DEFAULT_BOARD: &Board = &Board {
-    rows: [
-        [
-            Tile::Corner(CornerSide::TopLeft),
-            Tile::Edge(EdgeSide::Top),
-            Tile::Edge(EdgeSide::Top),
-            Tile::Edge(EdgeSide::Top),
-            Tile::Edge(EdgeSide::Top),
-            Tile::Corner(CornerSide::TopRight),
-        ],
-        [
-            Tile::Edge(EdgeSide::Left),
-            Tile::Empty(),
-            Tile::Empty(),
-            Tile::Empty(),
-            Tile::Empty(),
-            Tile::Edge(EdgeSide::Right),
-        ],
-        [
-            Tile::Edge(EdgeSide::Left),
-            Tile::Empty(),
-            Tile::Empty(),
-            Tile::Empty(),
-            Tile::Empty(),
-            Tile::Edge(EdgeSide::Right),
-        ],
-        [
-            Tile::Edge(EdgeSide::Left),
-            Tile::Empty(),
-            Tile::Empty(),
-            Tile::Empty(),
-            Tile::Empty(),
-            Tile::Edge(EdgeSide::Right),
-        ],
-        [
-            Tile::Edge(EdgeSide::Left),
-            Tile::Empty(),
-            Tile::Empty(),
-            Tile::Empty(),
-            Tile::Empty(),
-            Tile::Edge(EdgeSide::Right),
-        ],
-        [
-            Tile::Corner(CornerSide::BottomLeft),
-            Tile::Edge(EdgeSide::Bottom),
-            Tile::Edge(EdgeSide::Bottom),
-            Tile::Edge(EdgeSide::Bottom),
-            Tile::Edge(EdgeSide::Bottom),
-            Tile::Corner(CornerSide::BottomRight),
-        ],
-    ],
+    tiles: Tiles([
+        Tile::Corner(CornerSide::TopLeft),
+        Tile::Edge(EdgeSide::Top),
+        Tile::Edge(EdgeSide::Top),
+        Tile::Edge(EdgeSide::Top),
+        Tile::Edge(EdgeSide::Top),
+        Tile::Corner(CornerSide::TopRight),
+        Tile::Edge(EdgeSide::Left),
+        Tile::Empty(),
+        Tile::Empty(),
+        Tile::Empty(),
+        Tile::Empty(),
+        Tile::Edge(EdgeSide::Right),
+        Tile::Edge(EdgeSide::Left),
+        Tile::Empty(),
+        Tile::Empty(),
+        Tile::Empty(),
+        Tile::Empty(),
+        Tile::Edge(EdgeSide::Right),
+        Tile::Edge(EdgeSide::Left),
+        Tile::Empty(),
+        Tile::Empty(),
+        Tile::Empty(),
+        Tile::Empty(),
+        Tile::Edge(EdgeSide::Right),
+        Tile::Edge(EdgeSide::Left),
+        Tile::Empty(),
+        Tile::Empty(),
+        Tile::Empty(),
+        Tile::Empty(),
+        Tile::Edge(EdgeSide::Right),
+        Tile::Corner(CornerSide::BottomLeft),
+        Tile::Edge(EdgeSide::Bottom),
+        Tile::Edge(EdgeSide::Bottom),
+        Tile::Edge(EdgeSide::Bottom),
+        Tile::Edge(EdgeSide::Bottom),
+        Tile::Corner(CornerSide::BottomRight),
+    ]),
     open_tiles: 16,
     score: 0,
     max_tile: 0,

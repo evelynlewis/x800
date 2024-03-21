@@ -20,7 +20,6 @@
   SOFTWARE.
 */
 
-pub(super) type Generation = u32;
 pub(super) type Power = u32;
 
 use super::constants::{
@@ -30,14 +29,7 @@ use super::constants::{
 use super::BOARD_DIMENSION;
 use crate::colour::Colour;
 use std::fmt;
-
-#[derive(Clone, Copy, PartialEq, Eq)]
-pub(super) enum Tile {
-    Empty(),
-    Number(Power, Generation),
-    Edge(EdgeSide),
-    Corner(CornerSide),
-}
+use std::ops::{Index, IndexMut};
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub(super) enum EdgeSide {
@@ -55,25 +47,35 @@ pub(super) enum CornerSide {
     BottomRight,
 }
 
-impl Tile {
-    pub(super) fn merge(self, other: &Self, gen: Generation) -> Option<Self> {
-        match (self, other) {
-            // Merge two similar number tiles
-            (Self::Number(n, j), Self::Number(m, k)) if n == *m && ((j != gen) && (*k != gen)) => {
-                Some(Self::Number(n + 1, gen))
-            }
-            // Shift number tile to fill space
-            (Self::Number(n, j), Self::Empty()) => Some(Self::Number(n, j)),
-            // Anything else
-            _ => None,
-        }
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub enum Tile {
+    Empty(),
+    Number(Power),
+    Edge(EdgeSide),
+    Corner(CornerSide),
+}
+
+#[derive(Clone)]
+pub struct Tiles(pub [Tile; BOARD_DIMENSION * BOARD_DIMENSION]);
+
+impl Index<(usize, usize)> for Tiles {
+    type Output = Tile;
+
+    fn index(&self, index: (usize, usize)) -> &Self::Output {
+        &(self.0[index.0 * BOARD_DIMENSION + index.1])
+    }
+}
+
+impl IndexMut<(usize, usize)> for Tiles {
+    fn index_mut(&mut self, index: (usize, usize)) -> &mut Self::Output {
+        &mut (self.0[index.0 * BOARD_DIMENSION + index.1])
     }
 }
 
 impl fmt::Display for Tile {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Self::Number(num, _) => {
+            Self::Number(num) => {
                 write!(
                     f,
                     "{}{:^width$}{}",
