@@ -20,29 +20,13 @@
 # AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
-
+# SOFTWARE
 set -e
 
-trap '' HUP
-FUZZER_NAME="roger"
+cd fuzz || echo "Must be run from the root x800 directory"
 
-set -x
-test -d ./fuzz
+mkdir -p hfuzz_workspace/hroger/
 
-# Do a blocking build first
-cargo fuzz build "$@" --sanitizer none --release
+cargo hfuzz build
 
-# Run fuzzer using cargo-fuzz
-nice -n 8 cargo fuzz run \
-	"$@" \
-	--sanitizer none \
-	--release "${FUZZER_NAME}" \
-	-- \
-	-dict=./fuzz/dictionary.txt \
-	-len_control=0 \
-	-max_len=2048 \
-	-use_value_profile=1 \
-	1>/dev/null \
-	2>>./fuzz/target/roger-output.txt \
-	&
+HFUZZ_INPUT="./corpus/roger/" HFUZZ_RUN_ARGS="-n 2" cargo hfuzz run hroger

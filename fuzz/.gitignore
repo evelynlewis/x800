@@ -2,3 +2,5 @@ target
 corpus
 artifacts
 coverage
+hfuzz_workspace
+hfuzz_target

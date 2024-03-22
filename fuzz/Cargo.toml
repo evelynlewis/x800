@@ -9,6 +9,7 @@ cargo-fuzz = true
 
 [dependencies]
 libfuzzer-sys = "0.4"
+honggfuzz = { version = "0.5", default-features = false }
 x800 = { path = ".." }
 
 [lints.clippy]
@@ -24,7 +25,14 @@ panic = "abort"
 
 [[bin]]
 name = "roger"
-path = "fuzz_targets/roger.rs"
+path = "src/roger.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "hroger"
+path = "src/hroger.rs"
 test = false
 doc = false
 bench = false
