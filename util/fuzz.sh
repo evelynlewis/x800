@@ -43,6 +43,7 @@ nice -n 8 cargo fuzz run \
 	-len_control=0 \
 	-max_len=2048 \
 	-use_value_profile=1 \
+	-jobs=16 \
 	1>/dev/null \
 	2>>./fuzz/target/roger-output.txt \
 	&
