@@ -22,7 +22,9 @@
 
 #![no_main]
 #[macro_use]
+
 extern crate libfuzzer_sys;
+
 mod shared;
 
 fuzz_target!(|data: &[u8]| shared::one_shot(data));

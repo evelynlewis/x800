@@ -31,7 +31,7 @@ set -x
 test -d ./fuzz
 
 # Do a blocking build first
-cargo fuzz build "$@" --sanitizer none --release
+cargo fuzz build ${FUZZER_NAME} "$@" --sanitizer none --release
 
 # Run fuzzer using cargo-fuzz
 nice -n 8 cargo fuzz run \

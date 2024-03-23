@@ -20,19 +20,18 @@
   SOFTWARE.
 */
 
+use std::mem::size_of;
+
 #[inline(always)]
 pub fn one_shot(data: &[u8]) {
-    if data.len() < std::mem::size_of::<u64>() + 1 {
+    if data.len() < size_of::<u64>() + 1 {
         return;
     }
     // Generate 64 bit PRNG seed
-    let seed = (data[0] as u64)
-        + (data[1] as u64 >> 8)
-        + (data[2] as u64 >> 16)
-        + (data[3] as u64 >> 24)
-        + (data[4] as u64 >> 32)
-        + (data[5] as u64 >> 40)
-        + (data[6] as u64 >> 48)
-        + (data[7] as u64 >> 56);
-    x800::fuzz(&data[4..], seed)
+    let seed = u64::from_ne_bytes(
+        data[..size_of::<u64>()]
+            .try_into()
+            .expect("Failed to generate seed"),
+    );
+    x800::fuzz(&data[(size_of::<u64>() - 1)..], seed)
 }
