@@ -29,6 +29,13 @@ set -e
 test -d ./util/
 test -d ./fuzz/
 
+# Corpus selection
+CORPUS="fuzz/corpus/roger/"
+if [ ${#} -gt 0 ]; then
+	CORPUS=$1
+fi
+echo "Using corpus directory: '${CORPUS}'"
+
 DEPS="rustfilt cargo-fuzz"
 FUZZ_ARGS="--release --sanitizer none --no-cfg-fuzzing roger"
 COV_ARGS='-Xdemangler=rustfilt -ignore-filename-regex='.cargo' -ignore-filename-regex='/rustc/.+' -use-color -instr-profile=fuzz/coverage/roger/coverage.profdata'
@@ -39,7 +46,7 @@ cargo install --quiet ${DEPS}
 
 # Build fuzz target and generate coverage
 # shellcheck disable=SC2086
-cargo fuzz coverage ${FUZZ_ARGS} fuzz/corpus/roger/ -- -use_value_profile=1 >/dev/null
+cargo fuzz coverage ${FUZZ_ARGS} "${CORPUS}" -- -use_value_profile=1 >/dev/null
 
 # Show coverage
 # shellcheck disable=SC2086
