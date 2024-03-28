@@ -31,6 +31,7 @@ use std::{
 use crate::board::{
     self,
     constants::{self, DEFAULT_BOARD, END_OF_GAME_CHARACTER},
+    Generation,
 };
 use board::Action;
 
@@ -97,10 +98,11 @@ pub fn play(input: &Input) -> Result<(), ()> {
     assert_eq!(cfg!(not(fuzzing)), io.is_some());
 
     // Clear screen and draw initial board
+    let mut generation: Generation = 0;
     {
         let mut unlocked = board.lock().unwrap();
         for _ in 0..INITIAL_TILES_COUNT {
-            unlocked.spawn_tile();
+            unlocked.spawn_tile(generation);
         }
     }
 
@@ -137,6 +139,7 @@ pub fn play(input: &Input) -> Result<(), ()> {
 
     // The main event loop
     loop {
+        generation += 1;
         let action = match input {
             Input::Slice(_) => Action::parse(*iter.next().unwrap_or(&END_OF_GAME_CHARACTER)),
             Input::Interactive => stdin_reader(),
@@ -146,7 +149,7 @@ pub fn play(input: &Input) -> Result<(), ()> {
         match action {
             Action::Direction(direction) => {
                 let mut unlocked = board.lock().unwrap();
-                moved = unlocked.update(direction, &mut empty_set);
+                moved = unlocked.update(direction, generation, &mut empty_set);
 
                 // If the move had no effect on a non-full board,
                 // skip adding a new tile
@@ -156,7 +159,7 @@ pub fn play(input: &Input) -> Result<(), ()> {
 
                 // Add new starting tile if possible
                 // Has the player already used their last move?
-                if !unlocked.spawn_tile() {
+                if !unlocked.spawn_tile(generation) {
                     break;
                 }
             }

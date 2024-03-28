@@ -36,6 +36,7 @@ use tile::Tile;
 
 // Promote Power type to public within this module
 pub type Power = tile::Power;
+pub type Generation = tile::Power;
 
 use constants::{BOARD_DIMENSION, NUMBER_TILES_RANGE};
 
@@ -115,7 +116,7 @@ impl Board {
             Tile::Empty() => {
                 set.insert(current);
             }
-            Tile::Number(_) => {
+            Tile::Number(_, _) => {
                 if !set.is_empty() {
                     let index = match direction {
                         Direction::Up | Direction::Left => set.pop_first(),
@@ -141,30 +142,30 @@ impl Board {
         minor: usize,
         direction: Direction,
         set: &mut BTreeSet<(usize, usize)>,
-        merged: bool,
+        generation: Generation,
     ) -> bool {
         let (current, next) = Self::pair(major, minor, direction);
 
         match (self.tiles[current], self.tiles[next]) {
-            (Tile::Number(n), Tile::Number(m)) => {
-                if n == m && !merged {
+            (Tile::Number(n, a), Tile::Number(m, b)) => {
+                if (n == m) && (a != generation && b != generation) {
                     self.score += 1 << (n + 1);
                     self.max_tile = cmp::max(self.max_tile, n + 1);
-                    self.tiles[current] = Tile::Number(n + 1);
+                    self.tiles[current] = Tile::Number(n + 1, generation);
                     self.tiles[next] = Tile::Empty();
                     set.insert(next);
                     self.open_tiles += 1;
                     return true;
                 }
             }
-            (Tile::Empty(), Tile::Number(n)) => {
+            (Tile::Empty(), Tile::Number(_, _)) => {
                 set.insert(current);
-                self.tiles[next] = Tile::Empty();
                 let index = match direction {
                     Direction::Up | Direction::Left => set.pop_first().unwrap(),
                     Direction::Down | Direction::Right => set.pop_last().unwrap(),
                 };
-                self.tiles[index] = Tile::Number(n);
+                self.tiles[index] = self.tiles[next];
+                self.tiles[next] = Tile::Empty();
             }
             (Tile::Edge(_), _)
             | (Tile::Corner(_), _)
@@ -172,42 +173,48 @@ impl Board {
             | (_, Tile::Edge(_))
             | (_, Tile::Corner(_)) => {}
         }
-        merged
+        false
     }
 
     #[inline(always)]
-    pub fn update(&mut self, direction: Direction, set: &mut BTreeSet<(usize, usize)>) -> bool {
+    pub fn update(
+        &mut self,
+        direction: Direction,
+        generation: Generation,
+        set: &mut BTreeSet<(usize, usize)>,
+    ) -> bool {
         let mut moved = false;
-        let mut merged;
 
         // Iterate in row or column major order. First scan removes slack; second does one merge
         match direction {
             Direction::Left | Direction::Up => {
+                const MIDDLE_TILE: usize = 2;
                 for major in NUMBER_TILES_RANGE {
-                    merged = false;
                     set.clear();
 
                     for minor in NUMBER_TILES_RANGE {
                         moved |= self.collect(major, minor, direction, set);
                     }
                     for minor in NUMBER_TILES_RANGE {
-                        merged |= self.merge(major, minor, direction, set, merged);
-                        moved |= merged;
+                        moved |= self.merge(major, minor, direction, set, generation);
                     }
+                    // Allow a final middle merge
+                    moved |= self.merge(major, MIDDLE_TILE, direction, set, generation);
                 }
             }
             Direction::Right | Direction::Down => {
+                const MIDDLE_TILE: usize = 3;
                 for major in NUMBER_TILES_RANGE.rev() {
-                    merged = false;
                     set.clear();
 
                     for minor in NUMBER_TILES_RANGE.rev() {
                         moved |= self.collect(major, minor, direction, set);
                     }
                     for minor in NUMBER_TILES_RANGE.rev() {
-                        merged |= self.merge(major, minor, direction, set, merged);
-                        moved |= merged;
+                        moved |= self.merge(major, minor, direction, set, generation);
                     }
+                    // Allow a final middle merge
+                    moved |= self.merge(major, MIDDLE_TILE, direction, set, generation);
                 }
             }
         }
@@ -216,7 +223,7 @@ impl Board {
 
     // Create a new '2' or '4' number tile in a blank space
     #[inline]
-    pub fn spawn_tile(&mut self) -> bool {
+    pub fn spawn_tile(&mut self, generation: Generation) -> bool {
         if !self.has_space() {
             return false;
         }
@@ -237,7 +244,7 @@ impl Board {
             for c in NUMBER_TILES_RANGE {
                 if (self.tiles[(r, c)]) == Tile::Empty() {
                     if cursor == insert_index {
-                        self.tiles[(r, c)] = Tile::Number(insert_value);
+                        self.tiles[(r, c)] = Tile::Number(insert_value, generation);
                         self.open_tiles -= 1;
                         self.max_tile = cmp::max(insert_value, self.max_tile);
                         // Return early

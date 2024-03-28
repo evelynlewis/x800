@@ -21,6 +21,7 @@
 */
 
 pub(super) type Power = u32;
+pub(super) type Generation = u32;
 
 use super::constants::{
     BOTTOM_EDGE, BOTTOM_LEFT_CORNER, BOTTOM_RIGHT_CORNER, BOTTOM_RIGHT_CORNER_SPACE, EMPTY_TILE,
@@ -50,7 +51,7 @@ pub(super) enum CornerSide {
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum Tile {
     Empty(),
-    Number(Power),
+    Number(Power, Generation),
     Edge(EdgeSide),
     Corner(CornerSide),
 }
@@ -75,7 +76,7 @@ impl IndexMut<(usize, usize)> for Tiles {
 impl fmt::Display for Tile {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Self::Number(num) => {
+            Self::Number(num, _) => {
                 write!(
                     f,
                     "{}{:^width$}{}",
