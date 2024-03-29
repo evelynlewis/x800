@@ -26,8 +26,19 @@ set -ex
 cargo fuzz build --release --no-cfg-fuzzing --sanitizer none roger
 
 BIN="$(find fuzz/target -name roger | grep release)"
+VALGRIND="valgrind"
+ANNOTATE="callgrind_annotate"
+OUT="callgrind.out"
 
-command -v "${BIN}" || echo "Could not find binary"
-command -v valgrind || echo "Could not find valgrind tool"
+# Ensure binaries are valid, and print message otherwise
+if_none() {
+	command -v "${1}" >/dev/null && return 0
+	echo "${2}"
+	return 1
+}
+if_none "${BIN}" "Could not find binary"
+if_none "${VALGRIND}" "Could not find valgrind tool"
+if_none "${ANNOTATE}" "Could not find valgrind annotator"
 
-valgrind --tool=callgrind --simulate-cache=yes "${BIN}" -runs=0 fuzz/corpus/roger > /dev/null
+${VALGRIND} --tool=callgrind --simulate-cache=yes --callgrind-out-file="${OUT}" "${BIN}" -runs=0 fuzz/corpus/roger >/dev/null
+${ANNOTATE} --auto=yes "${OUT}"
