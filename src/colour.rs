@@ -42,30 +42,28 @@ impl Colour {
     #[inline(always)]
     pub const fn from_power(power: Power) -> Self {
         match power {
-            // Blank colour
-            0 => Colour { row: 0, column: 0 },
             // first, left-most column, upwards (ie. /|\)
-            1..=3 => Colour {
-                row: 5 - ((power - 1) * 2),
+            0..=2 => Colour {
+                row: 5 - (power * 2),
                 column: COLOUR_LEFT_COLUMN,
             },
             // top-most row (ie. '>->')
-            4..=6 => Colour {
+            3..=5 => Colour {
                 row: 0,
-                column: COLOUR_LEFT_COLUMN + ((power - 4) * 2),
+                column: COLOUR_LEFT_COLUMN + ((power - 3) * 2),
             },
             // right-most column, downwards (ie. '\|/')
-            7..=9 => Colour {
-                row: (power - 7) * 2,
+            6..=8 => Colour {
+                row: (power - 6) * 2,
                 column: COLOUR_RIGHT_COLUMN,
             },
             // bottom-most row (ie. '<-<')
-            10..=12 => Colour {
+            9..=11 => Colour {
                 row: 5,
-                column: COLOUR_RIGHT_COLUMN + ((power - 10) * 2),
+                column: COLOUR_RIGHT_COLUMN + ((power - 9) * 2),
             },
             // above is a cycle, so use modulus
-            _ => Self::from_power(power % 13),
+            _ => Self::from_power(power % 12),
         }
     }
 }
@@ -74,16 +72,11 @@ const COLOUR_LEFT_COLUMN: Power = 34 - 16;
 const COLOUR_RIGHT_COLUMN: Power = COLOUR_LEFT_COLUMN + 5;
 
 #[test]
-fn power_to_colour_zero_test() {
-    assert_eq!(Colour::from_power(0), Colour::default());
-}
-
-#[test]
 fn power_to_colour_cycle_test() {
     for power in 0..=255_u8 {
         assert_eq!(
             Colour::from_power(power as Power),
-            Colour::from_power(power as Power % 13)
+            Colour::from_power(power as Power % 12)
         );
     }
 }
