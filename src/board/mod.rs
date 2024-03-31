@@ -29,8 +29,6 @@ pub use draw::draw;
 mod draw;
 mod tile;
 
-use crate::board::constants::NUMBER_TILES_PER_LINE;
-
 use self::constants::END_OF_GAME_CHARACTER;
 
 use super::colour::Colour;
@@ -198,8 +196,9 @@ impl Board {
                         moved |= self.collect(major, minor, direction, set);
                     }
                     for minor in NUMBER_TILES_RANGE {
-                        if minor == (NUMBER_TILES_RANGE.start + NUMBER_TILES_PER_LINE) - set.len() {
-                            // All remaining items on this major line are empty
+                        // Offset by one since the end member is exclusive
+                        if minor > (NUMBER_TILES_RANGE.end - (1 + set.len())) {
+                            // Remaining minor-indexed tiles are empty
                             break;
                         }
                         moved |= self.merge(major, minor, direction, set, generation);
@@ -217,8 +216,8 @@ impl Board {
                         moved |= self.collect(major, minor, direction, set);
                     }
                     for minor in NUMBER_TILES_RANGE.rev() {
-                        if minor == (NUMBER_TILES_RANGE.end - NUMBER_TILES_PER_LINE) + set.len() {
-                            // All remaining items on this major line are empty
+                        if minor < (NUMBER_TILES_RANGE.start + set.len()) {
+                            // Remaining minor-indexed tiles are empty
                             break;
                         }
                         moved |= self.merge(major, minor, direction, set, generation);
