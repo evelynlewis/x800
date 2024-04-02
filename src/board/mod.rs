@@ -21,7 +21,7 @@
 */
 
 use core::fmt;
-use std::{cmp, collections::BTreeSet, fmt::Write};
+use std::{cmp, collections::VecDeque, fmt::Write};
 
 pub mod constants;
 pub use draw::draw;
@@ -44,7 +44,7 @@ use constants::{BOARD_DIMENSION, NUMBER_TILES_RANGE};
 pub struct Board {
     tiles: tile::Tiles,
     score: u32,
-    open_tiles: u32,
+    open_tiles: usize,
     max_tile: Power,
 }
 
@@ -107,26 +107,23 @@ impl Board {
         major: usize,
         minor: usize,
         direction: Direction,
-        set: &mut BTreeSet<(usize, usize)>,
+        empty_queue: &mut VecDeque<(usize, usize)>,
     ) -> bool {
         let current = Self::pair(major, minor, direction).0;
         let mut moved = false;
 
         match self.tiles[current] {
             Tile::Empty() => {
-                set.insert(current);
+                empty_queue.push_back(current);
             }
             Tile::Number(_, _) => {
-                if !set.is_empty() {
-                    let index = match direction {
-                        Direction::Up | Direction::Left => set.pop_first(),
-                        Direction::Down | Direction::Right => set.pop_last(),
-                    }
-                    .expect("Malformed set");
+                if !empty_queue.is_empty() {
+                    let index = empty_queue.pop_front().expect("Bad queue");
 
                     self.tiles[index] = self.tiles[current];
                     self.tiles[current] = Tile::Empty();
-                    set.insert(current);
+
+                    empty_queue.push_back(current);
                     moved = true;
                 }
             }
@@ -141,29 +138,29 @@ impl Board {
         major: usize,
         minor: usize,
         direction: Direction,
-        set: &mut BTreeSet<(usize, usize)>,
+        empty_queue: &mut VecDeque<(usize, usize)>,
         generation: Generation,
     ) -> bool {
         let (current, next) = Self::pair(major, minor, direction);
-
         match (self.tiles[current], self.tiles[next]) {
             (Tile::Number(n, a), Tile::Number(m, b)) => {
                 if (n == m) && (a != generation && b != generation) {
                     self.score += 1 << (n + 1);
                     self.max_tile = cmp::max(self.max_tile, n + 1);
+
                     self.tiles[current] = Tile::Number(n + 1, generation);
                     self.tiles[next] = Tile::Empty();
-                    set.insert(next);
+
+                    empty_queue.push_back(next);
                     self.open_tiles += 1;
+
                     return true;
                 }
             }
             (Tile::Empty(), Tile::Number(_, _)) => {
-                set.insert(current);
-                let index = match direction {
-                    Direction::Up | Direction::Left => set.pop_first().unwrap(),
-                    Direction::Down | Direction::Right => set.pop_last().unwrap(),
-                };
+                empty_queue.push_back(next);
+                let index = empty_queue.pop_front().expect("Bad queue");
+
                 self.tiles[index] = self.tiles[next];
                 self.tiles[next] = Tile::Empty();
             }
@@ -181,52 +178,61 @@ impl Board {
         &mut self,
         direction: Direction,
         generation: Generation,
-        set: &mut BTreeSet<(usize, usize)>,
+        empty_queue: &mut VecDeque<(usize, usize)>,
     ) -> bool {
         let mut moved = false;
+        let mut empty_count = 0;
 
         // Iterate in row or column major order. First scan removes slack; second does one merge
         match direction {
             Direction::Left | Direction::Up => {
                 const MIDDLE_TILE: usize = 2;
                 for major in NUMBER_TILES_RANGE {
-                    set.clear();
+                    empty_queue.clear();
 
                     for minor in NUMBER_TILES_RANGE {
-                        moved |= self.collect(major, minor, direction, set);
+                        moved |= self.collect(major, minor, direction, empty_queue);
                     }
                     for minor in NUMBER_TILES_RANGE {
                         // Offset by one since the end member is exclusive
-                        if minor > (NUMBER_TILES_RANGE.end - (1 + set.len())) {
-                            // Remaining minor-indexed tiles are empty
+                        if minor >= NUMBER_TILES_RANGE.end - empty_queue.len() {
+                            // Remaining minor-indexed tiles are empty_queue
                             break;
                         }
-                        moved |= self.merge(major, minor, direction, set, generation);
+                        moved |= self.merge(major, minor, direction, empty_queue, generation);
                     }
                     // Allow a final middle merge
-                    moved |= self.merge(major, MIDDLE_TILE, direction, set, generation);
+                    moved |= self.merge(major, MIDDLE_TILE, direction, empty_queue, generation);
+
+                    // Ensure empty_count coherency
+                    empty_count += empty_queue.len();
                 }
             }
             Direction::Right | Direction::Down => {
                 const MIDDLE_TILE: usize = 3;
                 for major in NUMBER_TILES_RANGE.rev() {
-                    set.clear();
+                    empty_queue.clear();
 
                     for minor in NUMBER_TILES_RANGE.rev() {
-                        moved |= self.collect(major, minor, direction, set);
+                        moved |= self.collect(major, minor, direction, empty_queue);
                     }
                     for minor in NUMBER_TILES_RANGE.rev() {
-                        if minor < (NUMBER_TILES_RANGE.start + set.len()) {
-                            // Remaining minor-indexed tiles are empty
+                        if minor == empty_queue.len() + NUMBER_TILES_RANGE.start {
+                            // Remaining minor-indexed tiles are empty_queue
                             break;
                         }
-                        moved |= self.merge(major, minor, direction, set, generation);
+                        moved |= self.merge(major, minor, direction, empty_queue, generation);
                     }
                     // Allow a final middle merge
-                    moved |= self.merge(major, MIDDLE_TILE, direction, set, generation);
+                    moved |= self.merge(major, MIDDLE_TILE, direction, empty_queue, generation);
+
+                    // Ensure empty_count coherency
+                    empty_count += empty_queue.len();
                 }
             }
         }
+        // Ensure empty_count coherency
+        assert_eq!(empty_count, self.open_tiles);
         moved
     }
 

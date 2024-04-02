@@ -21,7 +21,7 @@
 */
 
 use std::{
-    collections::BTreeSet,
+    collections::VecDeque,
     io::{self, Read},
     mem,
     sync::{atomic, Arc, Mutex},
@@ -30,7 +30,7 @@ use std::{
 
 use crate::board::{
     self,
-    constants::{self, DEFAULT_BOARD, END_OF_GAME_CHARACTER},
+    constants::{self, DEFAULT_BOARD, END_OF_GAME_CHARACTER, NUMBER_TILES_PER_LINE},
     Generation,
 };
 use board::Action;
@@ -135,7 +135,7 @@ pub fn play(input: &Input) -> Result<(), ()> {
     }
 
     let mut moved;
-    let mut empty_set = BTreeSet::new();
+    let mut empty_queue = VecDeque::with_capacity(NUMBER_TILES_PER_LINE);
 
     // The main event loop
     loop {
@@ -149,7 +149,7 @@ pub fn play(input: &Input) -> Result<(), ()> {
         match action {
             Action::Direction(direction) => {
                 let mut unlocked = board.lock().unwrap();
-                moved = unlocked.update(direction, generation, &mut empty_set);
+                moved = unlocked.update(direction, generation, &mut empty_queue);
 
                 // If the move had no effect on a non-full board,
                 // skip adding a new tile
