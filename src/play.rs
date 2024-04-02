@@ -81,10 +81,10 @@ pub fn play(input: &Input) -> Result<(), ()> {
     let stdin_reader = || -> Action {
         // Read a byte from stdin
         let mut buffer = [0_u8; 1];
-        if let Err(_) = io::stdin().read_exact(&mut buffer) {
-            return Action::Shutdown;
+        match io::stdin().read_exact(&mut buffer) {
+            Err(_) => Action::Shutdown,
+            Ok(_) => Action::parse(buffer[0]),
         }
-        Action::parse(buffer[0])
     };
 
     // Pre-setup for slice input

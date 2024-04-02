@@ -92,6 +92,7 @@ impl Board {
         self.open_tiles != 0
     }
 
+    #[inline(always)]
     fn pair(major: usize, minor: usize, direction: Direction) -> ((usize, usize), (usize, usize)) {
         match direction {
             Direction::Left => ((major, minor), (major, minor + 1)),
@@ -110,11 +111,11 @@ impl Board {
         empty_queue: &mut VecDeque<(usize, usize)>,
     ) -> bool {
         let current = Self::pair(major, minor, direction).0;
-        let mut moved = false;
 
         match self.tiles[current] {
             Tile::Empty() => {
                 empty_queue.push_back(current);
+                false
             }
             Tile::Number(_, _) => {
                 if !empty_queue.is_empty() {
@@ -124,12 +125,13 @@ impl Board {
                     self.tiles[current] = Tile::Empty();
 
                     empty_queue.push_back(current);
-                    moved = true;
+                    true
+                } else {
+                    false
                 }
             }
-            Tile::Corner(_) | Tile::Edge(_) => {}
+            Tile::Corner(_) | Tile::Edge(_) => false,
         }
-        moved
     }
 
     #[inline(always)]
@@ -144,33 +146,34 @@ impl Board {
         let (current, next) = Self::pair(major, minor, direction);
         match (self.tiles[current], self.tiles[next]) {
             (Tile::Number(n, a), Tile::Number(m, b)) => {
-                if (n == m) && (a != generation && b != generation) {
-                    self.score += 1 << (n + 1);
-                    self.max_tile = cmp::max(self.max_tile, n + 1);
-
+                if (n == m) && ((a != generation) && (b != generation)) {
+                    // Block accounting
                     self.tiles[current] = Tile::Number(n + 1, generation);
                     self.tiles[next] = Tile::Empty();
-
                     empty_queue.push_back(next);
-                    self.open_tiles += 1;
 
-                    return true;
+                    // Updating stats
+                    self.open_tiles += 1;
+                    self.score += 1 << (n + 1);
+                    self.max_tile = cmp::max(self.max_tile, n + 1);
+                    true
+                } else {
+                    false
                 }
             }
             (Tile::Empty(), Tile::Number(_, _)) => {
                 empty_queue.push_back(next);
                 let index = empty_queue.pop_front().expect("Bad queue");
-
                 self.tiles[index] = self.tiles[next];
                 self.tiles[next] = Tile::Empty();
+                false
             }
             (Tile::Edge(_), _)
             | (Tile::Corner(_), _)
             | (_, Tile::Empty())
             | (_, Tile::Edge(_))
-            | (_, Tile::Corner(_)) => {}
+            | (_, Tile::Corner(_)) => false,
         }
-        false
     }
 
     #[inline(always)]
@@ -189,21 +192,14 @@ impl Board {
                 const MIDDLE_TILE: usize = 2;
                 for major in NUMBER_TILES_RANGE {
                     empty_queue.clear();
-
                     for minor in NUMBER_TILES_RANGE {
                         moved |= self.collect(major, minor, direction, empty_queue);
                     }
                     for minor in NUMBER_TILES_RANGE {
-                        // Offset by one since the end member is exclusive
-                        if minor >= NUMBER_TILES_RANGE.end - empty_queue.len() {
-                            // Remaining minor-indexed tiles are empty_queue
-                            break;
-                        }
                         moved |= self.merge(major, minor, direction, empty_queue, generation);
                     }
                     // Allow a final middle merge
                     moved |= self.merge(major, MIDDLE_TILE, direction, empty_queue, generation);
-
                     // Ensure empty_count coherency
                     empty_count += empty_queue.len();
                 }
@@ -212,20 +208,14 @@ impl Board {
                 const MIDDLE_TILE: usize = 3;
                 for major in NUMBER_TILES_RANGE.rev() {
                     empty_queue.clear();
-
                     for minor in NUMBER_TILES_RANGE.rev() {
                         moved |= self.collect(major, minor, direction, empty_queue);
                     }
                     for minor in NUMBER_TILES_RANGE.rev() {
-                        if minor == empty_queue.len() + NUMBER_TILES_RANGE.start {
-                            // Remaining minor-indexed tiles are empty_queue
-                            break;
-                        }
                         moved |= self.merge(major, minor, direction, empty_queue, generation);
                     }
                     // Allow a final middle merge
                     moved |= self.merge(major, MIDDLE_TILE, direction, empty_queue, generation);
-
                     // Ensure empty_count coherency
                     empty_count += empty_queue.len();
                 }
