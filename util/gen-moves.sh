@@ -25,46 +25,24 @@
 BS="4K"
 COUNT="1"
 
-exists () {
-	command -v "${1}" > /dev/null
-}
-
 # Use an output file if provided
-if [ -z "$1" ]; then
+if [ -z "${1}" ]; then
 	OUT="/dev/stdout"
 else
 	OUT="${1}"
 fi
 
-# Prefer the explicitly GNU tools
-if exists gbase32; then
-	BASE32="gbase32"
-elif exists base32; then
-	BASE32="base32"
-else
-	exit 1;
-fi
-
-if exists gtr; then
-	TR="gtr"
-elif exists tr; then
-	TR="tr"
-else
-	exit 1;
-fi
-
-if exists gdd; then
-	DD="gdd"
-elif exists dd; then
-	DD="dd"
-else
-	exit 1;
-fi
+# shellcheck disable=SC1091
+. ./util/compat.sh
+# Setup tools
+BASE32=$(compat base32)
+TR=$(compat tr)
+DD=$(compat dd)
 
 "${BASE32}" /dev/urandom |
-	"${DD}" conv=lcase 2> /dev/null |
+	"${DD}" conv=lcase 2>/dev/null |
 	"${TR}" -dC asdw |
-	"${DD}" of="${OUT}" bs="${BS}" count="${COUNT}" 2> /dev/null &&
+	"${DD}" of="${OUT}" bs="${BS}" count="${COUNT}" 2>/dev/null &&
 	exit 0
 
 exit 1

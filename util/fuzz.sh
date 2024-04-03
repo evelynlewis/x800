@@ -27,22 +27,26 @@ set -e
 trap '' HUP
 FUZZER_NAME="roger"
 
+FUZZER_ARGS="\
+	-dict=./fuzz/dictionary.txt \
+	-len_control=0 \
+	-max_len=2048 \
+	-use_value_profile=1"
+
 set -x
 test -d ./fuzz
 
 # Do a blocking build first
-cargo fuzz build ${FUZZER_NAME} "$@" --sanitizer none --release
+cargo fuzz build ${FUZZER_NAME} "${@}" --sanitizer none --release
 
 # Run fuzzer using cargo-fuzz
+# shellcheck disable=SC2086
 nice -n 8 cargo fuzz run \
 	"$@" \
 	--sanitizer none \
 	--release "${FUZZER_NAME}" \
 	-- \
-	-dict=./fuzz/dictionary.txt \
-	-len_control=0 \
-	-max_len=2048 \
-	-use_value_profile=1 \
+	${FUZZER_ARGS} \
 	1>/dev/null \
 	2>>./fuzz/target/roger-output.txt \
 	&

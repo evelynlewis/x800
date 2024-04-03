@@ -40,7 +40,7 @@ fi
 echo "
 Starting '${FUZZER_NAME}' launch script with args: ${SCRIPT_ARGS}
 "
-sh -c "set -x; ./util/fuzz.sh ${SCRIPT_ARGS}"
+sh -cx "./util/fuzz.sh ${SCRIPT_ARGS}"
 
 echo "
 Waiting ${WARMUP_DURATION}s for process warmup."
@@ -49,4 +49,4 @@ sleep ${WARMUP_DURATION}
 echo "
 Sampling '${FUZZER_NAME}' process with flamegraph: press CTRL-C to stop.
 "
-sh -c "set -x; flamegraph --deterministic --root --open --pid $(pgrep ${FUZZER_NAME})"
+sh -cx "flamegraph --deterministic --root --open --pid $(pgrep ${FUZZER_NAME})"

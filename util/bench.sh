@@ -1,5 +1,5 @@
 #!/bin/sh
-
+set -e
 # MIT License
 #
 # Copyright (c) 2024 Evelyn Lewis
@@ -22,17 +22,31 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-set -ex
+# shellcheck disable=SC1091
+. ./util/compat.sh
+# Setup tools
+BASE32=$(compat base32)
+TR=$(compat tr)
+DD=$(compat dd)
 
-test -d ./util/
-test -f ./util/gen-moves.sh
-cargo build -p x800 --release
+# Build
+echo "Building x800 executable."
+cargo build --release
 
-touch /tmp/moves
-hyperfine \
-	--prepare './util/gen-moves.sh /tmp/moves' \
-	--warmup=256 \
-	--runs=256 \
-	--input='/tmp/moves' \
-	-N \
-	'./target/release/x800'
+# Other params
+BS="2048"
+SLEEP="16"
+echo "Running benchmark for ${SLEEP} seconds."
+
+# Configure cleanup
+trap 'kill $(pgrep -P $$) 2> /dev/null' EXIT INT
+
+# Run worker
+${BASE32} </dev/urandom |
+    ${TR} -dC 'ASDW' |
+    ${DD} conv=lcase bs=${BS} status=progress |
+    sh -c 'while true; do ./target/release/x800 >/dev/null; done' &
+
+# Sleep and exit
+sleep ${SLEEP}
+exit 0

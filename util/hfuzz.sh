@@ -23,10 +23,12 @@
 # SOFTWARE
 set -e
 
-cd fuzz || echo "Must be run from the root x800 directory"
+if ! cd fuzz; then
+    echo "Run from target root"
+    exit 1
+fi
 
 mkdir -p hfuzz_workspace/hroger/
 
 cargo hfuzz build
-
 HFUZZ_INPUT="./corpus/roger/" HFUZZ_RUN_ARGS="-n 2" cargo hfuzz run hroger

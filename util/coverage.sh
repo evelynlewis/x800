@@ -48,10 +48,14 @@ cargo install --quiet ${DEPS}
 # shellcheck disable=SC2086
 cargo fuzz coverage ${FUZZ_ARGS} "${CORPUS}" -- -use_value_profile=1 >/dev/null
 
+# Ensure there is exactly one fuzzer, and that it is valid
+FUZZER="$(find target -name roger | grep coverage)"
+command -v "${FUZZER}"
+
 # Show coverage
 # shellcheck disable=SC2086
-"$(rustc --print=target-libdir)/../bin/llvm-cov" show "$(find target -name roger | grep coverage)" ${COV_ARGS}
+"$(rustc --print=target-libdir)/../bin/llvm-cov" show "${FUZZER}" ${COV_ARGS}
 
 # Generate report
 # shellcheck disable=SC2086
-"$(rustc --print=target-libdir)/../bin/llvm-cov" report "$(find target -name roger | grep coverage)" ${COV_ARGS}
+"$(rustc --print=target-libdir)/../bin/llvm-cov" report "${FUZZER}" ${COV_ARGS}
