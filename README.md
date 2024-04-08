@@ -153,20 +153,22 @@ Running benchmark for 16 seconds.
 Building x800 executable.
     Finished release [optimized] target(s) in 0.00s
 Running benchmark for 16 seconds.
-98453504 bytes (98 MB, 94 MiB) copied, 16 s, 6.2 MB/s
+102713344 bytes (103 MB, 98 MiB) copied, 16 s, 6.4 MB/s
 ```
 
 ## Fuzzing
 
 A fuzzer named `roger`, after the rabbit, is provided in the `fuzz/` directory. It's built using [`cargo-fuzz`](https://github.com/rust-fuzz/cargo-fuzz), which uses [LibFuzzer](https://llvm.org/docs/LibFuzzer.html), part of the LLVM project. A convenience script is under `util/fuzz.sh`.
 
-A variant of `roger` using [honggfuzz](https://honggfuzz.dev) and [honggfuzz-rs](https://github.com/rust-fuzz/honggfuzz-rs) is also included. It's named `hroger`,and a convenience script is under `util/hfuzz.sh`.
+A variant of `roger` using [honggfuzz](https://honggfuzz.dev) and [honggfuzz-rs](https://github.com/rust-fuzz/honggfuzz-rs) is also included. It's named `hroger`, and there's a convenience script under `util/hfuzz.sh`.
 
 Both a small dictionary and a minimized corpus with good coverage are checked into the repository. Both are compatible with each fuzzer.
 
 ## Flame graphs
 
-Flame graphs, first created by [Brendan Gregg](https://www.brendangregg.com/flamegraphs.html), are a powerful and intuitive performance-visualization tool. `x800` makes use of the Rust [`flamegraph`](https://github.com/flamegraph-rs/flamegraph) Crate for its straightforward flame graph support. Helper scripts at `util/flamegraph.sh` and `util/flamegraph-ncf.sh` allow for easy sampling of `x800`. In its default configuration, the script uses the `roger` fuzzer as the binary under test.
+Flame graphs, first created by [Brendan Gregg](https://www.brendangregg.com/flamegraphs.html), are a powerful and intuitive performance-visualization tool. This project makes use of the Rust [`flamegraph`](https://github.com/flamegraph-rs/flamegraph) Crate for its straightforward flame graph support.
+
+The helper script at `util/flamegraph.sh` allows for easy sampling of `x800`. In its default configuration, the script uses the `roger` fuzzer as the binary under test, with `cfg!(fuzzing)` enabled. The `util/flamegraph-ncf.sh` script is similar, but turns off `cfg!(fuzzing)`, which provides a more realistic `x800` gameplay workload.
 
 ## License
 
