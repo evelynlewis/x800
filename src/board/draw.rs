@@ -38,6 +38,9 @@ pub fn draw(board: Arc<Mutex<Board>>, done: &Arc<atomic::AtomicBool>) -> fmt::Re
     // Use one buffer for program duration
     let buffer = &mut String::with_capacity(constants::DISPLAY_BUFFER_SIZE);
 
+    // UNIX standard output stream
+    let mut stdout = std::io::stdout();
+
     // Duration between draws. 2ms is 500Hz
     const DRAW_DURATION: time::Duration = time::Duration::from_millis(2);
 
@@ -80,7 +83,7 @@ pub fn draw(board: Arc<Mutex<Board>>, done: &Arc<atomic::AtomicBool>) -> fmt::Re
         }
 
         // Write out framebuffer
-        write!(std::io::stdout(), "{}", buffer).expect("failed to render");
+        write!(stdout, "{}", buffer).expect("failed to render");
         buffer.clear();
 
         // Leave the loop
