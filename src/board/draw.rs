@@ -96,24 +96,11 @@ pub fn draw(board: Arc<Mutex<Board>>, done: &Arc<atomic::AtomicBool>) -> fmt::Re
 }
 
 impl Board {
-    pub fn draw_score(&self, buffer: &mut String) -> fmt::Result {
-        let space = constants::LEFT_SPACE;
-        let score_colour = Colour::from_power(self.max_tile);
-        let score_text = constants::SCORE_TEXT;
-        let length = constants::DISPLAY_LINE_LENGTH;
-        let no_colour = Colour::default();
-        let header = if self.max_tile >= constants::WIN_POWER {
-            constants::WIN_MESSAGE
-        } else {
-            "\r\n"
-        };
-
+    pub fn draw_clear(&self, output: &mut String) -> fmt::Result {
         write!(
-            buffer,
-            "{before}{score:<length$}{after}",
-            score = self.score,
-            before = format_args!("{space}{header}{space}{score_colour}{score_text}"),
-            after = format_args!("{no_colour}\r\n"),
+            output,
+            "{}",
+            format_args!("{}\u{1B}[2H\u{1B}[2J", Colour::default())
         )
     }
 
@@ -145,5 +132,26 @@ impl Board {
             }
         }
         Ok(())
+    }
+
+    pub fn draw_score(&self, buffer: &mut String) -> fmt::Result {
+        let space = constants::LEFT_SPACE;
+        let score_colour = Colour::from_power(self.max_tile);
+        let score_text = constants::SCORE_TEXT;
+        let length = constants::DISPLAY_LINE_LENGTH;
+        let no_colour = Colour::default();
+        let header = if self.max_tile >= constants::WIN_POWER {
+            constants::WIN_MESSAGE
+        } else {
+            "\r\n"
+        };
+
+        write!(
+            buffer,
+            "{before}{score:<length$}{after}",
+            score = self.score,
+            before = format_args!("{space}{header}{space}{score_colour}{score_text}"),
+            after = format_args!("{no_colour}\r\n"),
+        )
     }
 }

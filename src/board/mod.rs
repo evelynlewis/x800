@@ -19,19 +19,15 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   SOFTWARE.
 */
-
-use core::fmt;
-use std::{cmp, collections::VecDeque, fmt::Write};
+use std::{cmp, collections::VecDeque};
 
 pub mod constants;
-pub use draw::draw;
+use constants::END_OF_GAME_CHARACTER;
 
 mod draw;
+pub use draw::draw;
+
 mod tile;
-
-use self::constants::END_OF_GAME_CHARACTER;
-
-use super::colour::Colour;
 use tile::Tile;
 
 // Promote Power type to public within this module
@@ -77,16 +73,6 @@ impl Action {
 }
 
 impl Board {
-    // Clear screen
-    #[inline(always)]
-    pub fn draw_clear(&self, output: &mut String) -> fmt::Result {
-        write!(
-            output,
-            "{}",
-            format_args!("{}\u{1B}[2H\u{1B}[2J", Colour::default())
-        )
-    }
-
     #[inline(always)]
     pub fn has_space(&self) -> bool {
         self.open_tiles != 0
