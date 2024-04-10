@@ -83,7 +83,8 @@ pub fn draw(board: Arc<Mutex<Board>>, done: &Arc<atomic::AtomicBool>) -> fmt::Re
         }
 
         // Write out framebuffer
-        write!(stdout, "{}", buffer).expect("failed to render");
+        write!(stdout, "{}", buffer).expect("Failed to render");
+        stdout.flush().expect("Failed to flush board render");
         buffer.clear();
 
         // Leave the loop
