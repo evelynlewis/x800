@@ -10,9 +10,9 @@ checksum = "7d5a26814d8dcb93b0e5a0ff3c6d80a8843bafb21b39e8e18a6f05471870e110"
 
 [[package]]
 name = "cc"
-version = "1.0.90"
+version = "1.0.92"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8cd6604a82acf3039f1144f54b8eb34e91ffba622051189e71b781822d5ee1f5"
+checksum = "2678b2e3449475e95b0aa6f9b506a28e61b3dc8996592b983695e8ebb58a8b41"
 dependencies = [
  "jobserver",
  "libc",
@@ -83,6 +83,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3fdb12b2476b595f9358c5161aa467c2438859caa136dec86c26fdd2efe17b92"
 
 [[package]]
+name = "roger"
+version = "0.0.0"
+dependencies = [
+ "honggfuzz",
+ "libfuzzer-sys",
+ "x800",
+]
+
+[[package]]
 name = "rustc_version"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -103,13 +112,4 @@ version = "0.1.0"
 dependencies = [
  "fastrand",
  "libc",
-]
-
-[[package]]
-name = "x800-fuzz"
-version = "0.0.0"
-dependencies = [
- "honggfuzz",
- "libfuzzer-sys",
- "x800",
 ]

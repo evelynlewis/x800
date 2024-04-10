@@ -22,6 +22,10 @@ path = "src/bin.rs"
 fastrand = "2.0.1"
 libc = "0.2"
 
+[dev-dependencies]
+criterion = "0.3"
+roger = { path = "fuzz" }
+
 [lints.clippy]
 all = "deny"
 cargo = "deny"
@@ -33,3 +37,6 @@ lto = "fat"
 panic = "abort"
 strip = "debuginfo"
 
+[[bench]]
+name = "park"
+harness = false

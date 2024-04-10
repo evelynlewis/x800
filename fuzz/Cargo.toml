@@ -1,5 +1,5 @@
 [package]
-name = "x800-fuzz"
+name = "roger"
 version = "0.0.0"
 publish = false
 edition = "2021"
@@ -33,6 +33,13 @@ bench = false
 [[bin]]
 name = "hroger"
 path = "src/hroger.rs"
+test = false
+doc = false
+bench = false
+
+[lib]
+name = "roger"
+path = "src/shared.rs"
 test = false
 doc = false
 bench = false
