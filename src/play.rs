@@ -131,7 +131,7 @@ pub fn play(input: &Input) -> Result<(), ()> {
         draw_thread = Some(draw_join.as_ref().expect(EXPECT_NOT_FUZZING).thread());
 
         // Initially draw the board
-        draw_thread.as_ref().expect(EXPECT_NOT_FUZZING).unpark();
+        draw_thread.expect(EXPECT_NOT_FUZZING).unpark();
     }
 
     let mut moved;
@@ -173,7 +173,7 @@ pub fn play(input: &Input) -> Result<(), ()> {
 
         // In case of update while not fuzzing, draw the board
         if cfg!(not(fuzzing)) {
-            draw_thread.as_ref().expect(EXPECT_NOT_FUZZING).unpark();
+            draw_thread.expect(EXPECT_NOT_FUZZING).unpark();
         }
     }
 
@@ -181,7 +181,7 @@ pub fn play(input: &Input) -> Result<(), ()> {
     if cfg!(not(fuzzing)) {
         // Signal and join board-drawing thread, if it exists
         draw_quit.store(true, atomic::Ordering::Relaxed);
-        draw_thread.as_ref().expect(EXPECT_NOT_FUZZING).unpark();
+        draw_thread.expect(EXPECT_NOT_FUZZING).unpark();
         draw_join.unwrap().join().unwrap();
 
         // Print end-of-game message

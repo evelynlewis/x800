@@ -3,11 +3,20 @@ use roger::one_shot;
 use std::fs;
 
 const GOLD_FILE: &str = "fuzz/corpus/roger/eaaaac643234c7f28b0c93b9b80bf87ff43ee6cb";
+const STARTUP_FILE: &str = "fuzz/corpus/roger/fa6435a685f664c07212d0eb5ebc1366bdfd5080";
 
-pub fn criterion_benchmark(c: &mut Criterion) {
-    let content = fs::read_to_string(GOLD_FILE).unwrap().as_bytes().to_owned();
-    c.bench_function("gold", |b| b.iter(|| one_shot(black_box(&content))));
+pub fn criterion_gold(c: &mut Criterion) {
+    criterion_file(c, GOLD_FILE, "gold file");
 }
 
-criterion_group!(benches, criterion_benchmark);
+pub fn criterion_startup(c: &mut Criterion) {
+    criterion_file(c, STARTUP_FILE, "startup file");
+}
+
+fn criterion_file(c: &mut Criterion, file: &str, id: &str) {
+    let content = fs::read_to_string(file).unwrap().as_bytes().to_owned();
+    c.bench_function(id, |b| b.iter(|| one_shot(black_box(&content))));
+}
+
+criterion_group!(benches, criterion_gold, criterion_startup);
 criterion_main!(benches);
