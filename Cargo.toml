@@ -23,7 +23,7 @@ fastrand = "2.0.1"
 libc = "0.2"
 
 [dev-dependencies]
-criterion = "0.3"
+criterion = "0.5.1"
 roger = { path = "fuzz" }
 
 [lints.clippy]
