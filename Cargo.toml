@@ -24,7 +24,6 @@ libc = "0.2"
 
 [dev-dependencies]
 criterion = { version = "0.5.1", default-features = false }
-honggfuzz = { version = "0.5.55", default-features = false }
 iai = { version = "0.1.1", default-features = false }
 roger = { path = "fuzz" }
 

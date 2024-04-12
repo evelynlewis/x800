@@ -552,7 +552,6 @@ version = "0.1.0"
 dependencies = [
  "criterion",
  "fastrand",
- "honggfuzz",
  "iai",
  "libc",
  "roger",
