@@ -25,17 +25,19 @@ use std::fs;
 
 mod shared;
 
-pub fn bench_gold() {
-    bench_file(shared::GOLD_FILE);
+pub fn iai_gold() {
+    iai_file(shared::GOLD_FILE);
 }
 
-pub fn bench_startup() {
-    bench_file(shared::STARTUP_FILE);
+pub fn iai_startup() {
+    iai_file(shared::STARTUP_FILE);
 }
 
-fn bench_file(file: &str) {
+/// Function to read and execute a given function
+#[inline(always)]
+fn iai_file(file: &str) {
     let content = fs::read(file).unwrap();
     roger::one_shot(black_box(&content));
 }
 
-iai::main!(bench_startup, bench_gold);
+iai::main!(iai_startup, iai_gold);

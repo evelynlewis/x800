@@ -34,6 +34,7 @@ pub fn criterion_startup(c: &mut Criterion) {
     criterion_file(c, shared::STARTUP_FILE, "startup file");
 }
 
+#[inline(always)]
 fn criterion_file(c: &mut Criterion, file: &str, id: &str) {
     let content = fs::read(file).unwrap();
     c.bench_function(id, |b| b.iter(|| one_shot(black_box(&content))));
