@@ -21,6 +21,11 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+
+# valgrind.sh
+# Run Valgrind tools on the `roger` fuzzer
+# Using the -a flag prints annotation output
+
 set -ex
 
 cargo fuzz build --release --no-cfg-fuzzing --sanitizer none roger
@@ -41,4 +46,7 @@ if_none "${VALGRIND}" "Could not find valgrind tool"
 if_none "${ANNOTATE}" "Could not find valgrind annotator"
 
 ${VALGRIND} --tool=callgrind --simulate-cache=yes --callgrind-out-file="${OUT}" "${BIN}" -runs=0 fuzz/corpus/roger >/dev/null
-${ANNOTATE} --auto=yes "${OUT}"
+
+if [ "$1" = '-a' ]; then
+	${ANNOTATE} --auto=yes "${OUT}"
+fi
