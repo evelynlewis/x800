@@ -44,9 +44,9 @@ panic = "abort"
 strip = "symbols"
 
 [[bench]]
-name = "park"
+name = "timed"
 harness = false
 
 [[bench]]
-name = "mark"
+name = "count"
 harness = false

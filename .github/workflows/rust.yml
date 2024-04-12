@@ -41,11 +41,11 @@ jobs:
       - name: Criterion benchmarks
         run: |
           echo "Running criterion benchmarks"
-          cargo bench --bench park > /dev/null
+          cargo bench --bench timed > /dev/null
       - name: Iai benchmarks
         run: |
           echo "Running iai benchmarks"
-          cargo bench --bench mark
+          cargo bench --bench count
 
   etc:
     runs-on: ubuntu-latest

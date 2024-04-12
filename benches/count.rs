@@ -19,29 +19,30 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   SOFTWARE.
 */
-
 use iai::black_box;
 use std::fs;
 
 mod shared;
 
-pub fn iai_startup() {
-    iai_file(shared::STARTUP_FILE);
+pub fn init() {}
+
+pub fn count_startup() {
+    count_file(shared::STARTUP_FILE);
 }
 
-pub fn iai_short() {
-    iai_file(shared::SHORT_FILE);
+pub fn count_short() {
+    count_file(shared::SHORT_FILE);
 }
 
-pub fn iai_gold() {
-    iai_file(shared::GOLD_FILE);
+pub fn count_gold() {
+    count_file(shared::GOLD_FILE);
 }
 
 /// Function to read and execute a given function
 #[inline(always)]
-fn iai_file(file: &str) {
+fn count_file(file: &str) {
     let content = fs::read(file).unwrap();
     roger::one_shot(black_box(&content));
 }
 
-iai::main!(iai_startup, iai_short, iai_gold);
+iai::main!(init, count_startup, count_short, count_gold);
