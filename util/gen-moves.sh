@@ -26,10 +26,10 @@ BS="4K"
 COUNT="1"
 
 # Use an output file if provided
-if [ -z "${1}" ]; then
+if [ -z "$1" ]; then
 	OUT="/dev/stdout"
 else
-	OUT="${1}"
+	OUT="$1"
 fi
 
 # shellcheck disable=SC1091

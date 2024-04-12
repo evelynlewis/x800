@@ -32,8 +32,8 @@ OUT="callgrind.out"
 
 # Ensure binaries are valid, and print message otherwise
 if_none() {
-	command -v "${1}" >/dev/null && return 0
-	echo "${2}"
+	command -v "$1" >/dev/null && return 0
+	echo "$2"
 	return 1
 }
 if_none "${BIN}" "Could not find binary"
