@@ -24,8 +24,6 @@ use std::fs;
 
 mod shared;
 
-pub fn init() {}
-
 pub fn count_startup() {
     count_file(shared::STARTUP_FILE);
 }
@@ -45,4 +43,4 @@ fn count_file(file: &str) {
     roger::one_shot(black_box(&content));
 }
 
-iai::main!(init, count_startup, count_short, count_gold);
+iai::main!(count_startup, count_short, count_gold);
