@@ -38,9 +38,11 @@ jobs:
       - name: Criterion benchmarks
         run: |
           echo "Running criterion benchmarks"
-          # Build without verbose
-          cargo bench --no-run
-          cargo bench --verbose > /dev/null
+          cargo bench --bench park > /dev/null
+      - name: Iai benchmarks
+        run: |
+          echo "Running iai benchmarks"
+          cargo bench --bench mark
 
   etc:
     runs-on: ubuntu-latest
