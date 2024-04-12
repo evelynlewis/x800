@@ -20,5 +20,6 @@
   SOFTWARE.
 */
 
-pub const STARTUP_FILE: &str = "fuzz/corpus/roger/fa6435a685f664c07212d0eb5ebc1366bdfd5080";
+pub const STARTUP_FILE: &str = "fuzz/corpus/roger/fe7cf9ac24385fd85de511e5d522e9bb404ae968";
 pub const GOLD_FILE: &str = "fuzz/corpus/roger/e6ca62714f91b0b0f70ca5681c146e2d3f3aa8ff";
+pub const SHORT_FILE: &str = "fuzz/corpus/roger/b77256b1626d4ca390dfd49eaee6ec5eec6f1ba4";

@@ -26,12 +26,16 @@ use std::fs;
 
 mod shared;
 
-pub fn criterion_gold(c: &mut Criterion) {
-    criterion_file(c, shared::GOLD_FILE, "gold file");
-}
-
 pub fn criterion_startup(c: &mut Criterion) {
     criterion_file(c, shared::STARTUP_FILE, "startup file");
+}
+
+pub fn criterion_short(c: &mut Criterion) {
+    criterion_file(c, shared::SHORT_FILE, "short file");
+}
+
+pub fn criterion_gold(c: &mut Criterion) {
+    criterion_file(c, shared::GOLD_FILE, "gold file");
 }
 
 #[inline(always)]
@@ -40,5 +44,5 @@ fn criterion_file(c: &mut Criterion, file: &str, id: &str) {
     c.bench_function(id, |b| b.iter(|| one_shot(black_box(&content))));
 }
 
-criterion_group!(benches, criterion_gold, criterion_startup);
+criterion_group!(benches, criterion_startup, criterion_short, criterion_gold);
 criterion_main!(benches);

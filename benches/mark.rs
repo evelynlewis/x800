@@ -25,12 +25,16 @@ use std::fs;
 
 mod shared;
 
-pub fn iai_gold() {
-    iai_file(shared::GOLD_FILE);
-}
-
 pub fn iai_startup() {
     iai_file(shared::STARTUP_FILE);
+}
+
+pub fn iai_short() {
+    iai_file(shared::SHORT_FILE);
+}
+
+pub fn iai_gold() {
+    iai_file(shared::GOLD_FILE);
 }
 
 /// Function to read and execute a given function
@@ -40,4 +44,4 @@ fn iai_file(file: &str) {
     roger::one_shot(black_box(&content));
 }
 
-iai::main!(iai_startup, iai_gold);
+iai::main!(iai_startup, iai_short, iai_gold);
