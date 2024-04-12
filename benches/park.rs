@@ -2,7 +2,7 @@ use criterion::{black_box, criterion_group, criterion_main, Criterion};
 use roger::one_shot;
 use std::fs;
 
-const GOLD_FILE: &str = "fuzz/corpus/roger/eaaaac643234c7f28b0c93b9b80bf87ff43ee6cb";
+const GOLD_FILE: &str = "fuzz/corpus/roger/0042e044b7e96e41b40e66b38216866ea7de219a";
 const STARTUP_FILE: &str = "fuzz/corpus/roger/fa6435a685f664c07212d0eb5ebc1366bdfd5080";
 
 pub fn criterion_gold(c: &mut Criterion) {
@@ -14,7 +14,7 @@ pub fn criterion_startup(c: &mut Criterion) {
 }
 
 fn criterion_file(c: &mut Criterion, file: &str, id: &str) {
-    let content = fs::read_to_string(file).unwrap().as_bytes().to_owned();
+    let content = fs::read(file).unwrap();
     c.bench_function(id, |b| b.iter(|| one_shot(black_box(&content))));
 }
 
