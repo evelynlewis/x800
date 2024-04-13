@@ -110,9 +110,9 @@ These benchmarks require GNU `base32`, `tr`, `dd`, and a recent version of [`hyp
 
 ```sh
 ./util/hyperfine.sh
-    Finished release [optimized] target(s) in 0.01s
+    Finished release [optimized] target(s) in 0.02s
 Benchmark 1: ./target/release/x800
-  Time (mean ± σ):       1.1 ms ±   0.1 ms    [User: 0.8 ms, System: 0.2 ms]
+  Time (mean ± σ):       1.1 ms ±   0.1 ms    [User: 0.8 ms, System: 0.1 ms]
   Range (min … max):     1.0 ms …   1.3 ms    256 runs
 ```
 
@@ -120,9 +120,9 @@ Benchmark 1: ./target/release/x800
 
 ```sh
 ./util/hyperfine.sh
-    Finished release [optimized] target(s) in 0.00s
+    Finished release [optimized] target(s) in 0.01s
 Benchmark 1: ./target/release/x800
-  Time (mean ± σ):       1.2 ms ±   0.0 ms    [User: 0.5 ms, System: 0.4 ms]
+  Time (mean ± σ):       1.2 ms ±   0.1 ms    [User: 0.5 ms, System: 0.4 ms]
   Range (min … max):     1.1 ms …   1.4 ms    256 runs
 ```
 
@@ -151,9 +151,9 @@ Running benchmark for 16 seconds.
 ```sh
 ./util/bench.sh
 Building x800 executable.
-    Finished release [optimized] target(s) in 0.00s
+    Finished release [optimized] target(s) in 0.01s
 Running benchmark for 16 seconds.
-102713344 bytes (103 MB, 98 MiB) copied, 16 s, 6.4 MB/s
+103557120 bytes (104 MB, 99 MiB) copied, 16 s, 6.5 MB/s
 ```
 
 ## Fuzzing
