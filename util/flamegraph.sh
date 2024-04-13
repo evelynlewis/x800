@@ -21,14 +21,16 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-
 set -e
 
 test -d ./util/
 test -d ./fuzz/
 
-FUZZER_NAME="roger"
-SCRIPT_ARGS="${*}"
+# Setup fuzzer environment variables
+# shellcheck disable=SC1091
+. fenv.sh
+# Other environment variables
+SCRIPT_ARGS="$*"
 WARMUP_DURATION="4"
 
 if pgrep "${FUZZER_NAME}"; then
@@ -49,4 +51,4 @@ sleep ${WARMUP_DURATION}
 echo "
 Sampling '${FUZZER_NAME}' process with flamegraph: press CTRL-C to stop.
 "
-sh -cx "flamegraph --deterministic --root --open --pid $(pgrep ${FUZZER_NAME})"
+sh -cx "flamegraph --deterministic --root --open --pid $(pgrep "${FUZZER_NAME}")"

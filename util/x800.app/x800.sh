@@ -26,31 +26,32 @@
 #
 # This is a convenience script for x800 gameplay, as it provides the ability
 # to play several games in a loop.
-
+#
+# usage:
+# x800.sh
+#
 set -e
 
-BIN_PATH="${HOME}/.cargo/bin/x800"
+BIN="x800"
+BIN_PATH=$(command -v ${BIN})
 
 prompt() {
 	# Wait for user input before quitting
-	read -r input
+	read -r INPUT
 	# To avoid unused variable
-	echo "${input}" >/dev/null
+	echo "${INPUT}" >/dev/null
 }
 
-if ! command -v "${BIN_PATH}"; then
+if ! ${BIN_PATH}; then
 	# Note that the embedded newline and spaces are intentional
-	echo "
-      could not find x800 binary.
-      you could try:
-
-cargo install x800 --git 'https://github.com/evelynlewis/x800.git'
-
-      press enter to continue.
-"
+	echo "     can't find the x800 program"
+	echo "     maybe try this command:"
+	echo
+	echo "cargo install x800 --git 'https://github.com/evelynlewis/x800.git'"
+	echo
+	echo "     press enter to continue"
 	# Wait for user input
 	prompt
-
 	# There is no recovery possible
 	exit 1
 fi
@@ -58,12 +59,13 @@ fi
 # Game loop
 while true; do
 	# Run x800
-	"${BIN_PATH}"
+	${BIN_PATH}
 
 	# Prompt for new game input
 	# Note that the embedded newline and spaces are intentional
-	echo "
-      press enter for a new game
-"
+	echo
+	echo "      press enter for a new game"
+	echo
+	# Wait for user input
 	prompt
 done

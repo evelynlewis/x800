@@ -33,12 +33,11 @@ set -x
 test -d ./fuzz
 
 # Do a blocking build first
-cargo fuzz build "${FUZZER_NAME}" "${@}" --sanitizer none --release
+cargo fuzz build "${FUZZER_NAME}" "$@" --sanitizer none --release
 
 # Run fuzzer using cargo-fuzz
 # shellcheck disable=SC2086
-nice -n 8 cargo fuzz run \
-	"$@" \
+nice -n 8 cargo fuzz run "$@" \
 	--sanitizer none \
 	--release "${FUZZER_NAME}" \
 	-- \

@@ -22,6 +22,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+#
+# usage:
+# ./util/cmin.sh
+#
 set -e
 
 # shellcheck disable=SC1091

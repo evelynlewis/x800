@@ -22,7 +22,15 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-BS="4K"
+#
+# x800 valid move generator script
+# Writes moves to stdout or a provided file
+#
+# usage:
+# gen-moves.sh [OUTPUT_FILE]
+#
+
+BS="2K"
 COUNT="1"
 
 # Use an output file if provided
@@ -39,10 +47,9 @@ BASE32=$(compat base32)
 TR=$(compat tr)
 DD=$(compat dd)
 
-"${BASE32}" /dev/urandom |
-	"${DD}" conv=lcase 2>/dev/null |
-	"${TR}" -dC asdw |
-	"${DD}" of="${OUT}" bs="${BS}" count="${COUNT}" 2>/dev/null &&
+${BASE32} </dev/urandom |
+	${TR} -dC 'ASDW' |
+	${DD} of="${OUT}" bs="${BS}" count="${COUNT}" 2>/dev/null &&
 	exit 0
 
 exit 1

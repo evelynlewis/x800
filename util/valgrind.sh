@@ -25,8 +25,22 @@
 # valgrind.sh
 # Run Valgrind tools on the `roger` fuzzer
 # Using the -a flag prints annotation output
+#
+# usage:
+# ./util/valgrind.sh
+#
+set -e
 
-set -ex
+# Ensure we are in the root directory
+if ! test -d fuzz; then
+	echo "Error: must be run from root directory"
+	echo "usage:"
+	echo "./util/valgrind.sh"
+	exit 1
+fi
+
+# shellcheck disable=SC1091
+. util/fenv.sh
 
 cargo fuzz build --release --no-cfg-fuzzing --sanitizer none roger
 

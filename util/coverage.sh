@@ -22,40 +22,53 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# Errors are fatal, and trace execution
+#
+# usage:
+# ./util/coverage.sh
+#
 set -e
 
 # Ensure correct working directory
 test -d ./util/
 test -d ./fuzz/
 
-# Corpus selection
-CORPUS="fuzz/corpus/roger/"
-if [ ${#} -gt 0 ]; then
+# shellcheck disable=SC1091
+. util/fenv.sh
+
+# Corpus selection. Corpus can be passed as first argument
+CORPUS="fuzz/corpus/${FUZZER_NAME}/"
+if [ "$#" != 0 ]; then
 	CORPUS=$1
 fi
 echo "Using corpus directory: '${CORPUS}'"
 
-DEPS="rustfilt cargo-fuzz"
-FUZZ_ARGS="--release --sanitizer none --no-cfg-fuzzing roger"
-COV_ARGS='-Xdemangler=rustfilt -ignore-filename-regex='.cargo' -ignore-filename-regex='/rustc/.+' -use-color -instr-profile=fuzz/coverage/roger/coverage.profdata'
-
 # Install dependencies
+DEPS="rustfilt cargo-fuzz"
 # shellcheck disable=SC2086
 cargo install --quiet ${DEPS}
 
 # Build fuzz target and generate coverage
+FUZZ_ARGS="--release --sanitizer none --no-cfg-fuzzing ${FUZZER_NAME}"
 # shellcheck disable=SC2086
 cargo fuzz coverage ${FUZZ_ARGS} "${CORPUS}" -- -use_value_profile=1 >/dev/null
 
 # Ensure there is exactly one fuzzer, and that it is valid
-FUZZER="$(find target -name roger | grep coverage)"
+FUZZER="$(find target -type f -name "${FUZZER_NAME}" | grep coverage)"
 command -v "${FUZZER}"
 
-# Show coverage
-# shellcheck disable=SC2086
-"$(rustc --print=target-libdir)/../bin/llvm-cov" show "${FUZZER}" ${COV_ARGS}
+wrap_llvm_cov() {
+	COVERAGE="fuzz/coverage/${FUZZER_NAME}/coverage.profdata"
 
+	"$(rustc --print=target-libdir)/../bin/llvm-cov" \
+		"$@" "${FUZZER}" \
+		-Xdemangler=rustfilt \
+		-ignore-filename-regex='.cargo' \
+		-ignore-filename-regex='/rustc/.+' \
+		-use-color \
+		-instr-profile="${COVERAGE}"
+}
+
+# Show coverage
+wrap_llvm_cov show
 # Generate report
-# shellcheck disable=SC2086
-"$(rustc --print=target-libdir)/../bin/llvm-cov" report "${FUZZER}" ${COV_ARGS}
+wrap_llvm_cov report

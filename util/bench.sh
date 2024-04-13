@@ -1,5 +1,4 @@
 #!/bin/sh
-set -e
 # MIT License
 #
 # Copyright (c) 2024 Evelyn Lewis
@@ -22,8 +21,18 @@ set -e
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+#
+# x800 shell benchmark
+#
+# usage:
+# ./util/bench.sh
+#
+set -e
+
+# source environmental compatibility script
 # shellcheck disable=SC1091
 . ./util/compat.sh
+
 # Setup tools
 BASE32=$(compat base32)
 TR=$(compat tr)
@@ -42,6 +51,7 @@ echo "Running benchmark for ${SLEEP} seconds."
 trap 'kill $(pgrep -P $$) 2> /dev/null' EXIT INT
 
 # Run worker
+# Use two workers for more stability
 ${BASE32} </dev/urandom |
     ${TR} -dC 'ASDW' |
     ${DD} conv=lcase bs=${BS} status=progress |

@@ -54,7 +54,7 @@ jobs:
       - name: Setup
         run: |
           sudo apt update
-          sudo apt install -y valgrind
+          sudo apt install -y valgrind 
           rustup toolchain install stable --profile minimal
           rustup component add llvm-tools-preview
           cargo install --quiet cargo-fuzz

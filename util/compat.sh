@@ -1,12 +1,22 @@
 # shellcheck shell=sh
+# This file should be sourced not run
+#
+# usage:
+# . compat.sh
+#
+
+# Check without argument whether
+# the first argument given is executable
 exists() {
     command -v "$1" >/dev/null
 }
 
-# Prefer the explicitly GNU tools
+# Validated a provided executable name, with preference for GNU coreutils.
+# A GNU version of a tool 'TOOL' is often named 'gTOOL'. Prefer any such explicitly GNU tool.
+# The fallback is any valid executable of the provided name.
 compat() {
-    if exists "$1"; then
-        echo "$1"
+    if exists "g$1"; then
+        echo "g$1"
     elif exists "$1"; then
         echo "$1"
     else

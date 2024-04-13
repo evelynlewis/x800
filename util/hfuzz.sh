@@ -21,14 +21,30 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE
+
+#
+# Fuzz driver for hroger, a Honggfuzz driver
+#
+# usage:
+# ./util/hroger.sh
+#
 set -e
 
-if ! cd fuzz; then
-    echo "Run from target root"
+# See usage: should be run from x800 root
+if ! cd fuzz 2>/dev/null; then
+    echo "Error: must be run from root directory"
+    echo "usage:"
+    echo "./util/hroger.sh"
     exit 1
 fi
 
-mkdir -p hfuzz_workspace/hroger/
+# Install required tooling
+cargo install honggfuzz
 
+# Build first
 cargo hfuzz build
-HFUZZ_INPUT="./corpus/roger/" HFUZZ_RUN_ARGS="-n 2" cargo hfuzz run hroger
+
+# used by honggfuzz
+export HFUZZ_INPUT="./corpus/roger/"
+export HFUZZ_RUN_ARGS="-n 2"
+cargo hfuzz run hroger

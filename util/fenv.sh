@@ -21,6 +21,14 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+#
+# Fuzzer environment configuration
+# This file should be sourced not run
+#
+# usage:
+# . fenv.sh
+#
+
 # shellcheck disable=SC2034
 FUZZER_NAME="roger"
 
