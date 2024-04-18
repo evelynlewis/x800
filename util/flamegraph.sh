@@ -28,7 +28,7 @@ test -d ./fuzz/
 
 # Setup fuzzer environment variables
 # shellcheck disable=SC1091
-. fenv.sh
+. ./util/fenv.sh
 # Other environment variables
 SCRIPT_ARGS="$*"
 WARMUP_DURATION="4"
