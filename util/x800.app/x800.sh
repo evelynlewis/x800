@@ -32,17 +32,14 @@
 #
 set -e
 
-BIN="x800"
-BIN_PATH=$(command -v ${BIN})
-
+BIN='x800'
 prompt() {
 	# Wait for user input before quitting
+	# shellcheck disable=SC2034
 	read -r INPUT
-	# To avoid unused variable
-	echo "${INPUT}" >/dev/null
 }
 
-if ! ${BIN_PATH}; then
+if ! command -v "${BIN}"; then
 	# Note that the embedded newline and spaces are intentional
 	echo "     can't find the x800 program"
 	echo "     maybe try this command:"
@@ -59,7 +56,7 @@ fi
 # Game loop
 while true; do
 	# Run x800
-	${BIN_PATH}
+	${BIN}
 
 	# Prompt for new game input
 	# Note that the embedded newline and spaces are intentional
