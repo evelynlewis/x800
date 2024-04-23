@@ -38,7 +38,10 @@ use board::Action;
 const INITIAL_TILES_COUNT: u32 = 2;
 
 #[inline(always)]
-fn startup(input: &Input) -> Io {
+fn startup(input: &Input) -> Option<Io> {
+    if cfg!(feature = "sink") {
+        return None;
+    }
     let fd = libc::STDIN_FILENO;
     let return_ios: libc::termios;
     unsafe {
@@ -54,7 +57,7 @@ fn startup(input: &Input) -> Io {
             libc::tcsetattr(fd, libc::TCSANOW, &ios);
         }
     }
-    Io(fd, return_ios)
+    Some(Io(fd, return_ios))
 }
 
 #[allow(dead_code)]
@@ -105,15 +108,19 @@ pub fn play(input: &Input) -> Result<(), ()> {
     // Spawn board-drawing thread
     let board_arg = Arc::clone(&board);
     let quit_arg = Arc::clone(&draw_quit);
-    draw_join = thread::spawn(move || {
-        board::draw(board_arg, &quit_arg).expect(constants::GAME_FAILURE_MESSAGE);
-    });
+    draw_join = if cfg!(not(feature = "sink")) {
+        Some(thread::spawn(move || {
+            board::draw(board_arg, &quit_arg).expect(constants::GAME_FAILURE_MESSAGE);
+        }))
+    } else {
+        None
+    };
 
     // We need the thread handle separately
-    draw_thread = draw_join.thread();
+    draw_thread = draw_join.as_ref().and_then(|t| Some(t.thread()));
 
     // Initially draw the board
-    draw_thread.unpark();
+    draw_thread.and_then(|t| Some(t.unpark()));
 
     let mut moved;
     let mut empty_queue = VecDeque::with_capacity(NUMBER_TILES_PER_LINE);
@@ -153,14 +160,14 @@ pub fn play(input: &Input) -> Result<(), ()> {
         };
 
         // In case of update, draw the board
-        draw_thread.unpark();
+        draw_thread.and_then(|t| Some(t.unpark()));
     }
 
     // Handle graceful shutdown
     // Signal and join board-drawing thread, if it exists
     draw_quit.store(true, atomic::Ordering::Relaxed);
-    draw_thread.unpark();
-    draw_join.join().unwrap();
+    draw_thread.and_then(|t| Some(t.unpark()));
+    draw_join.and_then(|h| Some(h.join().unwrap()));
 
     // Print end-of-game message
     write!(
@@ -172,8 +179,11 @@ pub fn play(input: &Input) -> Result<(), ()> {
     .expect("Failed to write to output stream");
 
     // Reset terminal
-    unsafe {
-        libc::tcsetattr(io.0, libc::TCSANOW, &io.1);
+    if io.is_some() {
+        let io = io.unwrap();
+        unsafe {
+            libc::tcsetattr(io.0, libc::TCSANOW, &io.1);
+        }
     }
 
     Ok(())

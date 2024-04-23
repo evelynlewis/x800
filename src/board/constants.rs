@@ -41,22 +41,13 @@ pub(super) const WIN_MESSAGE: &str = "- - - - you win!! - - - -\r\n";
 pub(super) const WIN_POWER: Power = 11;
 pub(super) const TILES_WIDTH: usize = 4;
 pub(super) const BOARD_DIMENSION: usize = NUMBER_TILES_PER_LINE + 2 * LR_EDGE_WIDTH;
-pub(super) const DISPLAY_BUFFER_SIZE: usize = (BOARD_DIMENSION + 6) * (BOARD_DIMENSION + 4);
 pub(super) const NUMBER_TILES_RANGE: std::ops::Range<usize> =
     LR_EDGE_WIDTH..(LR_EDGE_WIDTH + NUMBER_TILES_PER_LINE);
-
-// Send all output to a null sink
-#[cfg(feature = "sink")]
-pub const WRITER: fn() -> std::io::Sink = std::io::sink;
-// Print output to stdout
-#[cfg(not(feature = "sink"))]
-pub const WRITER: fn() -> std::io::Stdout = std::io::stdout;
 
 // Public constants
 pub const NUMBER_TILES_PER_LINE: usize = 4;
 pub const LEFT_SPACE: &str = "\r      ";
 pub const GAME_OVER: &str = "- - - - game over - - - -\r\n";
-pub const GAME_FAILURE_MESSAGE: &str = " an ongoing game problem \r\n";
 pub const END_OF_GAME_CHARACTER: u8 = '\u{3}' as u8;
 pub const DISPLAY_LINE_LENGTH: usize =
     (NUMBER_TILES_PER_LINE * TILES_WIDTH) + (2 * LR_EDGE_WIDTH) + LEFT_SPACE.len()
@@ -105,3 +96,16 @@ pub const DEFAULT_BOARD: &Board = &Board {
     score: 0,
     max_tile: 0,
 };
+
+// Print output to stdout
+#[cfg(not(feature = "sink"))]
+pub const WRITER: fn() -> std::io::Stdout = std::io::stdout;
+
+// Send all output to a null sink
+#[cfg(feature = "sink")]
+pub const WRITER: fn() -> std::io::Sink = std::io::sink;
+
+#[allow(dead_code)]
+pub(super) const DISPLAY_BUFFER_SIZE: usize = (BOARD_DIMENSION + 6) * (BOARD_DIMENSION + 4);
+#[allow(dead_code)]
+pub const GAME_FAILURE_MESSAGE: &str = " an ongoing game problem \r\n";

@@ -31,6 +31,7 @@ use std::{
     thread, time,
 };
 
+#[allow(dead_code)]
 pub fn draw(board: Arc<Mutex<Board>>, done: &Arc<atomic::AtomicBool>) -> fmt::Result {
     // Use one buffer for program duration
     let buffer = &mut String::with_capacity(constants::DISPLAY_BUFFER_SIZE);
@@ -93,6 +94,7 @@ pub fn draw(board: Arc<Mutex<Board>>, done: &Arc<atomic::AtomicBool>) -> fmt::Re
     Ok(())
 }
 
+#[allow(dead_code)]
 impl Board {
     pub fn draw_clear(&self, output: &mut String) -> fmt::Result {
         write!(

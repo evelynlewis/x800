@@ -25,6 +25,7 @@ pub mod constants;
 use constants::END_OF_GAME_CHARACTER;
 
 mod draw;
+#[allow(unused_imports)]
 pub use draw::draw;
 
 mod tile;
