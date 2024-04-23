@@ -10,7 +10,7 @@ cargo-fuzz = true
 [dependencies]
 libfuzzer-sys = "0.4"
 honggfuzz = { version = "0.5", default-features = false }
-x800 = { path = ".." }
+x800 = { path = "..", features = ["sink"] }
 
 [lints.clippy]
 all = "deny"
@@ -19,9 +19,10 @@ pedantic = "deny"
 
 [profile.release]
 codegen-units = 1
-strip = "debuginfo"
 lto = "fat"
+opt-level = 3
 panic = "abort"
+strip = "debuginfo"
 
 [[bin]]
 name = "roger"

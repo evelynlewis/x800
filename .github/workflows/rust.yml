@@ -41,7 +41,7 @@ jobs:
       - name: Criterion benchmarks
         run: |
           echo "Running criterion benchmarks"
-          cargo bench --bench timed > /dev/null
+          cargo bench --bench timed
       - name: Iai benchmarks
         run: |
           echo "Running iai benchmarks"
@@ -60,7 +60,7 @@ jobs:
           cargo install --quiet cargo-fuzz
       - name: Validate
         run: |
-          cargo fuzz run roger --sanitizer none --release -- -runs=0 > /dev/null
+          cargo fuzz run roger --sanitizer none --release -- -runs=0
       - name: Coverage
         run: |
           ./util/coverage.sh

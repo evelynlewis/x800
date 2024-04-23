@@ -26,7 +26,7 @@ set -e
 
 test -d ./util/
 test -f ./util/gen-moves.sh
-cargo build -p x800 --release
+cargo build -p x800 --release --features sink
 
 cargo install --quiet hyperfine
 

@@ -22,7 +22,7 @@
 
 use std::{
     collections::VecDeque,
-    io::{self, Read},
+    io::{self, Read, Write},
     mem,
     sync::{atomic, Arc, Mutex},
     thread,
@@ -185,11 +185,13 @@ pub fn play(input: &Input) -> Result<(), ()> {
         draw_join.unwrap().join().unwrap();
 
         // Print end-of-game message
-        print!(
+        write!(
+            constants::OUT_STREAM(),
             "{}{}",
             board::constants::LEFT_SPACE,
             board::constants::GAME_OVER
-        );
+        )
+        .expect("Failed to write to output stream");
 
         // Reset terminal
         let io = io.expect("shutdown failed");

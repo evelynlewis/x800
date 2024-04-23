@@ -45,6 +45,13 @@ pub(super) const DISPLAY_BUFFER_SIZE: usize = (BOARD_DIMENSION + 6) * (BOARD_DIM
 pub(super) const NUMBER_TILES_RANGE: std::ops::Range<usize> =
     LR_EDGE_WIDTH..(LR_EDGE_WIDTH + NUMBER_TILES_PER_LINE);
 
+// Send all output to a null sink
+#[cfg(feature = "sink")]
+pub const OUT_STREAM: fn() -> std::io::Sink = std::io::sink;
+// Print output to stdout
+#[cfg(not(feature = "sink"))]
+pub const OUT_STREAM: fn() -> std::io::Stdout = std::io::stdout;
+
 // Public constants
 pub const NUMBER_TILES_PER_LINE: usize = 4;
 pub const LEFT_SPACE: &str = "\r      ";

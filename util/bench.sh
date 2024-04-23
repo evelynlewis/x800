@@ -40,7 +40,7 @@ DD=$(compat dd)
 
 # Build
 echo "Building x800 executable."
-cargo build --release
+cargo build --release --features sink
 
 # Other params
 BS="2048"
@@ -55,7 +55,7 @@ trap 'kill $(pgrep -P $$) 2> /dev/null' EXIT INT
 ${BASE32} </dev/urandom |
     ${TR} -dC 'ASDW' |
     ${DD} conv=lcase bs=${BS} status=progress |
-    sh -c 'while true; do ./target/release/x800 >/dev/null; done' &
+    sh -c 'while true; do ./target/release/x800; done' &
 
 # Sleep and exit
 sleep ${SLEEP}
