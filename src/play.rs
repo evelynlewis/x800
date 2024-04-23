@@ -39,7 +39,7 @@ const INITIAL_TILES_COUNT: u32 = 2;
 
 #[inline(always)]
 fn startup(input: &Input) -> Option<Io> {
-    if cfg!(feature = "sink") {
+    if cfg!(feature = "mini") {
         return None;
     }
     let fd = libc::STDIN_FILENO;
@@ -108,7 +108,7 @@ pub fn play(input: &Input) -> Result<(), ()> {
     // Spawn board-drawing thread
     let board_arg = Arc::clone(&board);
     let quit_arg = Arc::clone(&draw_quit);
-    draw_join = if cfg!(not(feature = "sink")) {
+    draw_join = if cfg!(not(feature = "mini")) {
         Some(thread::spawn(move || {
             board::draw(board_arg, &quit_arg).expect(constants::GAME_FAILURE_MESSAGE);
         }))

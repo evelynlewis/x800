@@ -26,11 +26,19 @@ set -e
 test -d ./util/
 test -d ./fuzz/
 
+# Script to launch the target
+LAUNCH_SCRIPT="./util/$1.sh"
+echo "Launching fuzzer with script:"
+if command -v "${LAUNCH_SCRIPT}"; then
+	echo "Script is valid"
+else
+	echo "Script \"$1\" at \"${LAUNCH_SCRIPT}\" is invalid"
+	exit 1
+fi
+
 # Setup fuzzer environment variables
 # shellcheck disable=SC1091
 . ./util/fenv.sh
-# Other environment variables
-SCRIPT_ARGS="$*"
 WARMUP_DURATION="4"
 
 if pgrep "${FUZZER_NAME}"; then
@@ -40,9 +48,9 @@ killall ${FUZZER_NAME}"
 fi
 
 echo "
-Starting '${FUZZER_NAME}' launch script with args: ${SCRIPT_ARGS}
+Starting '${FUZZER_NAME}' launch script
 "
-sh -cx "./util/fuzz.sh ${SCRIPT_ARGS}"
+sh -cx "${LAUNCH_SCRIPT}"
 
 echo "
 Waiting ${WARMUP_DURATION}s for process warmup."

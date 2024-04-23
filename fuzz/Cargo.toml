@@ -10,7 +10,12 @@ cargo-fuzz = true
 [dependencies]
 libfuzzer-sys = "0.4"
 honggfuzz = { version = "0.5", default-features = false }
-x800 = { path = "..", features = ["sink"] }
+x800 = { path = "..", optional = true, default-features = false }
+
+[features]
+default = ["sink"]
+mini = ["x800/mini"]
+sink = ["x800/sink"]
 
 [lints.clippy]
 all = "deny"
