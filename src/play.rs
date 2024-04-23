@@ -128,7 +128,7 @@ pub fn play(input: &Input) -> Result<(), ()> {
     loop {
         generation += 1;
         let action = match input {
-            Input::Slice(_) => Action::parse(*(iter.next().unwrap_or(&END_OF_GAME_CHARACTER))),
+            Input::Slice(_) => Action::parse(iter.next().copied().unwrap_or(END_OF_GAME_CHARACTER)),
             Input::Interactive => stdin_reader(),
         };
 
