@@ -116,10 +116,10 @@ pub fn play(input: &Input) -> Result<(), ()> {
     };
 
     // We need the thread handle separately
-    draw_thread = draw_join.as_ref().and_then(|t| Some(t.thread()));
+    draw_thread = draw_join.as_ref().map(|t| t.thread());
 
     // Initially draw the board
-    draw_thread.and_then(|t| Some(t.unpark()));
+    draw_thread.map(|t| t.unpark());
 
     let mut moved;
     let mut empty_queue = VecDeque::with_capacity(NUMBER_TILES_PER_LINE);
@@ -159,14 +159,14 @@ pub fn play(input: &Input) -> Result<(), ()> {
         };
 
         // In case of update, draw the board
-        draw_thread.and_then(|t| Some(t.unpark()));
+        draw_thread.map(|t| t.unpark());
     }
 
     // Handle graceful shutdown
     // Signal and join board-drawing thread, if it exists
     draw_quit.store(true, atomic::Ordering::Relaxed);
-    draw_thread.and_then(|t| Some(t.unpark()));
-    draw_join.and_then(|h| Some(h.join().unwrap()));
+    draw_thread.map(|t| t.unpark());
+    draw_join.map(|h| h.join().unwrap());
 
     // Print end-of-game message
     write!(
