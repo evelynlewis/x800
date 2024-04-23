@@ -33,7 +33,12 @@
 FUZZER_NAME="roger"
 
 # shellcheck disable=SC2034
-FUZZER_ARGS="\
+FUZZER_BUILD_ARGS="\
+	--sanitizer none \
+	--release"
+
+# shellcheck disable=SC2034
+FUZZER_RUN_ARGS="\
 	-dict=./fuzz/dictionary.txt \
 	-len_control=0 \
 	-max_len=2048 \

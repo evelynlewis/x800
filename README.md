@@ -168,7 +168,7 @@ Both a small dictionary and a minimized corpus with good coverage are checked in
 
 Flame graphs, first created by [Brendan Gregg](https://www.brendangregg.com/flamegraphs.html), are a powerful and intuitive performance-visualization tool. This project makes use of the Rust [`flamegraph`](https://github.com/flamegraph-rs/flamegraph) Crate for its straightforward flame graph support.
 
-The helper script at `util/flamegraph.sh` allows for easy sampling of `x800`. In its default configuration, the script uses the `roger` fuzzer as the binary under test, with `cfg!(fuzzing)` enabled. The `util/flamegraph-ncf.sh` script is similar, but turns off `cfg!(fuzzing)`, which provides a more realistic `x800` gameplay workload.
+The helper script at `util/flamegraph.sh` allows for easy sampling of `x800`. In its default configuration, the script uses the `roger` fuzzer as the binary under test.
 
 ## License
 

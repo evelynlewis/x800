@@ -48,9 +48,8 @@ DEPS="rustfilt cargo-fuzz"
 cargo install --quiet ${DEPS}
 
 # Build fuzz target and generate coverage
-FUZZ_ARGS="--release --sanitizer none --no-cfg-fuzzing ${FUZZER_NAME}"
 # shellcheck disable=SC2086
-cargo fuzz coverage ${FUZZ_ARGS} "${CORPUS}" -- -use_value_profile=1 >/dev/null
+cargo fuzz coverage ${FUZZER_NAME} ${FUZZER_BUILD_ARGS} "${CORPUS}" -- -use_value_profile=1 >/dev/null
 
 # Ensure there is exactly one fuzzer, and that it is valid
 FUZZER="$(find target -type f -name "${FUZZER_NAME}" | grep coverage)"

@@ -42,7 +42,7 @@ fi
 # shellcheck disable=SC1091
 . util/fenv.sh
 
-cargo fuzz build --release --no-cfg-fuzzing --sanitizer none roger
+cargo fuzz build --release --sanitizer none roger
 
 BIN="$(find fuzz/target -name roger | grep release)"
 VALGRIND="valgrind"

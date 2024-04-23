@@ -32,14 +32,11 @@ use std::{
 };
 
 pub fn draw(board: Arc<Mutex<Board>>, done: &Arc<atomic::AtomicBool>) -> fmt::Result {
-    // When fuzzing, this fn should not be called
-    assert!(cfg!(not(fuzzing)));
-
     // Use one buffer for program duration
     let buffer = &mut String::with_capacity(constants::DISPLAY_BUFFER_SIZE);
 
     // Preferred output stream
-    let mut output = constants::OUT_STREAM();
+    let mut output = constants::WRITER();
 
     // Duration between draws. 2ms is 500Hz
     const DRAW_DURATION: time::Duration = time::Duration::from_millis(2);

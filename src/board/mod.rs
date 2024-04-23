@@ -60,6 +60,7 @@ pub(super) enum Action {
 }
 
 impl Action {
+    #[inline(always)]
     pub(super) const fn parse(input: u8) -> Self {
         match input {
             b'w' => Action::Direction(Direction::Up),

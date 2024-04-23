@@ -36,16 +36,9 @@ use crate::board::{
 use board::Action;
 
 const INITIAL_TILES_COUNT: u32 = 2;
-const EXPECT_NOT_FUZZING: &str = "Expected cfg!(not(fuzzing))";
 
 #[inline(always)]
-fn startup(input: &Input) -> Option<Io> {
-    // Early exit
-    if cfg!(fuzzing) {
-        return None;
-    }
-
-    // In case of not fuzzing, we must return Some(_)
+fn startup(input: &Input) -> Io {
     let fd = libc::STDIN_FILENO;
     let return_ios: libc::termios;
     unsafe {
@@ -61,7 +54,7 @@ fn startup(input: &Input) -> Option<Io> {
             libc::tcsetattr(fd, libc::TCSANOW, &ios);
         }
     }
-    Some(Io(fd, return_ios))
+    Io(fd, return_ios)
 }
 
 #[allow(dead_code)]
@@ -90,14 +83,12 @@ pub fn play(input: &Input) -> Result<(), ()> {
     // Pre-setup for slice input
     let mut iter = match input {
         Input::Slice(slice) => slice.iter(),
-        _ => Default::default(),
+        Input::Interactive => Default::default(),
     };
 
-    let io: Option<Io> = startup(input);
-    // Ensure the postcondition holds
-    assert_eq!(cfg!(not(fuzzing)), io.is_some());
+    let io = startup(input);
 
-    // Clear screen and draw initial board
+    // Clear screen and generate initial tiles
     let mut generation: Generation = 0;
     {
         let mut unlocked = board.lock().unwrap();
@@ -111,28 +102,18 @@ pub fn play(input: &Input) -> Result<(), ()> {
     let draw_join;
     let draw_thread;
 
-    // Provision zero or one drawing threads
-    if cfg!(fuzzing) {
-        // Empty in case of fuzzing
-        draw_join = None;
-        draw_thread = None;
-    } else {
-        // The usual case
-        assert!(cfg!(not(fuzzing)));
+    // Spawn board-drawing thread
+    let board_arg = Arc::clone(&board);
+    let quit_arg = Arc::clone(&draw_quit);
+    draw_join = thread::spawn(move || {
+        board::draw(board_arg, &quit_arg).expect(constants::GAME_FAILURE_MESSAGE);
+    });
 
-        // Spawn board-drawing thread
-        let board_arg = Arc::clone(&board);
-        let quit_arg = Arc::clone(&draw_quit);
-        draw_join = Some(thread::spawn(move || {
-            board::draw(board_arg, &quit_arg).expect(constants::GAME_FAILURE_MESSAGE);
-        }));
+    // We need the thread handle separately
+    draw_thread = draw_join.thread();
 
-        // We need the thread handle separately
-        draw_thread = Some(draw_join.as_ref().expect(EXPECT_NOT_FUZZING).thread());
-
-        // Initially draw the board
-        draw_thread.expect(EXPECT_NOT_FUZZING).unpark();
-    }
+    // Initially draw the board
+    draw_thread.unpark();
 
     let mut moved;
     let mut empty_queue = VecDeque::with_capacity(NUMBER_TILES_PER_LINE);
@@ -141,7 +122,7 @@ pub fn play(input: &Input) -> Result<(), ()> {
     loop {
         generation += 1;
         let action = match input {
-            Input::Slice(_) => Action::parse(*iter.next().unwrap_or(&END_OF_GAME_CHARACTER)),
+            Input::Slice(_) => Action::parse(*(iter.next().unwrap_or(&END_OF_GAME_CHARACTER))),
             Input::Interactive => stdin_reader(),
         };
 
@@ -171,33 +152,28 @@ pub fn play(input: &Input) -> Result<(), ()> {
             }
         };
 
-        // In case of update while not fuzzing, draw the board
-        if cfg!(not(fuzzing)) {
-            draw_thread.expect(EXPECT_NOT_FUZZING).unpark();
-        }
+        // In case of update, draw the board
+        draw_thread.unpark();
     }
 
     // Handle graceful shutdown
-    if cfg!(not(fuzzing)) {
-        // Signal and join board-drawing thread, if it exists
-        draw_quit.store(true, atomic::Ordering::Relaxed);
-        draw_thread.expect(EXPECT_NOT_FUZZING).unpark();
-        draw_join.unwrap().join().unwrap();
+    // Signal and join board-drawing thread, if it exists
+    draw_quit.store(true, atomic::Ordering::Relaxed);
+    draw_thread.unpark();
+    draw_join.join().unwrap();
 
-        // Print end-of-game message
-        write!(
-            constants::OUT_STREAM(),
-            "{}{}",
-            board::constants::LEFT_SPACE,
-            board::constants::GAME_OVER
-        )
-        .expect("Failed to write to output stream");
+    // Print end-of-game message
+    write!(
+        constants::WRITER(),
+        "{}{}",
+        board::constants::LEFT_SPACE,
+        board::constants::GAME_OVER
+    )
+    .expect("Failed to write to output stream");
 
-        // Reset terminal
-        let io = io.expect("shutdown failed");
-        unsafe {
-            libc::tcsetattr(io.0, libc::TCSANOW, &io.1);
-        }
+    // Reset terminal
+    unsafe {
+        libc::tcsetattr(io.0, libc::TCSANOW, &io.1);
     }
 
     Ok(())

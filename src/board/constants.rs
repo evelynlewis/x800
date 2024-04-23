@@ -47,10 +47,10 @@ pub(super) const NUMBER_TILES_RANGE: std::ops::Range<usize> =
 
 // Send all output to a null sink
 #[cfg(feature = "sink")]
-pub const OUT_STREAM: fn() -> std::io::Sink = std::io::sink;
+pub const WRITER: fn() -> std::io::Sink = std::io::sink;
 // Print output to stdout
 #[cfg(not(feature = "sink"))]
-pub const OUT_STREAM: fn() -> std::io::Stdout = std::io::stdout;
+pub const WRITER: fn() -> std::io::Stdout = std::io::stdout;
 
 // Public constants
 pub const NUMBER_TILES_PER_LINE: usize = 4;
