@@ -37,7 +37,6 @@ use board::Action;
 
 const INITIAL_TILES_COUNT: u32 = 2;
 
-#[inline(always)]
 fn startup(input: &Input) -> Option<Io> {
     if cfg!(feature = "mini") {
         return None;

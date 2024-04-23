@@ -61,7 +61,6 @@ pub(super) enum Action {
 }
 
 impl Action {
-    #[inline(always)]
     pub(super) const fn parse(input: u8) -> Self {
         match input {
             b'w' => Action::Direction(Direction::Up),
@@ -75,12 +74,10 @@ impl Action {
 }
 
 impl Board {
-    #[inline(always)]
     pub fn has_space(&self) -> bool {
         self.open_tiles != 0
     }
 
-    #[inline(always)]
     fn pair(major: usize, minor: usize, direction: Direction) -> ((usize, usize), (usize, usize)) {
         match direction {
             Direction::Left => ((major, minor), (major, minor + 1)),
@@ -90,7 +87,6 @@ impl Board {
         }
     }
 
-    #[inline(always)]
     fn collect(
         &mut self,
         major: usize,
@@ -122,7 +118,6 @@ impl Board {
         }
     }
 
-    #[inline(always)]
     fn merge(
         &mut self,
         major: usize,
@@ -164,7 +159,6 @@ impl Board {
         }
     }
 
-    #[inline(always)]
     pub fn update(
         &mut self,
         direction: Direction,
@@ -215,7 +209,6 @@ impl Board {
     }
 
     // Create a new '2' or '4' number tile in a blank space
-    #[inline]
     pub fn spawn_tile(&mut self, generation: Generation) -> bool {
         if !self.has_space() {
             return false;
