@@ -4,9 +4,9 @@ x800: [ɛks eɪt ˈhʌndrəd]
 
 ## Introduction
 
-[2048](#gameplay) is a game of progressively merging power-of-two tiles as much as possible.
+2048 is a simple game played by merging a 4x4 grid of power-of-two tiles, to maximize the sum of resulting tile values (see [Gameplay](#gameplay)).
 
-`x800` currently has a sustained update [rate](#shell-benchmark-intel-pentium-g3220t-at-260ghz-with-linux-65) of 7.1 million moves per second on a 2.6GHz Intel Pentium CPU from 2013.
+How fast? At present, `x800` has a sustained update [rate](#shell-benchmark-intel-pentium-g3220t-at-260ghz-with-linux-65) of 7.1 million moves per second on a 2.6GHz Intel Pentium CPU from 2013.
 
 The project has few build dependencies. It doesn't use ncurses or an external Rust terminal library. It instead uses simple output buffering and standard [ANSI escape codes](https://en.wikipedia.org/wiki/ANSI_escape_code). The required POSIX-compatible [`libc`](https://docs.rs/libc/latest/libc/) Crate is part of Rust's standard library on POSIX targets. The only other build dependency is [`fastrand`](https://crates.io/crates/fastrand), a simple non-cryptographic pseudo-random number generator Crate without child dependencies.
 
