@@ -4,7 +4,7 @@ x800: [ɛks eɪt ˈhʌndrəd]
 
 ## Introduction
 
-2048 is a game of progressively merging power-of-two tiles as much as possible (see [gameplay](#gameplay)).
+[2048](#gameplay) is a game of progressively merging power-of-two tiles as much as possible.
 
 How fast is `x800`? The current implementation has a sustained update [rate](#shell-benchmark-intel-pentium-g3220t-at-260ghz-with-linux-65) of 7.1 million moves per second on a 2.6GHz Intel Pentium CPU from 2013.
 

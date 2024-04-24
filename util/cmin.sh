@@ -32,4 +32,4 @@ set -e
 . util/fenv.sh
 
 # shellcheck disable=SC2086
-cargo fuzz cmin ${FUZZER_BUILD_ARGS} "${FUZZER_NAME}" -- ${FUZZER_RUN_ARGS}
+cargo fuzz cmin ${FUZZER_BUILD_ARGS} "${FUZZER_NAME}" "$@" -- ${FUZZER_RUN_ARGS}
