@@ -4,7 +4,7 @@ x800: [ɛks eɪt ˈhʌndrəd]
 
 ## Introduction
 
-2048 is a simple game played by merging a 4x4 grid of power-of-two tiles, to maximize the sum of resulting tile values (see [Gameplay](#gameplay)).
+2048 is played by merging a four-by-four grid of power-of-two tiles, to maximize the sum of resulting tile values (see [Gameplay](#gameplay)).
 
 How fast? At present, `x800` has a sustained update [rate](#shell-benchmark-intel-pentium-g3220t-at-260ghz-with-linux-65) of 7.1 million moves per second on a 2.6GHz Intel Pentium CPU from 2013.
 
