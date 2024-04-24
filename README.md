@@ -10,7 +10,7 @@ How fast? At present, `x800` has a sustained update [rate](#shell-benchmark-inte
 
 The project has few build dependencies. It doesn't use ncurses or an external Rust terminal library. It instead uses simple output buffering and standard [ANSI escape codes](https://en.wikipedia.org/wiki/ANSI_escape_code). The required POSIX-compatible [`libc`](https://docs.rs/libc/latest/libc/) Crate is part of Rust's standard library on POSIX targets. The only other build dependency is [`fastrand`](https://crates.io/crates/fastrand), a simple non-cryptographic pseudo-random number generator Crate without child dependencies.
 
-The project started in part as a hands-on spike project for the author to learn [rustlang](rust-lang.org) as a systems software developer experienced in C and C++. The name `x800` is the number 2048 in base sixteen, modified to comply with Cargo's package naming rules which disallow a leading digit.
+The project started in part as a hands-on spike project for the author to learn [Rust](https://rust-lang.org) as a systems software developer experienced in C and C++. The name `x800` is the number 2048 in base sixteen, modified to comply with Cargo's package naming rules which disallow a leading digit.
 
 ## Preview
 
@@ -18,7 +18,7 @@ The project started in part as a hands-on spike project for the author to learn 
 
 ## Quick start
 
-The [rustup](https://rustup.rs) tool can be used to install the required Rust toolchain including `cargo` on your machine.
+The [`rustup`](https://rustup.rs) tool can be used to install the required Rust toolchain including `cargo` on your machine.
 
 ### Install
 
