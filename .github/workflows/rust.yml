@@ -32,8 +32,12 @@ jobs:
           rustup toolchain install stable --profile minimal
       - name: Shell benchmark
         run: |
-          echo "Running shell benchmark"
+          echo "Running full shell benchmark"
           ./util/bench.sh
+      - name: Mini shell benchmark
+        run: |
+          echo "Running mini shell benchmark"
+          ./util/mbench.sh
       - name: Hyperfine benchmark
         run: |
           echo "Running hyperfine benchmark"
