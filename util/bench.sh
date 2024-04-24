@@ -26,7 +26,7 @@
 # x800 shell benchmark
 #
 # usage:
-# ./util/bench.sh
+# ./util/bench.sh [ARGS]
 #
 set -e
 
@@ -41,7 +41,7 @@ DD=$(compat dd)
 
 # Build
 echo "Building x800 executable."
-cargo build --release --features sink
+cargo build --release --features sink "${@}"
 
 # Other params
 BS="2048"
