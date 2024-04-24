@@ -22,8 +22,16 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+#
+# Start roger fuzzer in mini mode`
+#
+# usage:
+# ./util/min.sh
+#
+
 set -e
 test -d ./fuzz
+test -d ./util
 
 # Call fuzzer in mini mode
 ./util/fuzz.sh --features mini

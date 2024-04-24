@@ -1,4 +1,5 @@
 # shellcheck disable=SC2148
+
 # MIT License
 #
 # Copyright (c) 2024 Evelyn Lewis

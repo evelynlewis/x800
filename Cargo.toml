@@ -26,7 +26,6 @@ libc = "0.2"
 criterion = { version = "0.5.1", default-features = false }
 iai = { version = "0.1.1", default-features = false }
 roger = { path = "fuzz" }
-# Workaround for enabling sink
 x800 = { path = ".", features = ["sink"] }
 
 [features]

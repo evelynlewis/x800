@@ -24,6 +24,7 @@
 
 #
 # Fuzz driver for hroger, a Honggfuzz driver
+# Builds and starts hroger in background
 #
 # usage:
 # ./util/hroger.sh

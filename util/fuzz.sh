@@ -22,6 +22,14 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+#
+# Fuzz driver for roger, a libfuzzer driver
+# Builds and starts roger in background
+#
+# usage:
+# ./util/fuzz.sh [ARGS]
+#
+
 set -e
 
 trap '' HUP

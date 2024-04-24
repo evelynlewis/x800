@@ -1,4 +1,5 @@
 #!/bin/sh
+
 # MIT License
 #
 # Copyright (c) 2024 Evelyn Lewis
