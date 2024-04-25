@@ -23,6 +23,8 @@
 # SOFTWARE.
 
 #
+# Minimize fuzzer coverage
+#
 # usage:
 # ./util/cmin.sh
 #
