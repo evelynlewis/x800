@@ -4,11 +4,11 @@ x800: [ɛks eɪt ˈhʌndrəd]
 
 ## Introduction
 
-2048 is played by merging a four-by-four grid of power-of-two tiles, to maximize the sum of resulting tile values (see [Gameplay](#gameplay)).
+2048 is played by merging a four-by-four grid of power-of-two tiles, to maximize the sum of resulting tile values.
 
 How fast? `x800` has a sustained update [rate](#shell-benchmark-intel-pentium-g3220t-at-260ghz-with-linux-65) of 7.1 million moves-per-second on a 2.6GHz Intel Pentium CPU from 2013.
 
-The project has few build dependencies. It doesn't use ncurses or an external Rust terminal library. It instead uses simple output buffering and standard [ANSI escape codes](https://en.wikipedia.org/wiki/ANSI_escape_code). The required POSIX-compatible [`libc`](https://docs.rs/libc/latest/libc/) Crate is part of Rust's standard library on POSIX targets. The only other build dependency is [`fastrand`](https://crates.io/crates/fastrand), a simple non-cryptographic pseudo-random number generator Crate without child dependencies.
+The project has few build dependencies. It doesn't use ncurses or an external Rust terminal library. It instead uses simple output buffering and standard [ANSI escape codes](https://en.wikipedia.org/wiki/ANSI_escape_code). The required POSIX-compatible [`libc`](https://docs.rs/libc/latest/libc/) Crate is part of Rust's standard library on POSIX targets. The only other build dependency is [`fastrand`](https://crates.io/crates/fastrand), a simple non-cryptographic pseudorandom number generator Crate without child dependencies.
 
 The project started in part as a hands-on spike project for the author to learn [Rust](https://rust-lang.org) as a systems software developer experienced in C and C++. The name `x800` is the number 2048 in base sixteen, modified to comply with Cargo's package naming rules which disallow a leading digit.
 
@@ -18,7 +18,7 @@ The project started in part as a hands-on spike project for the author to learn 
 
 ## Quick start
 
-The [`rustup`](https://rustup.rs) tool can be used to install the required Rust toolchain including `cargo` on your machine.
+Use the [`rustup`](https://rustup.rs) tool to install the required Rust toolchain including `cargo` on your machine.
 
 ### Install
 
@@ -42,6 +42,35 @@ To uninstall `x800`:
 cargo uninstall x800
 ```
 
+## Gameplay
+
+A description of 2048 gameplay, from [Wikipedia](https://en.wikipedia.org/wiki/2048_(video_game)):
+
+> 2048 is played on a plain 4×4 grid, with numbered tiles that slide when a player moves them using the four arrow keys. The game begins with two tiles already in the grid, having a value of either 2 or 4, and another such tile appears in a random empty space after each turn. Tiles slide as far as possible in the chosen direction until they are stopped by either another tile or the edge of the grid. If two tiles of the same number collide while moving, they will merge into a tile with the total value of the two tiles that collided. The resulting tile cannot merge with another tile again in the same move. Higher-scoring tiles emit a soft glow; the largest possible tile is 131,072.
+> 
+> If a move causes three consecutive tiles of the same value to slide together, only the two tiles farthest along the direction of motion will combine. If all four spaces in a row or column are filled with tiles of the same value, a move parallel to that row/column will combine the first two and last two. A scoreboard on the upper-right keeps track of the user's score. The user's score starts at zero, and is increased whenever two tiles combine, by the value of the new tile.
+>
+> The game is won when a tile with a value of 2048 appears on the board. Players can continue beyond that to reach higher scores. When the player has no legal moves (there are no empty spaces and no adjacent tiles with the same value), the game ends.
+
+`x800` gameplay is quite similar to the original 2048, with the minor difference of using only letter keys in place of arrow keys for movement. This decision was made to allow every input move to be exactly one byte, whereas directional arrow keys map to multi-byte escape codes. Since the original 2048 supports both letter and arrow keys, this a focused implementation of the 2048 concept.
+
+`x800` uses the 'w', 'a', 's', and 'd' keys for up, left, down, and right moves respectively.
+
+## Compatibility
+
+`x800` has the following requirements:
+
+1. A Rust toolchain supporting the Rust 2021 Edition, meaning version 1.56.0 or later.
+2. The toolchain supports the target system's target-triple. See [note 1](#compatibility-notes).
+3. The target's `libc` is POSIX-conforming. See [note 2](#compatibility-notes).
+
+This means that Linux, MacOS, other BSDs, and QNX should all work on a variety of architectures.
+
+### Compatibility notes
+
+1. For straightforward cross-compilation using `cross`, see the related [section](#cross-compilation-with-cross-crate).
+2. Refer to the Rust Platform Support [page](https://doc.rust-lang.org/rustc/platform-support.html) and Rust `libc` [documentation](https://docs.rs/libc/latest/libc/). For the latter, the platform selection dropdown at the top of the page is useful.
+
 ### Cross-compilation with `cross` Crate
 
 In case you wanted to play 2048 on a somewhat more underpowered or unique platform, the [`cross`](https://github.com/cross-rs/cross) Crate can be used to cross-compile for the target on a better-supported host.
@@ -53,32 +82,7 @@ cargo install cross --git 'https://github.com/cross-rs/cross'
 cross build --release --target=arm-unknown-linux-gnueabihf
 ```
 
-> Note that as of February 2024, the latest released version of `cross`, `v0.2.5`, has an ongoing problem with supporting some non-x86_64 build hosts. As of the time of writing the best workaround for this is to install directly from the `main` branch on GitHub as shown above. This is also the [recommended](https://github.com/cross-rs/cross##installation) installation method in the `cross` project documentation.
-
-## Compatibility
-
-`x800` has the following requirements:
-
-1. A Rust toolchain supporting the Rust 2021 Edition, meaning version 1.56.0 or later.
-2. The toolchain supports the target system's target-triple (see [note 1](#compatibility-notes)).
-3. The target's `libc` is POSIX-conforming (see [note 2](#compatibility-notes)).
-
-This means that Linux, MacOS, other BSDs, and QNX should all work on a variety of architectures.
-
-### Compatibility notes
-
-1. For straightforward cross-compilation using `cross`, see the related [section](#cross-compilation-with-cross-crate) above.
-2. Refer to the Rust Platform Support [page](https://doc.rust-lang.org/rustc/platform-support.html) and Rust `libc` [documentation](https://docs.rs/libc/latest/libc/). For the latter, the platform selection dropdown at the top of the page is useful.
-
-## Gameplay
-
-A description of 2048 gameplay, from [Wikipedia](https://en.wikipedia.org/wiki/2048_(video_game)):
-
-> 2048 is played on a plain 4×4 grid, with numbered tiles that slide when a player moves them using the four arrow keys. The game begins with two tiles already in the grid, having a value of either 2 or 4, and another such tile appears in a random empty space after each turn. Tiles slide as far as possible in the chosen direction until they are stopped by either another tile or the edge of the grid. If two tiles of the same number collide while moving, they will merge into a tile with the total value of the two tiles that collided.
-
-`x800` gameplay is quite similar to the original 2048, with the minor difference of using only letter keys in place of arrow keys for movement. This decision was made to allow every input move to be exactly one byte, whereas directional arrow keys map to multi-byte escape codes. Since the original 2048 supports both letter and arrow keys, this a focused implementation of the 2048 concept.
-
-The keys ('w', 'a', 's', 'd') are used for (up, left, down, right) moves respectively.
+> Note that as of February 2024, the latest released version of `cross`, `v0.2.5`, has an ongoing problem with supporting some non-x86_64 build hosts. As of the time of writing the best workaround for this is to install directly from the `main` branch on GitHub, as shown. This is also the [recommended](https://github.com/cross-rs/cross##installation) installation method in the `cross` project documentation.
 
 ## Local development
 
@@ -106,7 +110,7 @@ The `hyperfine` latency numbers correspond to the duration of a complete game ru
 
 These benchmarks require GNU `base32`, `tr`, `dd`, and a recent version of [`hyperfine`](https://github.com/sharkdp/hyperfine).
 
-> On most Linux systems the required GNU shell tools will be preinstalled. The `hyperfine` binary can be installed via your system package manager or with `cargo install hyperfine`. Your package manager's version may be too old.
+> The required GNU shell tools are part of GNU `coreutils` and preinstalled on most Linux systems. The `hyperfine` binary can be installed via your system package manager or with `cargo install hyperfine`. Your package manager's version may be too old.
 
 #### `hyperfine` benchmark: Intel Pentium G3220T at 2.60GHz with Linux 6.5
 
@@ -132,7 +136,7 @@ Benchmark 1: ./target/release/x800
 
 Requires POSIX `sh`, and GNU `base32`, `dd`, `tr`, and `grep`.
 
-> On most Linux systems the required GNU shell tools will be preinstalled. Also note that in this configuration, these benchmarks may be close to the performance limit for the shell tools themselves.
+> The required GNU shell tools are part of GNU `coreutils` and preinstalled on most Linux systems. Also note that in this configuration, these benchmarks may be close to the performance limit for the shell tools themselves.
 
 ```sh
 ./util/bench.sh
