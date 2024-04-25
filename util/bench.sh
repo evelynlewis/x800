@@ -44,7 +44,7 @@ echo "Building x800 executable."
 cargo build --release --features sink "${@}"
 
 # Other params
-BS="2048"
+BS="4096"
 SLEEP="16"
 echo "Running benchmark for ${SLEEP} seconds."
 

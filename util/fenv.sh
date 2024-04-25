@@ -42,5 +42,5 @@ FUZZER_BUILD_ARGS="\
 FUZZER_RUN_ARGS="\
 	-dict=./fuzz/dictionary.txt \
 	-len_control=0 \
-	-max_len=2048 \
+	-max_len=4096 \
 	-use_value_profile=1"
