@@ -41,6 +41,5 @@ FUZZER_BUILD_ARGS="\
 # shellcheck disable=SC2034
 FUZZER_RUN_ARGS="\
 	-dict=./fuzz/dictionary.txt \
-	-len_control=0 \
-	-max_len=4096 \
+	-max_len=8192 \
 	-use_value_profile=1"

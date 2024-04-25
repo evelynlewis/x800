@@ -30,7 +30,7 @@
 # gen-moves.sh [OUTPUT_FILE]
 #
 
-BS="4K"
+BS="8K"
 COUNT="1"
 
 # Use an output file if provided
