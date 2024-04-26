@@ -19,6 +19,9 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   SOFTWARE.
 */
+
+//! Data structures and functions needed to implement the x800 board
+
 use std::{cmp, collections::VecDeque};
 
 pub mod constants;

@@ -20,6 +20,8 @@
   SOFTWARE.
 */
 
+//! Implementation of [Board] drawing
+
 use crate::board::constants::BOARD_AREA;
 
 use super::super::colour::Colour;

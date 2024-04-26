@@ -20,15 +20,16 @@
   SOFTWARE.
 */
 
-/// Simple terminal colours for x800
-///
-/// Uses 256 colour ANSI escape codes. See:
-/// <https://en.wikipedia.org/wiki/ANSI_escape_code#8-bit>
-///
-/// We use a box-shaped segment of colours, beginning from
-/// the top right corner. Chosen order is to move down the
-/// right-hand column, across the bottom, up the left side,
-/// and across the top.
+//! Simple terminal colours for x800
+//!
+//! Uses 256 colour ANSI escape codes. See:
+//! <https://en.wikipedia.org/wiki/ANSI_escape_code#8-bit>
+//!
+//! We use a box-shaped segment of colours, beginning from
+//! the top right corner. Chosen order is to move down the
+//! right-hand column, across the bottom, up the left side,
+//! and across the top.
+
 use super::board::tile::Power;
 use std::fmt;
 

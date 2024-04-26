@@ -20,6 +20,8 @@
   SOFTWARE.
 */
 
+//! Data structures and functions needed to define, index, and display a [Tile] or [Tiles]
+
 /// The power-of-two of a [`Tile`]
 pub type Power = u32;
 /// The move number which created a [`Tile`]

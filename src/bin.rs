@@ -20,6 +20,8 @@
   SOFTWARE.
 */
 
+//! A minimal main program entry-point
+
 mod board;
 mod colour;
 mod play;

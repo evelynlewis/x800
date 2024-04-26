@@ -20,6 +20,8 @@
   SOFTWARE.
 */
 
+//! Implementation of `x800` core event loop
+
 use std::{
     collections::VecDeque,
     io::{self, Read, Write},
@@ -38,7 +40,8 @@ use crate::board::{
 /// The number of tiles to generate at startup
 const INITIAL_TILES_COUNT: u32 = 2;
 
-fn startup(input: &Input) -> Option<Io> {
+/// Configures terminal as-needed
+fn io_config(input: &Input) -> Option<Io> {
     if cfg!(feature = "mini") {
         return None;
     }
@@ -60,14 +63,16 @@ fn startup(input: &Input) -> Option<Io> {
     Some(Io(fd, return_ios))
 }
 
+/// Defines input mode
 #[allow(dead_code)]
 pub enum Input<'a> {
     Slice(&'a [u8]),
     Interactive,
 }
-
+/// Wrapper for handling IO-related data structures
 struct Io(libc::c_int, libc::termios);
 
+/// Main gameplay event loop
 #[inline(always)]
 pub fn play(input: &Input) -> Result<(), ()> {
     // Runtime storage
@@ -89,7 +94,7 @@ pub fn play(input: &Input) -> Result<(), ()> {
         Input::Interactive => Default::default(),
     };
 
-    let io = startup(input);
+    let io = io_config(input);
 
     // Clear screen and generate initial tiles
     let mut generation: Generation = 0;

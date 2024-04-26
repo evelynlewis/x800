@@ -20,7 +20,8 @@
   SOFTWARE.
 */
 
-// Include README.md docs
+// Include README.md docs inline
+// These are rendered to the root Crate page
 #![doc = include_str!("../README.md")]
 
 mod board;
