@@ -20,6 +20,8 @@
   SOFTWARE.
 */
 
+use crate::board::constants::BOARD_AREA;
+
 use super::super::colour::Colour;
 use super::constants::{self, BOARD_DIMENSION, NUMBER_TILES_PER_LINE};
 use super::Board;
@@ -39,7 +41,7 @@ pub fn draw(board: Arc<Mutex<Board>>, done: &Arc<atomic::AtomicBool>) -> fmt::Re
     // Preferred output stream
     let mut output = constants::WRITER();
 
-    // Duration between draws. 2ms is 500Hz
+    // Duration between draws. 2 ms is 500 Hz
     const DRAW_DURATION: time::Duration = time::Duration::from_millis(2);
 
     // If set, draw the board this time
@@ -123,7 +125,7 @@ impl Board {
 
     fn draw_tiles(&self, buffer: &mut String) -> fmt::Result {
         // Allow bounds-checking elision
-        assert_eq!(self.tiles.0.len(), BOARD_DIMENSION * BOARD_DIMENSION);
+        assert_eq!(self.tiles.0.len(), BOARD_AREA);
 
         // Iterate over each row and column, then print
         for i in 0..BOARD_DIMENSION {

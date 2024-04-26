@@ -41,6 +41,7 @@ pub(super) const WIN_MESSAGE: &str = "- - - - you win!! - - - -\r\n";
 pub(super) const WIN_POWER: Power = 11;
 pub(super) const TILES_WIDTH: usize = 4;
 pub(super) const BOARD_DIMENSION: usize = NUMBER_TILES_PER_LINE + 2 * LR_EDGE_WIDTH;
+pub(super) const BOARD_AREA: usize = BOARD_DIMENSION * BOARD_DIMENSION;
 pub(super) const NUMBER_TILES_RANGE: std::ops::Range<usize> =
     LR_EDGE_WIDTH..(LR_EDGE_WIDTH + NUMBER_TILES_PER_LINE);
 

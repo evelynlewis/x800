@@ -25,9 +25,8 @@ pub(super) type Generation = u32;
 
 use super::constants::{
     BOTTOM_EDGE, BOTTOM_LEFT_CORNER, BOTTOM_RIGHT_CORNER, BOTTOM_RIGHT_CORNER_SPACE, EMPTY_TILE,
-    LEFT_EDGE, LEFT_SPACE, RIGHT_EDGE, TOP_EDGE, TOP_LEFT_CORNER, TOP_RIGHT_CORNER,
+    LEFT_EDGE, LEFT_SPACE, RIGHT_EDGE, TOP_EDGE, TOP_LEFT_CORNER, TOP_RIGHT_CORNER, BOARD_AREA, BOARD_DIMENSION,
 };
-use super::BOARD_DIMENSION;
 use crate::colour::Colour;
 use std::fmt;
 use std::ops::{Index, IndexMut};
@@ -57,7 +56,7 @@ pub enum Tile {
 }
 
 #[derive(Clone)]
-pub struct Tiles(pub [Tile; BOARD_DIMENSION * BOARD_DIMENSION]);
+pub struct Tiles(pub [Tile; BOARD_AREA]);
 
 impl Index<(usize, usize)> for Tiles {
     type Output = Tile;

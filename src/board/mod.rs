@@ -22,7 +22,7 @@
 use std::{cmp, collections::VecDeque};
 
 pub mod constants;
-use constants::END_OF_GAME_CHARACTER;
+use constants::{END_OF_GAME_CHARACTER, NUMBER_TILES_RANGE};
 
 mod draw;
 #[allow(unused_imports)]
@@ -31,11 +31,9 @@ pub use draw::draw;
 mod tile;
 use tile::Tile;
 
-// Promote Power type to public within this module
+// Promote Power and Generation types to public within this module
 pub type Power = tile::Power;
 pub type Generation = tile::Power;
-
-use constants::{BOARD_DIMENSION, NUMBER_TILES_RANGE};
 
 #[derive(Clone)]
 pub struct Board {
