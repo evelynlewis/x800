@@ -33,7 +33,7 @@ use std::{
     thread, time,
 };
 
-#[allow(dead_code)]
+/// Worker thread function which draws board
 pub fn draw(board: Arc<Mutex<Board>>, done: &Arc<atomic::AtomicBool>) -> fmt::Result {
     // Use one buffer for program duration
     let buffer = &mut String::with_capacity(constants::DISPLAY_BUFFER_SIZE);
@@ -96,8 +96,8 @@ pub fn draw(board: Arc<Mutex<Board>>, done: &Arc<atomic::AtomicBool>) -> fmt::Re
     Ok(())
 }
 
-#[allow(dead_code)]
 impl Board {
+    /// Draw a 'clear screen' control character to the output String
     pub fn draw_clear(&self, output: &mut String) -> fmt::Result {
         write!(
             output,
@@ -106,9 +106,10 @@ impl Board {
         )
     }
 
-    fn draw_header(&self, buffer: &mut String) -> fmt::Result {
+    /// Draw the game header to the output String
+    fn draw_header(&self, output: &mut String) -> fmt::Result {
         write!(
-            buffer,
+            output,
             "{}",
             format_args!(
                 "{}{}{:<colour_len$}{}\r\n\n",
@@ -123,20 +124,22 @@ impl Board {
         )
     }
 
-    fn draw_tiles(&self, buffer: &mut String) -> fmt::Result {
+    /// Draw all [`Board`] Tiles to the output String
+    fn draw_tiles(&self, output: &mut String) -> fmt::Result {
         // Allow bounds-checking elision
         assert_eq!(self.tiles.0.len(), BOARD_AREA);
 
         // Iterate over each row and column, then print
         for i in 0..BOARD_DIMENSION {
             for j in 0..BOARD_DIMENSION {
-                write!(buffer, "{}", self.tiles[(i, j)])?;
+                write!(output, "{}", self.tiles[(i, j)])?;
             }
         }
         Ok(())
     }
 
-    pub fn draw_score(&self, buffer: &mut String) -> fmt::Result {
+    /// Draw the current score to the output String
+    pub fn draw_score(&self, output: &mut String) -> fmt::Result {
         let space = constants::LEFT_SPACE;
         let score_colour = Colour::from_power(self.max_tile);
         let score_text = constants::SCORE_TEXT;
@@ -149,7 +152,7 @@ impl Board {
         };
 
         write!(
-            buffer,
+            output,
             "{before}{score:<length$}{after}",
             score = self.score,
             before = format_args!("{space}{header}{space}{score_colour}{score_text}"),

@@ -33,5 +33,5 @@ pub fn one_shot(data: &[u8]) {
             .try_into()
             .expect("Failed to generate seed"),
     );
-    x800::fuzz(&data[(size_of::<u64>() - 1)..], seed)
+    x800::driver(&data[(size_of::<u64>() - 1)..], seed)
 }

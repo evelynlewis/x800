@@ -20,41 +20,47 @@
   SOFTWARE.
 */
 
-pub(super) type Power = u32;
-pub(super) type Generation = u32;
+/// The power-of-two of a [`Tile`]
+pub type Power = u32;
+/// The move number which created a [`Tile`]
+pub type Generation = u64;
 
 use super::constants::{
-    BOTTOM_EDGE, BOTTOM_LEFT_CORNER, BOTTOM_RIGHT_CORNER, BOTTOM_RIGHT_CORNER_SPACE, EMPTY_TILE,
-    LEFT_EDGE, LEFT_SPACE, RIGHT_EDGE, TOP_EDGE, TOP_LEFT_CORNER, TOP_RIGHT_CORNER, BOARD_AREA, BOARD_DIMENSION,
+    BOARD_AREA, BOARD_DIMENSION, BOTTOM_EDGE, BOTTOM_LEFT_CORNER, BOTTOM_RIGHT_CORNER, EMPTY_TILE,
+    LEFT_EDGE, LEFT_SPACE, RIGHT_EDGE, TOP_EDGE, TOP_LEFT_CORNER, TOP_RIGHT_CORNER,
 };
 use crate::colour::Colour;
 use std::fmt;
 use std::ops::{Index, IndexMut};
 
+/// Types of [`Edge`]
 #[derive(Clone, Copy, PartialEq, Eq)]
-pub(super) enum EdgeSide {
+pub enum Edge {
     Top,
     Bottom,
     Left,
     Right,
 }
 
+/// Types of [`Corner`]
 #[derive(Clone, Copy, PartialEq, Eq)]
-pub(super) enum CornerSide {
+pub enum Corner {
     TopLeft,
     TopRight,
     BottomLeft,
     BottomRight,
 }
 
+/// Basic [`super::Board`] block
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum Tile {
     Empty(),
     Number(Power, Generation),
-    Edge(EdgeSide),
-    Corner(CornerSide),
+    Edge(Edge),
+    Corner(Corner),
 }
 
+/// Unit tuple containing all [`Tile`]
 #[derive(Clone)]
 pub struct Tiles(pub [Tile; BOARD_AREA]);
 
@@ -85,29 +91,29 @@ impl fmt::Display for Tile {
                     width = BOARD_DIMENSION,
                 )
             }
-            Self::Edge(EdgeSide::Left) => {
+            Self::Edge(Edge::Left) => {
                 write!(f, "{LEFT_SPACE}{LEFT_EDGE}")
             }
-            Self::Edge(EdgeSide::Right) => {
+            Self::Edge(Edge::Right) => {
                 write!(f, "{RIGHT_EDGE}")
             }
-            Self::Edge(EdgeSide::Top) => {
+            Self::Edge(Edge::Top) => {
                 write!(f, "{TOP_EDGE}")
             }
-            Self::Edge(EdgeSide::Bottom) => {
+            Self::Edge(Edge::Bottom) => {
                 write!(f, "{BOTTOM_EDGE}")
             }
-            Self::Corner(CornerSide::TopLeft) => {
+            Self::Corner(Corner::TopLeft) => {
                 write!(f, "{LEFT_SPACE}{TOP_LEFT_CORNER}")
             }
-            Self::Corner(CornerSide::TopRight) => {
+            Self::Corner(Corner::TopRight) => {
                 write!(f, "{TOP_RIGHT_CORNER}")
             }
-            Self::Corner(CornerSide::BottomLeft) => {
+            Self::Corner(Corner::BottomLeft) => {
                 write!(f, "{LEFT_SPACE}{BOTTOM_LEFT_CORNER}")
             }
-            Self::Corner(CornerSide::BottomRight) => {
-                write!(f, "{BOTTOM_RIGHT_CORNER}{BOTTOM_RIGHT_CORNER_SPACE}")
+            Self::Corner(Corner::BottomRight) => {
+                write!(f, "{BOTTOM_RIGHT_CORNER}")
             }
             Self::Empty() => {
                 write!(f, "{EMPTY_TILE}")

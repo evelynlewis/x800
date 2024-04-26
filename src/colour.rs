@@ -20,7 +20,6 @@
   SOFTWARE.
 */
 
-use super::board::Power;
 /// Simple terminal colours for x800
 ///
 /// Uses 256 colour ANSI escape codes. See:
@@ -30,8 +29,10 @@ use super::board::Power;
 /// the top right corner. Chosen order is to move down the
 /// right-hand column, across the bottom, up the left side,
 /// and across the top.
+use super::board::tile::Power;
 use std::fmt;
 
+/// Information which fully specifies a given Colour
 #[derive(Debug, PartialEq, Eq, Default)]
 pub struct Colour {
     row: Power,
@@ -39,6 +40,7 @@ pub struct Colour {
 }
 
 impl Colour {
+    /// Generate a colour based on a Tile's power-of-two
     pub const fn from_power(power: Power) -> Self {
         match power {
             // first, left-most column, upwards (ie. /|\)
@@ -67,7 +69,9 @@ impl Colour {
     }
 }
 
+/// See <https://en.wikipedia.org/wiki/ANSI_escape_code#8-bit>
 const COLOUR_LEFT_COLUMN: Power = 34 - 16;
+/// See <https://en.wikipedia.org/wiki/ANSI_escape_code#8-bit>
 const COLOUR_RIGHT_COLUMN: Power = COLOUR_LEFT_COLUMN + 5;
 
 #[test]
@@ -81,6 +85,7 @@ fn power_to_colour_cycle_test() {
 }
 
 impl fmt::Display for Colour {
+    /// Generate and print foreground and background escape codes for a Colour
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let (bg, fg) = if *self == Self::default() {
             (0_u32, 15_u32)

@@ -10,28 +10,17 @@ repository = "https://github.com/evelynlewis/x800"
 keywords = ["2048", "command-line", "game", "libc", "minimal", "embedded"]
 readme = "README.md"
 
-[lib]
-name = "x800"
-path = "src/lib.rs"
-
 [[bin]]
 name = "x800"
 path = "src/bin.rs"
 
+[lib]
+name = "x800"
+path = "src/driver.rs"
+
 [dependencies]
 fastrand = "2.0.1"
 libc = "0.2"
-
-[dev-dependencies]
-criterion = { version = "0.5.1", default-features = false }
-iai = { version = "0.1.1", default-features = false }
-roger = { path = "fuzz" }
-x800 = { path = ".", features = ["sink"] }
-
-[features]
-default = []
-sink = []
-mini = ["sink"]
 
 [lints.clippy]
 all = "deny"
@@ -47,6 +36,17 @@ opt-level = 3
 lto = "fat"
 panic = "abort"
 strip = "symbols"
+
+[dev-dependencies]
+criterion = { version = "0.5.1", default-features = false }
+iai = { version = "0.1.1", default-features = false }
+roger = { path = "fuzz" }
+x800 = { path = ".", features = ["sink"] }
+
+[features]
+default = []
+sink = []
+mini = ["sink"]
 
 [[bench]]
 name = "timed"

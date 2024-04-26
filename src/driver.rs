@@ -24,7 +24,7 @@ mod colour;
 mod play;
 use play::{play, Input};
 
-pub fn fuzz(input: &[u8], seed: u64) {
+pub fn driver(input: &[u8], seed: u64) {
     fastrand::seed(seed);
     play(&Input::Slice(input)).unwrap();
 }

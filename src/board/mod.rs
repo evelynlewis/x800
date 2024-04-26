@@ -25,22 +25,17 @@ pub mod constants;
 use constants::{END_OF_GAME_CHARACTER, NUMBER_TILES_RANGE};
 
 mod draw;
-#[allow(unused_imports)]
 pub use draw::draw;
 
-mod tile;
-use tile::Tile;
-
-// Promote Power and Generation types to public within this module
-pub type Power = tile::Power;
-pub type Generation = tile::Power;
+pub mod tile;
+use tile::{Generation, Tile};
 
 #[derive(Clone)]
 pub struct Board {
     tiles: tile::Tiles,
     score: u32,
     open_tiles: usize,
-    max_tile: Power,
+    max_tile: tile::Power,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq)]

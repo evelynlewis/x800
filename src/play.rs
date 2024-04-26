@@ -31,10 +31,11 @@ use std::{
 use crate::board::{
     self,
     constants::{self, DEFAULT_BOARD, END_OF_GAME_CHARACTER, NUMBER_TILES_PER_LINE},
-    Generation,
+    tile::Generation,
+    Action,
 };
-use board::Action;
 
+/// The number of tiles to generate at startup
 const INITIAL_TILES_COUNT: u32 = 2;
 
 fn startup(input: &Input) -> Option<Io> {
