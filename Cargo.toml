@@ -16,7 +16,7 @@ path = "src/bin.rs"
 
 [lib]
 name = "x800"
-path = "src/driver.rs"
+path = "src/lib.rs"
 
 [dependencies]
 fastrand = "2.0.1"

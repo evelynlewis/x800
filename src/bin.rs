@@ -28,7 +28,6 @@ use libc;
 use std::process;
 
 use play::{play, Input};
-
 fn main() {
     match play(&Input::Interactive) {
         Err(_) => {

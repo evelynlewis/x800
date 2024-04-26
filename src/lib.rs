@@ -19,6 +19,10 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   SOFTWARE.
 */
+
+// Include README.md docs
+#![doc = include_str!("../README.md")]
+
 mod board;
 mod colour;
 mod play;
