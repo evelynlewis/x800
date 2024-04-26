@@ -57,6 +57,12 @@ xcall cargo test
 echo "OK"
 echo ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+echo "Now validating docs"
+echo
+xcall cargo doc
+echo "OK"
+echo ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 # Build and run criterion benchmarks
 echo "Now validating criterion benchmarks"
 echo
