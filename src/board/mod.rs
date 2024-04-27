@@ -22,14 +22,12 @@
 
 //! Data structures and functions needed to implement the x800 board
 
-use std::{cmp, collections::VecDeque};
+use std::{cmp, collections};
 
 pub mod constants;
 use constants::{END_OF_GAME_CHARACTER, NUMBER_TILES_RANGE};
-
 mod draw;
 pub use draw::draw;
-
 pub mod tile;
 use tile::{Generation, Tile};
 
@@ -89,7 +87,7 @@ impl Board {
         major: usize,
         minor: usize,
         direction: Direction,
-        empty_queue: &mut VecDeque<(usize, usize)>,
+        empty_queue: &mut collections::VecDeque<(usize, usize)>,
     ) -> bool {
         let current = Self::pair(major, minor, direction).0;
 
@@ -121,7 +119,7 @@ impl Board {
         major: usize,
         minor: usize,
         direction: Direction,
-        empty_queue: &mut VecDeque<(usize, usize)>,
+        empty_queue: &mut collections::VecDeque<(usize, usize)>,
         generation: Generation,
     ) -> bool {
         let (current, next) = Self::pair(major, minor, direction);
@@ -162,7 +160,7 @@ impl Board {
         &mut self,
         direction: Direction,
         generation: Generation,
-        empty_queue: &mut VecDeque<(usize, usize)>,
+        empty_queue: &mut collections::VecDeque<(usize, usize)>,
     ) -> bool {
         let mut moved = false;
         let mut empty_count = 0;

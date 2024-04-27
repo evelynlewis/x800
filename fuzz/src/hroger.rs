@@ -21,10 +21,9 @@
 */
 
 mod shared;
-use honggfuzz::fuzz;
 
 fn main() {
     loop {
-        fuzz!(|data: &[u8]| { shared::one_shot(data) });
+        honnggfuzz::fuzz!(|data: &[u8]| { shared::one_shot(data) });
     }
 }

@@ -33,7 +33,7 @@ use super::constants::{
 };
 use crate::colour::Colour;
 use std::fmt;
-use std::ops::{Index, IndexMut};
+use std::ops;
 
 /// Types of [`Edge`]
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -66,21 +66,25 @@ pub enum Tile {
 #[derive(Clone)]
 pub struct Tiles(pub [Tile; BOARD_AREA]);
 
-impl Index<(usize, usize)> for Tiles {
+impl ops::Index<(usize, usize)> for Tiles {
+    /// The [`Tiles`] structure contains [`Tile`] structs
     type Output = Tile;
 
+    /// Return a non-mutable reference to a [`Tile`] element of [`Tiles`]
     fn index(&self, index: (usize, usize)) -> &Self::Output {
         &(self.0[index.0 * BOARD_DIMENSION + index.1])
     }
 }
 
-impl IndexMut<(usize, usize)> for Tiles {
+impl ops::IndexMut<(usize, usize)> for Tiles {
+    /// Return a mutable reference to a [`Tile`] element of [`Tiles`]
     fn index_mut(&mut self, index: (usize, usize)) -> &mut Self::Output {
         &mut (self.0[index.0 * BOARD_DIMENSION + index.1])
     }
 }
 
 impl fmt::Display for Tile {
+    /// Format [`Tile`] to be displayed
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Number(num, _) => {

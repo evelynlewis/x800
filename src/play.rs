@@ -20,13 +20,13 @@
   SOFTWARE.
 */
 
-//! Implementation of `x800` core event loop
+//! Implementation of x800 core event loop
 
 use std::{
-    collections::VecDeque,
+    collections,
     io::{self, Read, Write},
     mem,
-    sync::{atomic, Arc, Mutex},
+    sync::{self, atomic},
     thread,
 };
 
@@ -40,7 +40,7 @@ use crate::board::{
 /// The number of tiles to generate at startup
 const INITIAL_TILES_COUNT: u32 = 2;
 
-/// Configures terminal as-needed
+/// Configures terminal as needed
 fn io_config(input: &Input) -> Option<Io> {
     if cfg!(feature = "mini") {
         return None;
@@ -69,14 +69,15 @@ pub enum Input<'a> {
     Slice(&'a [u8]),
     Interactive,
 }
+
 /// Wrapper for handling IO-related data structures
 struct Io(libc::c_int, libc::termios);
 
-/// Main gameplay event loop
+/// Main program event loop
 #[inline(always)]
 pub fn play(input: &Input) -> Result<(), ()> {
     // Runtime storage
-    let board = Arc::new(Mutex::new(DEFAULT_BOARD.clone()));
+    let board = sync::Arc::new(sync::Mutex::new(DEFAULT_BOARD.clone()));
 
     // Closure called for program input
     let stdin_reader = || -> Action {
@@ -106,13 +107,13 @@ pub fn play(input: &Input) -> Result<(), ()> {
     }
 
     // Bookkeeping for board-drawing thread
-    let draw_quit = Arc::new(atomic::AtomicBool::new(false));
+    let draw_quit = sync::Arc::new(atomic::AtomicBool::new(false));
     let draw_join;
     let draw_thread;
 
     // Spawn board-drawing thread
-    let board_arg = Arc::clone(&board);
-    let quit_arg = Arc::clone(&draw_quit);
+    let board_arg = sync::Arc::clone(&board);
+    let quit_arg = sync::Arc::clone(&draw_quit);
     draw_join = if cfg!(not(feature = "mini")) {
         Some(thread::spawn(move || {
             board::draw(board_arg, &quit_arg).expect(constants::GAME_FAILURE_MESSAGE);
@@ -128,7 +129,7 @@ pub fn play(input: &Input) -> Result<(), ()> {
     draw_thread.map(|t| t.unpark());
 
     let mut moved;
-    let mut empty_queue = VecDeque::with_capacity(NUMBER_TILES_PER_LINE);
+    let mut empty_queue = collections::VecDeque::with_capacity(NUMBER_TILES_PER_LINE);
 
     // The main event loop
     loop {

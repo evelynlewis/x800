@@ -22,21 +22,22 @@
 
 //! Implementation of [Board] drawing
 
-use crate::board::constants::BOARD_AREA;
-
 use super::super::colour::Colour;
-use super::constants::{self, BOARD_DIMENSION, NUMBER_TILES_PER_LINE};
+use super::constants::{self, BOARD_AREA, BOARD_DIMENSION, NUMBER_TILES_PER_LINE};
 use super::Board;
 use std::{
     fmt,
     fmt::Write as FmtWrite,
-    io::Write,
-    sync::{atomic, Arc, Mutex},
+    io::Write as IoWrite,
+    sync::{self, atomic},
     thread, time,
 };
 
 /// Worker thread function which draws board
-pub fn draw(board: Arc<Mutex<Board>>, done: &Arc<atomic::AtomicBool>) -> fmt::Result {
+pub fn draw(
+    board: sync::Arc<sync::Mutex<Board>>,
+    done: &sync::Arc<atomic::AtomicBool>,
+) -> fmt::Result {
     // Use one buffer for program duration
     let buffer = &mut String::with_capacity(constants::DISPLAY_BUFFER_SIZE);
 

@@ -22,8 +22,7 @@
 
 //! Various constants used by [Board]
 
-use super::tile::Power;
-use super::tile::{Corner, Edge, Tile, Tiles};
+use super::tile::{Corner, Edge, Power, Tile, Tiles};
 use super::Board;
 
 // Internal constants

@@ -20,16 +20,17 @@
   SOFTWARE.
 */
 
-//! A minimal main program entry-point
+//! A minimal program entry point
+use libc;
+use std::process;
+
+use play::{play, Input};
 
 mod board;
 mod colour;
 mod play;
 
-use libc;
-use std::process;
-
-use play::{play, Input};
+/// The main program entry point
 fn main() {
     match play(&Input::Interactive) {
         Err(_) => {

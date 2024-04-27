@@ -27,9 +27,9 @@
 mod board;
 mod colour;
 mod play;
-use play::{play, Input};
+use play::play;
 
 pub fn driver(input: &[u8], seed: u64) {
     fastrand::seed(seed);
-    play(&Input::Slice(input)).unwrap();
+    play(&play::Input::Slice(input)).unwrap();
 }
