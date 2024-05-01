@@ -44,11 +44,11 @@ cargo uninstall x800
 
 ## Gameplay
 
-A description of 2048 gameplay, from [Wikipedia](https://en.wikipedia.org/wiki/2048_(video_game)):
+A description of 2048 gameplay, from [Wikipedia](<https://en.wikipedia.org/wiki/2048_(video_game)>):
 
 > 2048 is played on a plain 4×4 grid, with numbered tiles that slide when a player moves them using the four arrow keys. The game begins with two tiles already in the grid, having a value of either 2 or 4, and another such tile appears in a random empty space after each turn. Tiles slide as far as possible in the chosen direction until they are stopped by either another tile or the edge of the grid. If two tiles of the same number collide while moving, they will merge into a tile with the total value of the two tiles that collided. The resulting tile cannot merge with another tile again in the same move. Higher-scoring tiles emit a soft glow; the largest possible tile is 131,072.
 >
->…
+> …
 >
 > The game is won when a tile with a value of 2048 appears on the board. Players can continue beyond that to reach higher scores. When the player has no legal moves (there are no empty spaces and no adjacent tiles with the same value), the game ends.
 
@@ -60,16 +60,19 @@ A description of 2048 gameplay, from [Wikipedia](https://en.wikipedia.org/wiki/2
 
 `x800` has the following requirements:
 
-1. A Rust toolchain supporting the Rust 2021 Edition, meaning version 1.56.0 or later.
-2. The toolchain supports the target system's target-triple. See [note 1](#compatibility-notes).
-3. The target's `libc` is POSIX-conforming. See [note 2](#compatibility-notes).
+1. A Rust toolchain supporting the target system's target-triple, including `std` support. See [notes 1 and 2](#notes).
+2. The target's Rust `libc` Crate is POSIX-conforming. See [notes 2 and 3](#notes).
+3. A Minimum Supported Rust Version (MSRV) of 1.56. This version stabilized support for the 2021 Edition.
 
-This means that Linux, MacOS, other BSDs, and QNX should all work on a variety of architectures.
+There are no other known requirements.
 
-### Compatibility notes
+This means that Linux, MacOS, and other BSDs should all work on a variety of architectures.
+
+### Notes
 
 1. For straightforward cross-compilation using `cross`, see the related [section](#cross-compilation-with-cross-crate).
-2. Refer to the Rust Platform Support [page](https://doc.rust-lang.org/rustc/platform-support.html) and Rust `libc` [documentation](https://docs.rs/libc/latest/libc/). For the latter, the platform selection dropdown at the top of the page is useful.
+2. For information on Rust platform support see the appropriate [page](https://doc.rust-lang.org/rustc/platform-support.html) in the Rust documentation.
+3. Refer to the Rust `libc` [documentation](https://docs.rs/libc/latest/libc/). The platform selection dropdown at the top of the page is useful.
 
 ### Cross-compilation with `cross` Crate
 
@@ -102,7 +105,7 @@ Since `x800` takes input from standard input, or `stdin`, and exits at the compl
 
 ### Benchmarks using the `hyperfine` tool
 
-*The Rust Performance Book* [describes]((https://nnethercote.github.io/perf-book/benchmarking.html)) `hyperfine` as "an excellent general-purpose benchmarking tool." It seems to deliver.
+_The Rust Performance Book_ [describes](<(https://nnethercote.github.io/perf-book/benchmarking.html)>) `hyperfine` as "an excellent general-purpose benchmarking tool." It seems to deliver.
 
 The `hyperfine` latency numbers correspond to the duration of a complete game run beginning-to-end with random input. Statistical reasoning of the number of moves this typically corresponds to is left as an exercise for the reader.
 
@@ -182,16 +185,16 @@ The helper script at `util/flamegraph.sh` allows for easy sampling of `x800`. In
 
 ## References
 
-- [*ANSI escape code*, Wikipedia](https://en.wikipedia.org/wiki/ANSI_escape_code)
-- [*The TTY demystified*, Linus Åkesson](http://www.linusakesson.net/programming/tty/)
-- [*Zero-dependency random number generation in Rust*, Orhun Parmaksız](https://blog.orhun.dev/zero-deps-random-in-rust/)
-- [*termios(3) — Linux manual page*, man7.org](https://man7.org/linux/man-pages/man3/termios.3.html)
-- [*The Rust Performance Book*, Nicholas Nethercote](https://nnethercote.github.io/perf-book)
-- [*Clippy's Lints*, Clippy Documentation](https://doc.rust-lang.org/stable/clippy/lints.html)
-- [*hyperfine*, GitHub](https://github.com/sharkdp/hyperfine)
-- [*Rust Fuzz Book*, The Rust Fuzzing Authority](https://rust-fuzz.github.io/book)
-- [*LibFuzzer*, llvm.org](https://llvm.org/docs/LibFuzzer.html)
-- [*cargo-fuzz*, GitHub](https://github.com/rust-fuzz/cargo-fuzz)
-- [*honggfuzz*, honggfuzz.dev](https://honggfuzz.dev)
-- [*honggfuzz-rs*, GitHub](https://github.com/rust-fuzz/honggfuzz-rs)
-- [*Flame Graphs*, Brendan Gregg](https://www.brendangregg.com/flamegraphs.html)
+- [_ANSI escape code_, Wikipedia](https://en.wikipedia.org/wiki/ANSI_escape_code)
+- [_The TTY demystified_, Linus Åkesson](http://www.linusakesson.net/programming/tty/)
+- [_Zero-dependency random number generation in Rust_, Orhun Parmaksız](https://blog.orhun.dev/zero-deps-random-in-rust/)
+- [_termios(3) — Linux manual page_, man7.org](https://man7.org/linux/man-pages/man3/termios.3.html)
+- [_The Rust Performance Book_, Nicholas Nethercote](https://nnethercote.github.io/perf-book)
+- [_Clippy's Lints_, Clippy Documentation](https://doc.rust-lang.org/stable/clippy/lints.html)
+- [_hyperfine_, GitHub](https://github.com/sharkdp/hyperfine)
+- [_Rust Fuzz Book_, The Rust Fuzzing Authority](https://rust-fuzz.github.io/book)
+- [_LibFuzzer_, llvm.org](https://llvm.org/docs/LibFuzzer.html)
+- [_cargo-fuzz_, GitHub](https://github.com/rust-fuzz/cargo-fuzz)
+- [_honggfuzz_, honggfuzz.dev](https://honggfuzz.dev)
+- [_honggfuzz-rs_, GitHub](https://github.com/rust-fuzz/honggfuzz-rs)
+- [_Flame Graphs_, Brendan Gregg](https://www.brendangregg.com/flamegraphs.html)
