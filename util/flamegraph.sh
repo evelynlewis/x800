@@ -37,6 +37,15 @@ set -e
 test -d ./util/
 test -d ./fuzz/
 
+# Require one argument
+if [ $# -eq 0 ]; then
+	echo "Please provide an argument. An example:"
+	echo "$0 fuzz"
+	exit 1
+elif [ $# -gt 1 ]; then
+	echo "Too many arguments provided"
+	exit 1
+fi
 # Script to launch the target
 LAUNCH_SCRIPT="./util/$1.sh"
 echo "Launching fuzzer with script:"
