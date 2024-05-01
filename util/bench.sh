@@ -52,7 +52,6 @@ echo "Running benchmark for ${SLEEP} seconds."
 trap 'kill $(pgrep -P $$) 2> /dev/null' EXIT INT
 
 # Run worker
-# Use two workers for more stability
 ${BASE32} </dev/urandom |
     ${TR} -dC 'ASDW' |
     ${DD} conv=lcase bs=${BS} status=progress |
