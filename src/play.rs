@@ -80,15 +80,11 @@ pub fn play(input: &Input) -> Result<(), ()> {
     let board = sync::Arc::new(sync::Mutex::new(DEFAULT_BOARD.clone()));
 
     // Closure called for program input
-    const READ_SIZE: usize = 1;
-    let mut input_buffer = [0; READ_SIZE];
-    let mut stdin = io::stdin();
-    let mut stdin_reader = || -> Action {
-        // We rely on size '1' for parsing below
-        assert_eq!(READ_SIZE, 1, "READ_SIZE must be 1");
-        match stdin.read_exact(&mut input_buffer) {
+    let stdin_reader = || -> Action {
+        let mut buffer = [0; 1];
+        match io::stdin().read_exact(&mut buffer) {
             Err(_) => Action::Shutdown,
-            Ok(_) => Action::parse(input_buffer[0]),
+            Ok(_) => Action::parse(buffer[0]),
         }
     };
 
