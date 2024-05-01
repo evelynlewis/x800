@@ -81,7 +81,8 @@ pub fn play(input: &Input) -> Result<(), ()> {
 
     // Closure called for program input
     let stdin_reader = || -> Action {
-        let mut buffer = [0; 1];
+        // Read one byte from stdin
+        let mut buffer = [0_u8; 1];
         match io::stdin().read_exact(&mut buffer) {
             Err(_) => Action::Shutdown,
             Ok(_) => Action::parse(buffer[0]),
