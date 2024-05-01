@@ -1,4 +1,4 @@
-name: x800 docs
+name: docs
 
 on:
   push:
@@ -12,9 +12,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Setup
+      - name: Setup toolchain
         run: rustup toolchain install stable --profile minimal
-      - name: Setup pages
+      - name: Setup github-pages
         id: pages
         uses: actions/configure-pages@v4
       - name: Build documentation

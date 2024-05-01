@@ -1,4 +1,4 @@
-name: x800 build bot
+name: build-bot
 
 on:
   push:
