@@ -1,3 +1,4 @@
 /target
 *grind.out*
 fuzz-*.log
+doc/
