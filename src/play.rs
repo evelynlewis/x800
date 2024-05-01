@@ -78,12 +78,13 @@ struct Io(libc::c_int, libc::termios);
 pub fn play(input: &Input) -> Result<(), ()> {
     // Runtime storage
     let board = sync::Arc::new(sync::Mutex::new(DEFAULT_BOARD.clone()));
+    let mut stdin = io::stdin();
 
     // Closure called for program input
-    let stdin_reader = || -> Action {
+    let mut stdin_reader = || -> Action {
         // Read one byte from stdin
         let mut buffer = [0_u8; 1];
-        match io::stdin().read_exact(&mut buffer) {
+        match stdin.read_exact(&mut buffer) {
             Err(_) => Action::Shutdown,
             Ok(_) => Action::parse(buffer[0]),
         }
