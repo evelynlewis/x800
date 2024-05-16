@@ -43,29 +43,29 @@ pub struct Colour {
 impl Colour {
     /// Generate a colour based on a Tile's power-of-two
     pub const fn from_power(power: Power) -> Self {
-        match power {
+        let limited = power % 12;
+        match limited {
             // first, left-most column, upwards (ie. /|\)
             0..=2 => Colour {
-                row: 5 - (power * 2),
+                row: 5 - (limited * 2),
                 column: COLOUR_LEFT_COLUMN,
             },
             // top-most row (ie. '>->')
             3..=5 => Colour {
                 row: 0,
-                column: COLOUR_LEFT_COLUMN + ((power - 3) * 2),
+                column: COLOUR_LEFT_COLUMN + ((limited - 3) * 2),
             },
             // right-most column, downwards (ie. '\|/')
             6..=8 => Colour {
-                row: (power - 6) * 2,
+                row: (limited - 6) * 2,
                 column: COLOUR_RIGHT_COLUMN,
             },
             // bottom-most row (ie. '<-<')
             9..=11 => Colour {
                 row: 5,
-                column: COLOUR_RIGHT_COLUMN + ((power - 9) * 2),
+                column: COLOUR_RIGHT_COLUMN + ((limited - 9) * 2),
             },
-            // above is a cycle, so use modulus
-            _ => Self::from_power(power % 12),
+            _ => Self::from_power(0 as Power),
         }
     }
 }

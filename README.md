@@ -6,7 +6,7 @@ x800: [ɛks eɪt ˈhʌndrəd]
 
 2048 is played by merging a four-by-four grid of power-of-two tiles, to maximize the sum of resulting tile values.
 
-How fast? `x800` has a sustained update [rate](#shell-benchmark-intel-pentium-g3220t-at-260ghz-with-linux-65) of 7.1 million moves-per-second on a 2.6GHz Intel Pentium CPU from 2013.
+How fast? `x800` has a sustained update [rate](#shell-benchmark-intel-pentium-g3220t-at-260ghz-with-linux-65) of 7.2 million moves-per-second on a 2.6GHz Intel Pentium CPU from 2013.
 
 The project has few build dependencies. It doesn't use ncurses or an external Rust terminal library. It instead uses simple output buffering and standard [ANSI escape codes](https://en.wikipedia.org/wiki/ANSI_escape_code). The required POSIX-compatible [`libc`](https://docs.rs/libc/latest/libc/) Crate is part of Rust's standard library on POSIX targets. The only other build dependency is [`fastrand`](https://crates.io/crates/fastrand), a simple non-cryptographic pseudorandom number generator Crate without child dependencies.
 
@@ -119,19 +119,19 @@ These benchmarks require GNU `base32`, `tr`, `dd`, and a recent version of [`hyp
 
 ```sh
 ./util/hyperfine.sh
-    Finished release [optimized] target(s) in 0.02s
+    Finished `release` profile [optimized] target(s) in 0.02s
 Benchmark 1: ./target/release/x800
-  Time (mean ± σ):       1.1 ms ±   0.1 ms    [User: 0.8 ms, System: 0.1 ms]
-  Range (min … max):     1.0 ms …   1.3 ms    256 runs
+  Time (mean ± σ):       1.2 ms ±   0.1 ms    [User: 0.9 ms, System: 0.2 ms]
+  Range (min … max):     1.1 ms …   1.5 ms    256 runs
 ```
 
 #### `hyperfine` benchmark: M1 MacBook Air with MacOS 14
 
 ```sh
 ./util/hyperfine.sh
-    Finished release [optimized] target(s) in 0.01s
+    Finished `release` profile [optimized] target(s) in 0.01s
 Benchmark 1: ./target/release/x800
-  Time (mean ± σ):       1.2 ms ±   0.1 ms    [User: 0.5 ms, System: 0.4 ms]
+  Time (mean ± σ):       1.2 ms ±   0.1 ms    [User: 0.6 ms, System: 0.4 ms]
   Range (min … max):     1.1 ms …   1.4 ms    256 runs
 ```
 
@@ -150,9 +150,9 @@ Requires POSIX `sh`, and GNU `base32`, `dd`, `tr`, and `grep`.
 ```sh
 ./util/bench.sh
 Building x800 executable.
-    Finished release [optimized] target(s) in 0.01s
+    Finished `release` profile [optimized] target(s) in 0.02s
 Running benchmark for 16 seconds.
-113035264 bytes (113 MB, 108 MiB) copied, 16 s, 7.1 MB/s
+115048448 bytes (115 MB, 110 MiB) copied, 16 s, 7.2 MB/s
 ```
 
 ### Shell benchmark: M1 MacBook Air with MacOS 14
@@ -160,9 +160,9 @@ Running benchmark for 16 seconds.
 ```sh
 ./util/bench.sh
 Building x800 executable.
-    Finished release [optimized] target(s) in 0.01s
+    Finished `release` profile [optimized] target(s) in 0.01s
 Running benchmark for 16 seconds.
-103557120 bytes (104 MB, 99 MiB) copied, 16 s, 6.5 MB/s
+103841792 bytes (104 MB, 99 MiB) copied, 16 s, 6.5 MB/s
 ```
 
 ## Fuzzing
