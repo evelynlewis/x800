@@ -20,6 +20,6 @@
   SOFTWARE.
 */
 
-pub const STARTUP_FILE: &str = "fuzz/corpus/roger/3b1f7d2cbc8ece848e6f9fcc6bae872ac76205cf";
-pub const GOLD_FILE: &str = "fuzz/corpus/roger/33ea786d65e874584306964b003a95b2a220b325";
-pub const SHORT_FILE: &str = "fuzz/corpus/roger/7d2ca7968b912b1fbaad341bdbe1bd91201d4f66";
+pub const STARTUP_FILE: &str = "fuzz/corpus/roger/f970f537217cf67c21806a303fa45d451c973575";
+pub const GOLD_FILE: &str = "fuzz/corpus/roger/0a4ef05b451f08cd3d96caa83ac18104aa140c0e";
+pub const SHORT_FILE: &str = "fuzz/corpus/roger/efe240b9fc5991028128218fdb750881c0772fe4";

@@ -32,6 +32,7 @@
 set -e
 
 xcall() {
+    sh -cx "cargo clean"
     sh -cx "$*"
 }
 
@@ -59,7 +60,7 @@ echo ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 echo "Now validating docs"
 echo
-xcall cargo doc
+xcall cargo doc --document-private-items
 echo "OK"
 echo ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
