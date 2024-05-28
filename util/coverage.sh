@@ -31,6 +31,7 @@ set -e
 # Ensure correct working directory
 test -d ./util/
 test -d ./fuzz/
+test -f Cargo.toml
 
 # shellcheck disable=SC1091
 . util/fenv.sh
@@ -46,6 +47,9 @@ echo "Using corpus directory: '${CORPUS}'"
 DEPS="rustfilt cargo-fuzz"
 # shellcheck disable=SC2086
 cargo install --quiet ${DEPS}
+
+# Remove old coverage files
+rm -rf ./fuzz/coverage/
 
 # Build fuzz target and generate coverage
 # shellcheck disable=SC2086
