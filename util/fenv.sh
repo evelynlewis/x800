@@ -35,13 +35,27 @@ FUZZER_NAME="roger"
 
 # shellcheck disable=SC2034
 FUZZER_BUILD_ARGS="\
-	--sanitizer none\
-	--release\
+--sanitizer none \
+--release \
+${EXTRA_FUZZER_BUILD_ARGS} \
 "
 
 # shellcheck disable=SC2034
 FUZZER_RUN_ARGS="\
-	-dict=./fuzz/dictionary.txt\
-	-max_len=8192\
-	-use_value_profile=1\
+-dict=./fuzz/dictionary.txt \
+-max_len=8192 \
+-use_value_profile=1 \
+${EXTRA_FUZZER_RUN_ARGS} \
 "
+
+# Do a blocking build
+fuzz_build() {
+	# shellcheck disable=SC2086
+	cargo fuzz build "$@" ${FUZZER_BUILD_ARGS} "${FUZZER_NAME}"
+}
+
+# Run fuzzer using cargo-fuzz
+fuzz_run() {
+	# shellcheck disable=SC2086
+	cargo fuzz run "$@" ${FUZZER_BUILD_ARGS} "${FUZZER_NAME}" -- ${FUZZER_RUN_ARGS}
+}

@@ -33,5 +33,12 @@ set -e
 # shellcheck disable=SC1091
 . util/fenv.sh
 
+MAIN_DIR="./fuzz/corpus/roger/"
+ARCHIVE_DIR="./fuzz/corpus/roger-archive/"
+
+# Archive before cmin
+mkdir -p "${MAIN_DIR}" "${ARCHIVE_DIR}"
+rsync -av "${MAIN_DIR}" "${ARCHIVE_DIR}"
+
 # shellcheck disable=SC2086
 cargo fuzz cmin ${FUZZER_BUILD_ARGS} "${FUZZER_NAME}" "$@" -- ${FUZZER_RUN_ARGS}
