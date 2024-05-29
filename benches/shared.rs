@@ -21,5 +21,5 @@
 */
 
 pub const STARTUP_FILE: &str = "fuzz/corpus/roger/f970f537217cf67c21806a303fa45d451c973575";
-pub const GOLD_FILE: &str = "fuzz/corpus/roger/0a4ef05b451f08cd3d96caa83ac18104aa140c0e";
+pub const GOLD_FILE: &str = "fuzz/corpus/roger/e554601613daf929020eedba40b3d16d8b59a916";
 pub const SHORT_FILE: &str = "fuzz/corpus/roger/efe240b9fc5991028128218fdb750881c0772fe4";
