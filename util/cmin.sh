@@ -30,15 +30,29 @@
 #
 set -e
 
-# shellcheck disable=SC1091
-. util/fenv.sh
+set -ex
+test -d ./fuzz
+test -d ./util
 
 MAIN_DIR="./fuzz/corpus/roger/"
 ARCHIVE_DIR="./fuzz/corpus/roger-archive/"
+TMP_DIR="./fuzz/corpus/roger-tmp/"
 
-# Archive before cmin
 mkdir -p "${MAIN_DIR}" "${ARCHIVE_DIR}"
-rsync -av "${MAIN_DIR}" "${ARCHIVE_DIR}"
+rsync -a "${MAIN_DIR}" "${ARCHIVE_DIR}"
 
-# shellcheck disable=SC2086
-cargo fuzz cmin ${FUZZER_BUILD_ARGS} "${FUZZER_NAME}" "$@" -- ${FUZZER_RUN_ARGS}
+rm -rf "${TMP_DIR}"
+rsync -a "${MAIN_DIR}" "${TMP_DIR}"
+
+# Clean out main dir
+rm -rf "${MAIN_DIR}"
+mkdir -p "${MAIN_DIR}"
+
+# Merge corpus directories
+export EXTRA_FUZZER_RUN_ARGS="-merge=1 ${MAIN_DIR} ${TMP_DIR}"
+
+# shellcheck disable=SC1091
+. util/fenv.sh
+
+# Merge all corpus directories
+fuzz_run "$@"
