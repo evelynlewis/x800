@@ -28,7 +28,6 @@
 # usage:
 # ./util/merge.sh
 #
-
 set -ex
 test -d ./fuzz
 test -d ./util
@@ -37,13 +36,14 @@ MAIN_DIR="./fuzz/corpus/roger/"
 ARCHIVE_DIR="./fuzz/corpus/roger-archive/"
 
 mkdir -p "${MAIN_DIR}" "${ARCHIVE_DIR}"
-rsync -av "${MAIN_DIR}" "${ARCHIVE_DIR}"
+rsync -av "${MAIN_DIR}" "$@" "${ARCHIVE_DIR}"
 
 # Merge corpus directories
-export EXTRA_FUZZER_RUN_ARGS="-merge=1 ${MAIN_DIR} ${ARCHIVE_DIR}"
+# shellcheck disable=SC2034
+EXTRA_FUZZER_RUN_ARGS="-merge=1 ${MAIN_DIR} ${ARCHIVE_DIR} $*"
 
 # shellcheck disable=SC1091
 . util/fenv.sh
 
 # Merge all corpus directories
-fuzz_run "$@"
+fuzz_run

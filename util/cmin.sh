@@ -26,11 +26,10 @@
 # Minimize fuzzer coverage
 #
 # usage:
-# ./util/cmin.sh
+# ./util/cmin.sh [DIR]
 #
-set -e
-
 set -ex
+
 test -d ./fuzz
 test -d ./util
 
@@ -49,10 +48,11 @@ rm -rf "${MAIN_DIR}"
 mkdir -p "${MAIN_DIR}"
 
 # Merge corpus directories
-export EXTRA_FUZZER_RUN_ARGS="-merge=1 ${MAIN_DIR} ${TMP_DIR}"
+# shellcheck disable=SC2034
+EXTRA_FUZZER_RUN_ARGS="-merge=1 ${MAIN_DIR} ${TMP_DIR}"
 
 # shellcheck disable=SC1091
 . util/fenv.sh
 
 # Merge all corpus directories
-fuzz_run "$@"
+fuzz_run
