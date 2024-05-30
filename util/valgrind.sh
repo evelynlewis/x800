@@ -39,7 +39,7 @@ if ! test -d fuzz; then
 	exit 1
 fi
 
-# shellcheck disable=SC1091
+# shellcheck source=fenv.sh
 . util/fenv.sh
 
 cargo fuzz build --release --sanitizer none roger

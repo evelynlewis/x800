@@ -1,5 +1,3 @@
-# shellcheck disable=SC2148
-
 # MIT License
 #
 # Copyright (c) 2024 Evelyn Lewis
@@ -30,17 +28,16 @@
 # . fenv.sh
 #
 
-# shellcheck disable=SC2034
+# shellcheck shell=sh
+
 FUZZER_NAME="roger"
 
-# shellcheck disable=SC2034
 FUZZER_BUILD_ARGS="\
 --sanitizer none \
 --release \
 ${EXTRA_FUZZER_BUILD_ARGS} \
 "
 
-# shellcheck disable=SC2034
 FUZZER_RUN_ARGS="\
 -dict=./fuzz/dictionary.txt \
 -max_len=8192 \
@@ -58,4 +55,10 @@ fuzz_build() {
 fuzz_run() {
 	# shellcheck disable=SC2086
 	cargo fuzz run "$@" ${FUZZER_BUILD_ARGS} "${FUZZER_NAME}" -- ${FUZZER_RUN_ARGS}
+}
+
+# Run fuzzer using cargo-fuzz
+fuzz_check() {
+	# shellcheck disable=SC2086
+	cargo fuzz run ${FUZZER_BUILD_ARGS} "${FUZZER_NAME}" "$@"
 }

@@ -57,7 +57,7 @@ else
 fi
 
 # Setup fuzzer environment variables
-# shellcheck disable=SC1091
+# shellcheck source=fenv.sh
 . ./util/fenv.sh
 WARMUP_DURATION="4"
 

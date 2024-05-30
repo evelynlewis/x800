@@ -40,7 +40,7 @@ else
 	OUT="$1"
 fi
 
-# shellcheck disable=SC1091
+# shellcheck source=compat.sh
 . ./util/compat.sh
 # Setup tools
 BASE32=$(compat base32)

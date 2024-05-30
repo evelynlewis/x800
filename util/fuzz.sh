@@ -32,7 +32,7 @@
 set -e
 trap '' HUP
 
-# shellcheck disable=SC1091
+# shellcheck source=fenv.sh
 . ./util/fenv.sh
 
 test -d ./fuzz

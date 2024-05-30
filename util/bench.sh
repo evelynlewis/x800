@@ -31,7 +31,7 @@
 set -e
 
 # source environmental compatibility script
-# shellcheck disable=SC1091
+# shellcheck source=compat.sh
 . ./util/compat.sh
 
 # Setup tools

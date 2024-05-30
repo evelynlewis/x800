@@ -35,8 +35,7 @@ set -e
 BIN='x800'
 prompt() {
 	# Wait for user input before quitting
-	# shellcheck disable=SC2034
-	read -r INPUT
+	read -r _
 }
 
 if ! command -v "${BIN}"; then

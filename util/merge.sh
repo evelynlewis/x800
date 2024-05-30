@@ -39,11 +39,10 @@ mkdir -p "${MAIN_DIR}" "${ARCHIVE_DIR}"
 rsync -av "${MAIN_DIR}" "$@" "${ARCHIVE_DIR}"
 
 # Merge corpus directories
-# shellcheck disable=SC2034
-EXTRA_FUZZER_RUN_ARGS="-merge=1 ${MAIN_DIR} ${ARCHIVE_DIR} $*"
-
-# shellcheck disable=SC1091
-. util/fenv.sh
+# shellcheck source=fenv.sh
+EXTRA_FUZZER_RUN_ARGS="-merge=1 ${MAIN_DIR} ${ARCHIVE_DIR} $*" \
+    . util/fenv.sh
 
 # Merge all corpus directories
+# shellcheck disable=SC2119
 fuzz_run
