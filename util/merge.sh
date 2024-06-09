@@ -23,7 +23,7 @@
 # SOFTWARE.
 
 #
-# Start roger fuzzer in mini mode`
+# Merge archive corpus with main corpus
 #
 # usage:
 # ./util/merge.sh
