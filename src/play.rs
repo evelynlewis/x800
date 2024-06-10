@@ -65,6 +65,7 @@ fn io_config(input: &Input) -> Option<Io> {
 
 /// Defines input mode
 #[allow(dead_code)]
+#[derive(PartialEq, Eq)]
 pub enum Input<'a> {
     Slice(&'a [u8]),
     Interactive,
@@ -80,13 +81,23 @@ pub fn play(input: &Input) -> Result<(), ()> {
     let board = sync::Arc::new(sync::Mutex::new(DEFAULT_BOARD.clone()));
     let mut stdin = io::stdin();
 
+    // Game save setup
+    #[cfg(feature = "save")]
+    let mut save: Vec<u8> = Vec::with_capacity(2048);
+    #[cfg(feature = "save")]
+    save.extend(fastrand::get_seed().to_ne_bytes());
+
     // Closure called for program input
     let mut stdin_reader = || -> Action {
         // Read one byte from stdin
         let mut buffer = [0_u8; 1];
         match stdin.read_exact(&mut buffer) {
             Err(_) => Action::Shutdown,
-            Ok(_) => Action::parse(buffer[0]),
+            Ok(_) => {
+                #[cfg(feature = "save")]
+                save.push(buffer[0]);
+                Action::parse(buffer[0])
+            }
         }
     };
 
@@ -191,6 +202,16 @@ pub fn play(input: &Input) -> Result<(), ()> {
         unsafe {
             libc::tcsetattr(io.0, libc::TCSANOW, &io.1);
         }
+    }
+
+    // All game activity must be done prior
+    #[cfg(feature = "save")]
+    if *input == Input::Interactive {
+        let name = format!("x800-game-save-{}.bin", fastrand::u64(..));
+        let mut save_file = std::fs::File::create(name).expect("Failed to open save file");
+        save_file
+            .write(&save)
+            .expect("Failed to write game save file");
     }
 
     Ok(())
