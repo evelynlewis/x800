@@ -20,29 +20,33 @@
   SOFTWARE.
 */
 
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
+use divan::{black_box, Bencher};
 use std::fs;
 use x800::one_shot;
 
 mod shared;
-
-pub fn timed_startup(c: &mut Criterion) {
-    timed_file(c, shared::STARTUP_FILE, "startup file");
+#[divan::bench]
+pub fn timed_startup(c: Bencher) {
+    timed_file(c, shared::STARTUP_FILE);
 }
 
-pub fn timed_short(c: &mut Criterion) {
-    timed_file(c, shared::SHORT_FILE, "short file");
+#[divan::bench]
+pub fn timed_short(c: Bencher) {
+    timed_file(c, shared::SHORT_FILE);
 }
 
-pub fn timed_gold(c: &mut Criterion) {
-    timed_file(c, shared::GOLD_FILE, "gold file");
+#[divan::bench]
+pub fn timed_gold(c: Bencher) {
+    timed_file(c, shared::GOLD_FILE);
 }
 
 #[inline(always)]
-fn timed_file(c: &mut Criterion, file: &str, id: &str) {
+fn timed_file(c: Bencher, file: &str) {
     let content = fs::read(file).unwrap();
-    c.bench_function(id, |b| b.iter(|| one_shot(black_box(&content))));
+    c.bench(|| one_shot(black_box(&content)));
 }
 
-criterion_group!(benches, timed_startup, timed_short, timed_gold);
-criterion_main!(benches);
+fn main() {
+    // Run registered benchmarks.
+    divan::main();
+}
