@@ -21,8 +21,8 @@
 */
 
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
-use roger::one_shot;
 use std::fs;
+use x800::one_shot;
 
 mod shared;
 

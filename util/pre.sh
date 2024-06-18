@@ -52,6 +52,24 @@ xcall cargo build
 echo "OK"
 echo ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+echo "Now validating build with sink feature"
+echo
+xcall cargo build --features sink
+echo "OK"
+echo ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+echo "now validating build with mini feature"
+echo
+xcall cargo build --features mini
+echo "ok"
+echo ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+echo "now validating build with save feature"
+echo
+xcall cargo build --features save
+echo "ok"
+echo ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 echo "Now validating test"
 echo
 xcall cargo test

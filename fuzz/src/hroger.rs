@@ -20,10 +20,8 @@
   SOFTWARE.
 */
 
-mod shared;
-
 fn main() {
     loop {
-        honnggfuzz::fuzz!(|data: &[u8]| { shared::one_shot(data) });
+        honnggfuzz::fuzz!(|data: &[u8]| { x800::one_shot(data) });
     }
 }

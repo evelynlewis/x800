@@ -40,7 +40,7 @@ pub fn count_gold() {
 #[inline(always)]
 fn count_file(file: &str) {
     let content = fs::read(file).unwrap();
-    roger::one_shot(black_box(&content));
+    x800::one_shot(black_box(&content));
 }
 
 iai::main!(count_startup, count_short, count_gold);

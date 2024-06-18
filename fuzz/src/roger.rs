@@ -23,7 +23,6 @@
 #![no_main]
 #[macro_use]
 extern crate libfuzzer_sys;
-mod shared;
 
 // Call the shared fuzz driver
-fuzz_target!(|data: &[u8]| shared::one_shot(data));
+fuzz_target!(|data: &[u8]| x800::one_shot(data));

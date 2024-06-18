@@ -42,10 +42,3 @@ path = "src/hroger.rs"
 test = false
 doc = false
 bench = false
-
-[lib]
-name = "roger"
-path = "src/shared.rs"
-test = false
-doc = false
-bench = false

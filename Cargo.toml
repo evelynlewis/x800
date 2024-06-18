@@ -15,6 +15,10 @@ readme = "README.md"
 name = "x800"
 path = "src/bin.rs"
 
+[[bin]]
+name = "ryan"
+path = "src/ryan/bin.rs"
+
 [lib]
 name = "x800"
 path = "src/lib.rs"
@@ -41,7 +45,6 @@ strip = "symbols"
 [dev-dependencies]
 criterion = { version = "0.5.1", default-features = false }
 iai = { version = "0.1.1", default-features = false }
-roger = { path = "fuzz" }
 x800 = { path = ".", features = ["sink"] }
 
 [features]
