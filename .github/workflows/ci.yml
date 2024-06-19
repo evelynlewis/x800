@@ -44,9 +44,9 @@ jobs:
         run: |
           echo "Running hyperfine benchmark"
           ./util/hyperfine.sh
-      - name: Criterion benchmarks
+      - name: Timed benchmarks
         run: |
-          echo "Running criterion benchmarks"
+          echo "Running timed benchmarks"
           cargo bench --bench timed
       - name: Iai benchmarks
         run: |

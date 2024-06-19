@@ -40,9 +40,19 @@ echo ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 echo "Starting pre-flight validation"
 echo ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 echo "Now validating environment"
-echo
 test -d ./fuzz
 test -d ./util
+echo "OK"
+echo ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+echo "Now validating git"
+if [ $(git status --porcelain=v1 2>/dev/null | wc -l) -ne 0 ]; then
+	echo "ERROR: untracked files:"
+	echo
+	git status
+	echo
+	exit 1
+fi
 echo "OK"
 echo ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -61,13 +71,13 @@ echo ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 echo "now validating build with mini feature"
 echo
 xcall cargo build --features mini
-echo "ok"
+echo "OK"
 echo ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 echo "now validating build with save feature"
 echo
 xcall cargo build --features save
-echo "ok"
+echo "OK"
 echo ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 echo "Now validating test"
@@ -82,8 +92,8 @@ xcall cargo doc --document-private-items
 echo "OK"
 echo ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-# Build and run criterion benchmarks
-echo "Now validating criterion benchmarks"
+# Build and run timed benchmarks
+echo "Now validating timed benchmarks"
 echo
 xcall cargo bench --bench timed
 echo "OK"
