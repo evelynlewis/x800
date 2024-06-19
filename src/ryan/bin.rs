@@ -20,6 +20,9 @@
   SOFTWARE.
 */
 
+// Include README.md docs inline
+#![doc = include_str!("./README.md")]
+
 use std::env;
 use std::fs;
 use std::path;
@@ -30,7 +33,16 @@ use x800::one_shot;
 fn main() {
     let args: Vec<String> = env::args().collect();
     let usage = || {
-        println!("usage:\n    {} FILE [COUNT]", args[0]);
+        println!(
+            "
+usage:
+    {bin} FILE [COUNT]
+
+    FILE: an x800 save file
+    COUNT: number of loops
+",
+            bin = args[0]
+        );
     };
     let error = |msg: String| -> ! {
         println!("{bin}: ERROR: {msg}", bin = args[0]);
