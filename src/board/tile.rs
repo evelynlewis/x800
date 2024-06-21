@@ -31,6 +31,7 @@ use super::constants::{
     BOARD_AREA, BOARD_DIMENSION, BOTTOM_EDGE, BOTTOM_LEFT_CORNER, BOTTOM_RIGHT_CORNER, EMPTY_TILE,
     LEFT_EDGE, LEFT_SPACE, RIGHT_EDGE, TOP_EDGE, TOP_LEFT_CORNER, TOP_RIGHT_CORNER,
 };
+use super::TileIndex;
 use crate::colour::Colour;
 use std::fmt;
 use std::ops;
@@ -62,23 +63,31 @@ pub enum Tile {
     Corner(Corner),
 }
 
-/// Unit tuple containing all [`Tile`]
+/// A [`Tile::Empty`] [`Tile`] is the [`Default`]
+impl Default for Tile {
+    fn default() -> Self {
+        Self::Empty()
+    }
+}
+
 #[derive(Clone)]
 pub struct Tiles(pub [Tile; BOARD_AREA]);
 
-impl ops::Index<(usize, usize)> for Tiles {
+impl ops::Index<TileIndex> for Tiles {
     /// The [`Tiles`] structure contains [`Tile`] structs
     type Output = Tile;
 
     /// Return a non-mutable reference to a [`Tile`] element of [`Tiles`]
-    fn index(&self, index: (usize, usize)) -> &Self::Output {
+    #[inline]
+    fn index(&self, index: TileIndex) -> &Self::Output {
         &(self.0[index.0 * BOARD_DIMENSION + index.1])
     }
 }
 
-impl ops::IndexMut<(usize, usize)> for Tiles {
+impl ops::IndexMut<TileIndex> for Tiles {
     /// Return a mutable reference to a [`Tile`] element of [`Tiles`]
-    fn index_mut(&mut self, index: (usize, usize)) -> &mut Self::Output {
+    #[inline]
+    fn index_mut(&mut self, index: TileIndex) -> &mut Self::Output {
         &mut (self.0[index.0 * BOARD_DIMENSION + index.1])
     }
 }

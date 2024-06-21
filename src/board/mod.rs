@@ -22,7 +22,7 @@
 
 //! Data structures and functions needed to implement the x800 board
 
-use std::{cmp, collections};
+use std::{cmp, collections, mem};
 
 pub mod constants;
 use constants::{END_OF_GAME_CHARACTER, NUMBER_TILES_RANGE};
@@ -30,6 +30,12 @@ mod draw;
 pub use draw::draw;
 pub mod tile;
 use tile::{Generation, Tile};
+
+/// A row-major [`Tile`] index
+type TileIndex = (usize, usize);
+
+/// ScanPair.0 is the current
+type ScanPair = (TileIndex, TileIndex);
 
 #[derive(Clone)]
 pub struct Board {
@@ -73,7 +79,10 @@ impl Board {
         self.open_tiles != 0
     }
 
-    fn pair(major: usize, minor: usize, direction: Direction) -> ((usize, usize), (usize, usize)) {
+    #[inline]
+    /// Adjacent tiles have a difference of plus or minus 1 in their minor indexes and have the same major index.
+    /// Direction determines the choice of major and minor axis, and if the second [`ScanPair`] element is one more or less that the first.
+    fn pair(major: usize, minor: usize, direction: Direction) -> ScanPair {
         match direction {
             Direction::Left => ((major, minor), (major, minor + 1)),
             Direction::Right => ((major, minor), (major, minor - 1)),
@@ -82,6 +91,9 @@ impl Board {
         }
     }
 
+    /// Pick up slack between adjacent tiles in a given major axis (row or column).
+    /// See [`Board::pair`].
+    #[inline(always)]
     fn collect(
         &mut self,
         major: usize,
@@ -97,22 +109,25 @@ impl Board {
                 false
             }
             Tile::Number(_, _) => {
-                if !empty_queue.is_empty() {
+                if empty_queue.is_empty() {
+                    false
+                } else {
                     let index = empty_queue.pop_front().expect("Bad queue");
 
-                    self.tiles[index] = self.tiles[current];
-                    self.tiles[current] = Tile::Empty();
+                    // Move current Tile into the popped index and replace it with an empty one
+                    // This is more efficient than the manual version
+                    self.tiles[index] = mem::take(&mut self.tiles[current]);
 
                     empty_queue.push_back(current);
                     true
-                } else {
-                    false
                 }
             }
             Tile::Corner(_) | Tile::Edge(_) => false,
         }
     }
 
+    /// Merge two adjacent tiles which have collided on the wall side (ie. opposite the direction of movement).
+    /// See [`Board::pair`].
     #[inline(always)]
     fn merge(
         &mut self,
@@ -155,6 +170,7 @@ impl Board {
         }
     }
 
+    /// Update the [`Board`], given a move [`Direction`] and [`Generation`], and its current state.
     #[inline(always)]
     pub fn update(
         &mut self,
@@ -226,7 +242,7 @@ impl Board {
         // Brute force isn't great, but it's an exceptionally small board (about 16 loops maximum)
         for r in NUMBER_TILES_RANGE {
             for c in NUMBER_TILES_RANGE {
-                if (self.tiles[(r, c)]) == Tile::Empty() {
+                if self.tiles[(r, c)] == Tile::Empty() {
                     if cursor == insert_index {
                         self.tiles[(r, c)] = Tile::Number(insert_value, generation);
                         self.open_tiles -= 1;
