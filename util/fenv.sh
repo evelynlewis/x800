@@ -40,7 +40,7 @@ ${EXTRA_FUZZER_BUILD_ARGS} \
 
 FUZZER_RUN_ARGS="\
 -dict=./fuzz/dictionary.txt \
--max_len=8192 \
+-max_len=32768 \
 -use_value_profile=1 \
 ${EXTRA_FUZZER_RUN_ARGS} \
 "
