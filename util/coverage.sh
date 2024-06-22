@@ -43,6 +43,17 @@ if [ "$#" != 0 ]; then
 fi
 echo "Using corpus directory: '${CORPUS}'"
 
+# Use HTML mode when invoked as such
+USE_HTML=0
+NAME="$(basename "$0")"
+HTML_BIN_NAME="htmlcov.sh"
+HTML_OUT_FILE="fuzz/target/roger.html"
+HTML_ARGS=""
+if [ "${NAME}" = "${HTML_BIN_NAME}" ]; then
+	USE_HTML=1
+	HTML_ARGS="-format=html"
+fi
+
 # Install dependencies
 DEPS="rustfilt cargo-fuzz"
 # shellcheck disable=SC2086
@@ -68,10 +79,17 @@ wrap_llvm_cov() {
 		-ignore-filename-regex='.cargo' \
 		-ignore-filename-regex='/rustc/.+' \
 		-use-color \
-		-instr-profile="${COVERAGE}"
+		-instr-profile="${COVERAGE}" \
+		"${HTML_ARGS}"
 }
 
-# Show coverage
-wrap_llvm_cov show
-# Generate report
-wrap_llvm_cov report
+if [ "${USE_HTML}" ]; then
+	# Save coverage to output file
+	wrap_llvm_cov show >"${HTML_OUT_FILE}"
+	echo "Saved coverage output in HTML format to ${HTML_OUT_FILE}"
+else
+	# Print coverage plaintext to terminal
+	wrap_llvm_cov show
+	# Print coverage report (summary) to terminal
+	wrap_llvm_cov report
+fi
