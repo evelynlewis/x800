@@ -36,10 +36,10 @@ fn main() {
         println!(
             "
 usage:
-    {bin} FILE [COUNT]
+    {bin} FILE [LOOPS]
 
-    FILE: an x800 save file
-    COUNT: number of loops
+    FILE: path to x800 save
+    LOOPS: iterate LOOPS times
 ",
             bin = args[0]
         );
@@ -54,8 +54,9 @@ usage:
     let count;
     match len {
         0 | 1 => {
+            assert_eq!(WANT_ARG_COUNT, 1);
             error(format!(
-                "Need at least {WANT_ARG_COUNT} arguments, but {} arguments found",
+                "Needs {WANT_ARG_COUNT} arguments or more: {} arguments found",
                 len - 1
             ));
         }
@@ -64,7 +65,9 @@ usage:
         }
         3.. => match args[2].parse::<usize>() {
             Err(_) => {
-                error(format!("Failed to parse numeric COUNT"));
+                error(format!(
+                    "Bad optional LOOPS argunent: need positive integer"
+                ));
             }
             Ok(n) => count = n,
         },

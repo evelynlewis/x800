@@ -32,87 +32,79 @@
 set -e
 
 xcall() {
-    sh -cx "cargo clean"
-    sh -cx "$*"
+	sh -cx "cargo clean"
+	sh -cx "$*"
 }
 
-echo ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+test -d ./util/
+# shellcheck source=common.sh
+. ./util/common.sh
+
+plus_line
 echo "Starting pre-flight validation"
-echo ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-echo "Now validating environment"
+plus_line
+echo
+
+plus_header "Now validating environment"
 test -d ./fuzz
 test -d ./util
-echo "OK"
-echo ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+plus_ok
 
-echo "Now validating git"
-if [ $(git status --porcelain=v1 2>/dev/null | wc -l) -ne 0 ]; then
+plus_header "Now validating git"
+if [ "$(git status --porcelain=v1 2>/dev/null | wc -l)" -ne 0 ]; then
 	echo "ERROR: untracked files:"
 	echo
 	git status
 	echo
 	exit 1
 fi
-echo "OK"
-echo ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+plus_ok
 
-echo "Now validating build"
-echo
+plus_header "Now validating build"
 xcall cargo build
-echo "OK"
-echo ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+plus_ok
 
-echo "Now validating build with sink feature"
-echo
+plus_header "Now validating build with sink feature"
 xcall cargo build --features sink
-echo "OK"
-echo ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+plus_ok
 
-echo "now validating build with mini feature"
-echo
+plus_header "Now validating build with mini feature"
 xcall cargo build --features mini
-echo "OK"
-echo ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+plus_ok
 
-echo "now validating build with save feature"
-echo
+plus_header "Now validating build with save feature"
 xcall cargo build --features save
-echo "OK"
-echo ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+plus_ok
 
-echo "Now validating test"
-echo
+plus_header "Now validating test"
 xcall cargo test
-echo "OK"
-echo ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+plus_ok
 
-echo "Now validating docs"
-echo
+plus_header "Now validating docs"
 xcall cargo doc --document-private-items
-echo "OK"
-echo ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+plus_ok
 
 # Build and run timed benchmarks
-echo "Now validating timed benchmarks"
-echo
+plus_header "Now validating timed benchmarks"
 xcall cargo bench --bench timed
-echo "OK"
-echo ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+plus_ok
+
+# Build and run hyperfine benchmarks
+plus_header "Now validating hyperfine benchmarks"
+xcall ./util/hyperfine.sh
+plus_ok
 
 # Run fuzzer on known inputs
-echo "Now validating fuzzer in default mode"
-echo
+plus_header "Now validating fuzzer in default mode"
 xcall cargo fuzz run roger --sanitizer none --release -- -runs=0
-echo "OK"
-echo ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+plus_ok
 
-echo "Now validating fuzzer in mini mode"
+plus_header "Now validating fuzzer in mini mode"
 xcall cargo fuzz run roger --sanitizer none --release --features mini -- -runs=0
-echo "OK"
-echo ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-echo
+plus_ok
 
-echo ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+echo
+plus_line
 echo "ALL OK"
 echo "Passed all pre-flight validation"
-echo ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+plus_line

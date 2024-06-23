@@ -4,15 +4,15 @@
 
 ```sh
 usage:
-    ryan FILE [COUNT]
+    ryan FILE [LOOPS]
 
-    FILE: an x800 save file
-    COUNT: number of loops
+    FILE: path to x800 save
+    LOOPS: iterate LOOPS times
 ```
 
 Given some `x800` save file `FILE`, `ryan` will run a deterministic `x800` game using the contents of `FILE`.
 
-The optional `COUNT` argument runs complete games using the contents of `FILE` repeatedly, `COUNT` times.
+The optional `LOOPS` argument runs complete games using the contents of `FILE` repeatedly, `LOOPS` times.
 
 ### Example
 
