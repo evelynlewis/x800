@@ -28,10 +28,10 @@ use std::fs;
 use std::path;
 use std::process;
 
-use x800::one_shot;
-
 fn main() {
-    let args: Vec<String> = env::args().collect();
+    // Used in debug messages
+    let bin_name = || env::args().nth(0).expect("Failed to get binary name");
+    // Print program usage message
     let usage = || {
         println!(
             "
@@ -39,52 +39,60 @@ usage:
     {bin} FILE [LOOPS]
 
     FILE: path to x800 save
-    LOOPS: iterate LOOPS times
-",
-            bin = args[0]
+    LOOPS: iterate LOOPS times",
+            bin = bin_name()
         );
     };
+    // Fatal error handler
     let error = |msg: String| -> ! {
-        println!("{bin}: ERROR: {msg}", bin = args[0]);
+        println!("{bin}: ERROR: {msg}", bin = bin_name());
         usage();
         process::exit(1);
     };
+
+    // The usable command-line arguments. argv[0] is the binary name, so skip it.
+    let args: Vec<String> = env::args().skip(1).collect();
+
+    // Command-line parsing bookkeeping
     const WANT_ARG_COUNT: usize = 1;
     let len = args.len();
-    let count;
+    let loops;
+
     match len {
-        0 | 1 => {
+        0 => {
             assert_eq!(WANT_ARG_COUNT, 1);
             error(format!(
-                "Needs {WANT_ARG_COUNT} arguments or more: {} arguments found",
-                len - 1
+                "Need at least {WANT_ARG_COUNT} arguments, but {} found",
+                len
             ));
         }
-        2 => {
-            count = 1;
+        1 => {
+            loops = 1;
         }
-        3.. => match args[2].parse::<usize>() {
+        2.. => match args[1].parse::<usize>() {
             Err(_) => {
                 error(format!(
-                    "Bad optional LOOPS argunent: need positive integer"
+                    "Bad LOOPS argument '{}': need positive integer",
+                    args[1]
                 ));
             }
-            Ok(n) => count = n,
+            Ok(n) => loops = n,
         },
     }
-    let name = path::Path::new(&args[1]);
+
+    // The input file
+    let name = path::Path::new(&args[0]);
     let contents = fs::read(name);
     match contents {
         Err(e) => {
-            error(format!(
-                "Failed to read file: {}\nError: {}",
-                name.display(),
-                e
-            ));
+            error(format!("Failed to read FILE '{}': {}", name.display(), e));
         }
         Ok(d) => {
-            for _ in 0..count {
-                one_shot(&d);
+            // Repeat `loops` times
+            for _ in 0..loops {
+                // Run x800 with the file contents
+                // Use `black_box` to avoid optimizing away the loop
+                std::hint::black_box(x800::one_shot(&d));
             }
         }
     }

@@ -51,7 +51,7 @@ plus_ok
 
 GOLD_FILE="$(realpath ./fuzz/corpus/roger/gold)"
 GOLD_LOOPS="1000"
-plus_header "Running gold file"
+plus_header "Running with gold file input"
 echo "Size, resolved path, and loop count are:"
 printf "%s %s\n\n" "$(du -sh "${GOLD_FILE}")" "${GOLD_LOOPS}"
 
