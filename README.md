@@ -1,4 +1,4 @@
-# `x800`: A fast and portable 2048 for POSIX
+# `x800`: a fast and portable 2048 for POSIX
 
 x800: [ɛks eɪt ˈhʌndrəd]
 
@@ -6,11 +6,9 @@ x800: [ɛks eɪt ˈhʌndrəd]
 
 2048 is played by merging a four-by-four grid of power-of-two tiles, to maximize the sum of resulting tile values.
 
-How fast? With board rendering enabled and live-generated random input moves, `x800` has a sustained update [rate](#shell-benchmark-intel-pentium-g3220t-at-260ghz-with-linux-65) of 7.5 million moves-per-second on a 2.6GHz Intel Pentium CPU from 2013.
+How fast? With live-generated random input moves derived from `/dev/urandom`, `x800` has a sustained update [rate](#shell-benchmark-intel-pentium-g3220t-at-260ghz-with-linux-65) of 7.5 million moves-per-second on a relatively slow 2.6GHz Intel Pentium CPU from 2013, running Linux. Providing a large known-good input improves results. The Pentium can play 4300 complete loops of a high-scoring four thousand move game in under a second. This gives an effective throughput of 16 million moves-per-second. The same benchmark on an M1 MacBook Air running MacOS gives 35 million moves-per-second. These result can be replicated using [`util/rbench.sh`](./util/rbench.sh).
 
-Providing a large known-good input improves results. The Pentium can play 4300 loops of a high-scoring 4000 move game in under a second. This gives an effective throughput of 16 million moves-per-second. The same benchmark on an M1 MacBook Air running MacOS gives 35 million moves-per-second. See also [`util/rbench.sh`](./util/rbench.sh).
-
-The project has few build dependencies. It doesn't use ncurses or an external Rust terminal library. It instead uses simple output buffering and standard [ANSI escape codes](https://en.wikipedia.org/wiki/ANSI_escape_code). The required POSIX-compatible [`libc`](https://docs.rs/libc/latest/libc/) Crate is part of Rust's standard library on POSIX targets. The only other build dependency is [`fastrand`](https://crates.io/crates/fastrand), a simple non-cryptographic pseudorandom number generator Crate without child dependencies.
+The project has few build dependencies. It doesn't use ncurses or an external Rust terminal library. It instead uses simple output buffering and standard [ANSI escape codes](https://en.wikipedia.org/wiki/ANSI_escape_code). The required POSIX-compatible [`libc`](https://docs.rs/libc/latest/libc/) crate is part of Rust's standard library on POSIX targets. The only other build dependency is [`fastrand`](https://crates.io/crates/fastrand), a simple non-cryptographic pseudorandom number generator crate without child dependencies.
 
 The project started in part as a hands-on spike project for the author to learn [Rust](https://rust-lang.org) as a systems software developer experienced in C and C++. The name `x800` is the number 2048 in base sixteen, modified to comply with Cargo's package naming rules which disallow a leading digit.
 
@@ -63,7 +61,7 @@ A description of 2048 gameplay, from [Wikipedia](<https://en.wikipedia.org/wiki/
 `x800` has the following requirements:
 
 1. A Rust toolchain supporting the target system's target-triple, including `std` support. See [notes 1 and 2](#notes).
-2. The target's Rust `libc` Crate is POSIX-conforming. See [notes 2 and 3](#notes).
+2. The target's Rust `libc` crate is POSIX-conforming. See [notes 2 and 3](#notes).
 3. A Minimum Supported Rust Version (MSRV) of 1.56. This version stabilized support for the 2021 Edition.
 
 There are no other known requirements.
@@ -76,9 +74,9 @@ This means that Linux, MacOS, and other BSDs should all work on a variety of arc
 2. For information on Rust platform support see the appropriate [page](https://doc.rust-lang.org/rustc/platform-support.html) in the Rust documentation.
 3. Refer to the Rust `libc` [documentation](https://docs.rs/libc/latest/libc/). The platform selection dropdown at the top of the page is useful.
 
-### Cross-compilation with `cross` Crate
+### Cross-compilation with `cross` crate
 
-In case you wanted to play 2048 on a somewhat more underpowered or unique platform, the [`cross`](https://github.com/cross-rs/cross) Crate can be used to cross-compile for the target on a better-supported host.
+In case you wanted to play 2048 on a somewhat more underpowered or unique platform, the [`cross`](https://github.com/cross-rs/cross) crate can be used to cross-compile for the target on a better-supported host.
 
 This example was tested on both an x86-64 Linux box and an arm64 MacOS host. It builds `x800` to target a Raspberry Pi Zero W with target triple `arm-unknown-linux-gnueabihf`:
 
@@ -203,7 +201,7 @@ Both a small dictionary and a minimized corpus with good coverage are checked in
 
 ## Flame graphs
 
-Flame graphs, first created by [Brendan Gregg](https://www.brendangregg.com/flamegraphs.html), are a powerful and intuitive performance-visualization tool. This project makes use of the Rust [`flamegraph`](https://github.com/flamegraph-rs/flamegraph) Crate for its straightforward flame graph support.
+Flame graphs, first created by [Brendan Gregg](https://www.brendangregg.com/flamegraphs.html), are a powerful and intuitive performance-visualization tool. This project makes use of the Rust [`flamegraph`](https://github.com/flamegraph-rs/flamegraph) crate for its straightforward flame graph support.
 
 The helper script at `util/flamegraph.sh` allows for easy sampling of `x800`. In its default configuration, the script uses the `roger` fuzzer as the binary under test.
 
