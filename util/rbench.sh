@@ -9,20 +9,15 @@ test -d ./util
 LOOPS=10000
 
 test_ryan() {
-    time ./target/release/ryan ./fuzz/corpus/roger/gold "${LOOPS}"
+    plus_header "Building the ryan driver in $1 mode"
+    cargo build --release --features="$1" --bin ryan
+    echo
+    echo "Running ${LOOPS} iterations:"
+    time ./target/release/ryan ./fuzz/corpus/roger/gold "${LOOPS}" >/dev/null
+    plus_ok
+    echo
 }
 
-plus_header "Building the ryan driver in default mode"
-cargo build --release --bin ryan
-test_ryan > /dev/null
-plus_ok
-
-plus_header "Building the ryan driver in sink mode"
-cargo build --release --features=sink --bin ryan
-test_ryan
-plus_ok
-
-plus_header "Building the ryan driver in mini mode"
-cargo build --release --features=mini --bin ryan
-test_ryan
-plus_ok
+test_ryan default
+test_ryan sink
+test_ryan mini
