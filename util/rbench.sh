@@ -49,9 +49,11 @@ test_ryan() {
     # Allow for best of a few iterations
     i=0
     while [ $i -lt 5 ]; do
+	echo
         time -p ./target/release/ryan ./fuzz/corpus/roger/gold "${LOOPS}" >/dev/null
         i=$((i + 1))
     done
+    echo
     plus_ok
     echo
 }
