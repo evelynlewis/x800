@@ -94,6 +94,11 @@ plus_header "Now validating hyperfine benchmarks"
 xcall ./util/hyperfine.sh
 plus_ok
 
+# Build and run hyperfine benchmarks
+plus_header "Now validating ryan benchmarks"
+xcall ./util/rbench.sh
+plus_ok
+
 # Run fuzzer on known inputs
 plus_header "Now validating fuzzer in default mode"
 xcall cargo fuzz run roger --sanitizer none --release -- -runs=0

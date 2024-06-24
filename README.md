@@ -6,7 +6,7 @@ x800: [ɛks eɪt ˈhʌndrəd]
 
 2048 is played by merging a four-by-four grid of power-of-two tiles, to maximize the sum of resulting tile values.
 
-How fast? With board rendering enabled and live-generated random input moves, `x800` has a sustained update [rate](#shell-benchmark-intel-pentium-g3220t-at-260ghz-with-linux-65) of 7.2 million moves-per-second on a 2.6GHz Intel Pentium CPU from 2013.
+How fast? With board rendering enabled and live-generated random input moves, `x800` has a sustained update [rate](#shell-benchmark-intel-pentium-g3220t-at-260ghz-with-linux-65) of 7.5 million moves-per-second on a 2.6GHz Intel Pentium CPU from 2013.
 
 With board rendering disabled using the `mini` feature, the same machine can play 5500 loops of a fuzzer-generated high-scoring 4000 move game in under a second. This gives an effective throughput of 22 million moves-per-second. The same benchmark on an M1 MacBook Air running MacOS gives 52 million moves-per-second. These latter tests were done using the `ryan` binary and the test-case located at `fuzz/corpus/roger/gold`.
 
@@ -121,20 +121,46 @@ These benchmarks require GNU `base32`, `tr`, `dd`, and a recent version of [`hyp
 
 ```sh
 ./util/hyperfine.sh
-    Finished `release` profile [optimized] target(s) in 0.02s
+[...]
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Running with random input
+
 Benchmark 1: ./target/release/x800
-  Time (mean ± σ):       1.2 ms ±   0.1 ms    [User: 0.9 ms, System: 0.2 ms]
-  Range (min … max):     1.1 ms …   1.5 ms    256 runs
+  Time (mean ± σ):       1.1 ms ±   0.1 ms    [User: 0.4 ms, System: 0.6 ms]
+  Range (min … max):     1.0 ms …   1.5 ms    256 runs
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Running with gold file input
+
+Size, resolved path, and loop count are:
+4.0K	./fuzz/corpus/roger/0385ba3512e77623555fabd0ec9340830cfbf947 1000
+
+Benchmark 1: ./target/release/ryan ./fuzz/corpus/roger/0385ba3512e77623555fabd0ec9340830cfbf947 1000
+  Time (mean ± σ):     260.0 ms ±   2.9 ms    [User: 230.6 ms, System: 34.6 ms]
+  Range (min … max):   253.6 ms … 263.0 ms    32 runs
 ```
 
 #### `hyperfine` benchmark: M1 MacBook Air with MacOS 14
 
 ```sh
 ./util/hyperfine.sh
-    Finished `release` profile [optimized] target(s) in 0.01s
+[...]
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Running with random input
+
 Benchmark 1: ./target/release/x800
   Time (mean ± σ):       1.2 ms ±   0.1 ms    [User: 0.6 ms, System: 0.4 ms]
-  Range (min … max):     1.1 ms …   1.4 ms    256 runs
+  Range (min … max):     1.1 ms …   1.6 ms    256 runs
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Running with gold file input
+
+Size, resolved path, and loop count are:
+4.0K	./fuzz/corpus/roger/0385ba3512e77623555fabd0ec9340830cfbf947 1000
+
+Benchmark 1: ./target/release/ryan ./fuzz/corpus/roger/0385ba3512e77623555fabd0ec9340830cfbf947 1000
+  Time (mean ± σ):     120.6 ms ±   0.3 ms    [User: 101.4 ms, System: 27.7 ms]
+  Range (min … max):   120.1 ms … 121.6 ms    32 runs
 ```
 
 ### Benchmarks using shell tools
@@ -152,9 +178,9 @@ Requires POSIX `sh`, and GNU `base32`, `dd`, `tr`, and `grep`.
 ```sh
 ./util/bench.sh
 Building x800 executable.
-    Finished `release` profile [optimized] target(s) in 0.02s
+    Finished `release` profile [optimized] target(s) in 0.01s
 Running benchmark for 16 seconds.
-115048448 bytes (115 MB, 110 MiB) copied, 16 s, 7.2 MB/s
+119332864 bytes (119 MB, 114 MiB) copied, 16 s, 7.5 MB/s
 ```
 
 ### Shell benchmark: M1 MacBook Air with MacOS 14
@@ -164,7 +190,7 @@ Running benchmark for 16 seconds.
 Building x800 executable.
     Finished `release` profile [optimized] target(s) in 0.01s
 Running benchmark for 16 seconds.
-103841792 bytes (104 MB, 99 MiB) copied, 16 s, 6.5 MB/s
+103407616 bytes (103 MB, 99 MiB) copied, 16 s, 6.5 MB/s
 ```
 
 ## Fuzzing

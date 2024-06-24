@@ -40,6 +40,9 @@ use crate::board::{
 /// The number of tiles to generate at startup
 const INITIAL_TILES_COUNT: u32 = 2;
 
+/// Minimum wait between non-terminal draws
+const MIN_DRAW_DELAY: std::time::Duration = std::time::Duration::from_millis(4);
+
 /// Configures terminal as needed
 fn io_config(input: &Input) -> Option<Io> {
     if cfg!(feature = "mini") {
@@ -138,6 +141,7 @@ pub fn play(input: &Input) -> Result<(), ()> {
     draw_thread = draw_join.as_ref().map(|t| t.thread());
 
     // Initially draw the board
+    let mut last_draw = std::time::Instant::now();
     draw_thread.map(|t| t.unpark());
 
     let mut moved;
@@ -178,7 +182,12 @@ pub fn play(input: &Input) -> Result<(), ()> {
         };
 
         // In case of update, draw the board
-        draw_thread.map(|t| t.unpark());
+        draw_thread.map(|t| {
+            if (std::time::Instant::now() - last_draw) > MIN_DRAW_DELAY {
+                t.unpark();
+                last_draw = std::time::Instant::now();
+            }
+        });
     }
 
     // Handle graceful shutdown

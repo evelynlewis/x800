@@ -80,10 +80,10 @@ wrap_llvm_cov() {
 		-ignore-filename-regex='/rustc/.+' \
 		-use-color \
 		-instr-profile="${COVERAGE}" \
-		"${HTML_ARGS}"
+		${HTML_ARGS}
 }
 
-if [ "${USE_HTML}" ]; then
+if [ "${USE_HTML}" -ne 0 ]; then
 	# Save coverage to output file
 	wrap_llvm_cov show >"${HTML_OUT_FILE}"
 	echo "Saved coverage output in HTML format to ${HTML_OUT_FILE}"

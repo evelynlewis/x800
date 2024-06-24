@@ -30,10 +30,10 @@ use std::{
     fmt::Write as FmtWrite,
     io::Write as IoWrite,
     sync::{self, atomic},
-    thread, time,
+    thread,
 };
 
-/// Worker thread function which draws board
+/// Board drawing worker function
 pub fn draw(
     board: sync::Arc<sync::Mutex<Board>>,
     done: &sync::Arc<atomic::AtomicBool>,
@@ -44,54 +44,29 @@ pub fn draw(
     // Preferred output stream
     let mut output = constants::WRITER();
 
-    // Duration between draws. 2 ms is 500 Hz
-    const DRAW_DURATION: time::Duration = time::Duration::from_millis(2);
-
-    // If set, draw the board this time
-    let mut force_draw = true;
-
-    // Always draw the first time
-    let mut timestamp = time::Instant::now();
-    let mut exit_after = false;
+    // Our own personal local board
+    let mut cloned;
 
     loop {
         // Wait for wakeup
         thread::park();
 
-        // Check if we should exit this time
-        if done.load(atomic::Ordering::Relaxed) {
-            exit_after = true;
-            force_draw = true;
-        }
+        // Clone for drawing
+        cloned = board.lock().unwrap().clone();
 
-        // Continue waiting if time has not elapsed and a draw is not required
-        // Note that we use the monotonic timestamp, time::Instant()
-        if !force_draw && (time::Instant::now() - timestamp) < DRAW_DURATION {
-            continue;
-        } else {
-            force_draw = false;
-            timestamp = time::Instant::now();
-        }
-
-        // Limit scope to avoid holding the lock
-        {
-            // Alias for reading
-            let board = board.lock().unwrap();
-
-            // Write out to string
-            board.draw_clear(buffer)?;
-            board.draw_header(buffer)?;
-            board.draw_tiles(buffer)?;
-            board.draw_score(buffer)?;
-        }
+        // Write out to string
+        cloned.draw_clear(buffer)?;
+        cloned.draw_header(buffer)?;
+        cloned.draw_tiles(buffer)?;
+        cloned.draw_score(buffer)?;
 
         // Write out framebuffer
         write!(output, "{}", buffer).expect("Failed to render");
-        output.flush().expect("Failed to flush board render");
+        output.flush().expect("failed to flush board render");
         buffer.clear();
 
         // Leave the loop
-        if exit_after {
+        if done.load(atomic::Ordering::Relaxed) {
             break;
         }
     }

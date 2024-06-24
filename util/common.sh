@@ -30,7 +30,6 @@
 
 # shellcheck shell=sh
 plus_header(){
-    echo
     echo ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     echo "$*"
     echo
@@ -39,6 +38,7 @@ plus_header(){
 plus_ok(){
     echo "OK"
     echo ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    echo
 }
 
 plus_line(){

@@ -32,11 +32,9 @@ test -f ./util/gen-moves.sh
 
 plus_header "Building project"
 cargo build -p x800 --release --features sink
-plus_ok
 
 plus_header "Installing hyperfine"
 cargo install --quiet hyperfine
-plus_ok
 
 plus_header "Running with random input"
 touch /tmp/moves
@@ -47,17 +45,15 @@ hyperfine \
 	--input='/tmp/moves' \
 	-N \
 	'./target/release/x800'
-plus_ok
 
 GOLD_FILE="$(realpath ./fuzz/corpus/roger/gold)"
 GOLD_LOOPS="1000"
 plus_header "Running with gold file input"
 echo "Size, resolved path, and loop count are:"
-printf "%s %s\n\n" "$(du -sh "${GOLD_FILE}")" "${GOLD_LOOPS}"
+printf "%s %s\n" "$(du -sh "${GOLD_FILE}")" "${GOLD_LOOPS}"
 
 hyperfine \
 	--warmup=32 \
 	--runs=32 \
 	-N \
 	"./target/release/ryan ${GOLD_FILE} ${GOLD_LOOPS}"
-plus_ok
