@@ -46,7 +46,12 @@ test_ryan() {
     cargo build --release --features="$1" --bin ryan
     echo
     echo "Running ${LOOPS} iterations:"
-    time ./target/release/ryan ./fuzz/corpus/roger/gold "${LOOPS}" >/dev/null
+    # Allow for best of a few iterations
+    i=0
+    while [ $i -lt 5 ]; do
+        time ./target/release/ryan ./fuzz/corpus/roger/gold "${LOOPS}" >/dev/null
+        i=$((i + 1))
+    done
     plus_ok
     echo
 }
