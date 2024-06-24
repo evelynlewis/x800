@@ -8,8 +8,6 @@ x800: [ɛks eɪt ˈhʌndrəd]
 
 How fast? With board rendering enabled and live-generated random input moves, `x800` has a sustained update [rate](#shell-benchmark-intel-pentium-g3220t-at-260ghz-with-linux-65) of 7.5 million moves-per-second on a 2.6GHz Intel Pentium CPU from 2013.
 
-With board rendering disabled using the `mini` feature, the same machine can play 5500 loops of a fuzzer-generated high-scoring 4000 move game in under a second. This gives an effective throughput of 22 million moves-per-second. The same benchmark on an M1 MacBook Air running MacOS gives 52 million moves-per-second. These latter tests were done using the `ryan` binary and the test-case located at `fuzz/corpus/roger/gold`.
-
 The project has few build dependencies. It doesn't use ncurses or an external Rust terminal library. It instead uses simple output buffering and standard [ANSI escape codes](https://en.wikipedia.org/wiki/ANSI_escape_code). The required POSIX-compatible [`libc`](https://docs.rs/libc/latest/libc/) Crate is part of Rust's standard library on POSIX targets. The only other build dependency is [`fastrand`](https://crates.io/crates/fastrand), a simple non-cryptographic pseudorandom number generator Crate without child dependencies.
 
 The project started in part as a hands-on spike project for the author to learn [Rust](https://rust-lang.org) as a systems software developer experienced in C and C++. The name `x800` is the number 2048 in base sixteen, modified to comply with Cargo's package naming rules which disallow a leading digit.

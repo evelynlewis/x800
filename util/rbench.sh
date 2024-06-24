@@ -6,7 +6,11 @@ test -d ./util
 # shellcheck source=common.sh
 . ./util/common.sh
 
-LOOPS=10000
+if [ $# -gt 0 ]; then
+	LOOPS=$1
+else
+	LOOPS=10000
+fi
 
 test_ryan() {
     plus_header "Building the ryan driver in $1 mode"
