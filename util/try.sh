@@ -23,7 +23,7 @@
 # SOFTWARE.
 
 #
-# Run one or more fuzzer input files with output:w
+# Run one or more fuzzer input files with output
 #
 # usage:
 # ./util/try.sh [FILES]
