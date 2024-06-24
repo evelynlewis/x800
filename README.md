@@ -6,7 +6,7 @@ x800: [ɛks eɪt ˈhʌndrəd]
 
 2048 is played by merging a four-by-four grid of power-of-two tiles, to maximize the sum of resulting tile values.
 
-How fast? In one second, a Linux machine with an Intel Pentium CPU from 2013 can play 4300 complete loops of a four thousand move `x800` game. This gives an effective throughput of 16 million moves-per-second. In the same test, an MacOS M1 MacBook Air can complete 35 million moves-per-second. When disabling rendering by using the `mini` build feature, `x800` on the M1 machine processes 55 million moves-per-second, or 18 nanoseconds per move. This duration is the time needed for light to travel 5.5 metres, the [height](https://en.wikipedia.org/wiki/Giraffe#Anatomy) of an adult giraffe, and less than half the [length](https://olympics.com/en/news/badminton-court-size-dimension-measurement-length-width-net-height-service-line) of a standard badminton court.
+How fast? In one second, a Linux machine with an Intel Pentium CPU from 2013 can play 4300 complete loops of a four thousand move `x800` game. This gives an effective throughput of 16 million moves-per-second. In the same test, an MacOS M1 MacBook Air can complete 35 million moves-per-second. When disabling rendering by using the `mini` build feature, `x800` on the M1 machine processes 55 million moves-per-second, or 18 nanoseconds per move. This duration is the time needed for light to travel 5.5 metres: the [height](https://en.wikipedia.org/wiki/Giraffe#Anatomy) of a giraffe, and less than half the [length](https://olympics.com/en/news/badminton-court-size-dimension-measurement-length-width-net-height-service-line) of a standard badminton court.
 
 See also the benchmark [section](#benchmarks) below, and the [util/rbench.sh](./util/rbench.sh) script.
 
