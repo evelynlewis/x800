@@ -32,9 +32,13 @@ jobs:
           sudo apt update
           sudo apt install -y valgrind
           rustup toolchain install stable --profile minimal
-      - name: Shell benchmark
+      - name: ryan benchmarks
         run: |
-          echo "Running full shell benchmark"
+          echo "Running ryan benchmarks"
+          ./util/rbench.sh
+      - name: Basic shell benchmark
+        run: |
+          echo "Running basic shell benchmark"
           ./util/bench.sh
       - name: Mini shell benchmark
         run: |
@@ -44,9 +48,9 @@ jobs:
         run: |
           echo "Running hyperfine benchmark"
           ./util/hyperfine.sh
-      - name: Timed benchmarks
+      - name: Divan benchmarks
         run: |
-          echo "Running timed benchmarks"
+          echo "Running Divan benchmarks"
           cargo bench --bench timed
       - name: Iai benchmarks
         run: |
