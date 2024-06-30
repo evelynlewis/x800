@@ -6,7 +6,7 @@ x800 : /ˈɛks ˈeɪt ˈhəndɹəd/
 
 2048 is played by merging a four-by-four grid of power-of-two tiles, to maximize the sum of resulting tile values.
 
-How fast? In one second, a Linux machine with an Intel Pentium CPU from 2013 can play 4300 complete loops of a four thousand move `x800` game. This gives an effective throughput of 16 million moves-per-second. In the same test, an MacOS M1 MacBook Air can complete 35 million moves-per-second. When disabling rendering by using the `mini` build feature, `x800` on the M1 machine processes 55 million moves-per-second, or 18 nanoseconds per move. This duration is the time needed for light to travel 5.5 metres: the [height](https://en.wikipedia.org/wiki/Giraffe#Anatomy) of a giraffe, and less than half the [length](https://olympics.com/en/news/badminton-court-size-dimension-measurement-length-width-net-height-service-line) of a standard badminton court.
+How fast? In one second, a Linux machine with an Intel Pentium CPU from 2013 was tested to play 4300 complete loops of a 739 move `x800` game, equivalent to 2.93 million moves-per-second. In the same test, a MacOS M1 MacBook Air runs at 6.45 million moves-per-second. Using the `mini` build feature to disable rendering, `x800` on the M1 machine runs at 10.2 million moves-per-second, or 97.9 nanoseconds per move, including amortized startup time. In this duration, light travels 29.3 metres: a distance which Usain Bolt ran in 2.39 [seconds](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10669785) in 2009 to set the current 100m sprint record.
 
 See also the benchmark [section](#benchmarks) below, and the [util/rbench.sh](./util/rbench.sh) script.
 
@@ -233,6 +233,7 @@ SOFTWARE.
 
 ## References
 
+- [_Multicomponent Velocity Measurement for Linear Sprinting: Usain Bolt’s 100 m World-Record Analysis_, _Bioengineering (Basel, Switzerland)_, National Library of Medicine](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10669785)
 - [_ANSI escape code_, Wikipedia](https://en.wikipedia.org/wiki/ANSI_escape_code)
 - [_The TTY demystified_, Linus Åkesson](http://www.linusakesson.net/programming/tty/)
 - [_Zero-dependency random number generation in Rust_, Orhun Parmaksız](https://blog.orhun.dev/zero-deps-random-in-rust/)
