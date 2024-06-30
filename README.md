@@ -1,6 +1,6 @@
 # `x800`: a fast and portable 2048 for POSIX
 
-x800: [ɛks eɪt ˈhʌndrəd]
+x800 : /ˈɛks ˈeɪt ˈhəndɹəd/
 
 ## Introduction
 
