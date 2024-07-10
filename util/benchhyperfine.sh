@@ -48,9 +48,9 @@ hyperfine \
 
 GOLD_FILE="$(realpath ./fuzz/corpus/roger/gold)"
 GOLD_LOOPS="1000"
+GOLD_REALPATH="$(realpath fuzz/corpus/roger/gold)"
 plus_header "Running with gold file input"
-echo "Size, resolved path, and loop count are:"
-printf "%s %s\n" "$(du -sh "${GOLD_FILE}")" "${GOLD_LOOPS}"
+printf "PATH:           %s\nGAME SAVE SIZE: %s\nGAMES PER RUN:  %s\n" "${GOLD_REALPATH}" "$(du -b "${GOLD_REALPATH}" | cut -f1)" "${GOLD_LOOPS}"
 
 hyperfine \
 	--warmup=32 \

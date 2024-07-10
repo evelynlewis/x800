@@ -109,7 +109,9 @@ Since `x800` takes input from standard input, or `stdin`, and exits at the compl
 
 _The Rust Performance Book_ [describes](<(https://nnethercote.github.io/perf-book/benchmarking.html)>) `hyperfine` as "an excellent general-purpose benchmarking tool." It seems to deliver.
 
-The `hyperfine` latency numbers correspond to the duration of a complete game run beginning-to-end with random input. Statistical reasoning of the number of moves this typically corresponds to is left as an exercise for the reader.
+#### `hyperfine` with random input
+
+The `hyperfine` 'random input' latency numbers correspond to the duration of a complete game run beginning-to-end with random input. Statistical reasoning of the number of moves this typically corresponds to is left as an exercise for the reader.
 
 #### Requirements
 
@@ -117,7 +119,12 @@ These benchmarks require GNU `base32`, `tr`, `dd`, and a recent version of [`hyp
 
 > The required GNU shell tools are part of GNU `coreutils` and preinstalled on most Linux systems. The `hyperfine` binary can be installed via your system package manager or with `cargo install hyperfine`. Your package manager's version may be too old.
 
+#### `hyperfine` with gold file input
+
+The 'gold file input' latency numbers correspond to a large number of loops of a known high-scoring, (ie. "gold"), `x800` save file. This is done through the the [`ryan`](./src/ryan/README.md) reproducible `x800` driver.
+
 #### `hyperfine` benchmark: Intel Pentium G3220T at 2.60GHz with Linux 6.5
+
 
 ```sh
 ./util/benchhyperfine.sh
@@ -132,8 +139,10 @@ Benchmark 1: ./target/release/x800
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 Running with gold file input
 
-Size, resolved path, and loop count are:
-4.0K	./fuzz/corpus/roger/0385ba3512e77623555fabd0ec9340830cfbf947 1000
+PATH:           /Users/evelynlewis/lab/x800/fuzz/corpus/roger/0385ba3512e77623555fabd0ec9340830cfbf947
+GAME SAVE SIZE: 747
+GAMES PER RUN:  1000
+Running with gold file input
 
 Benchmark 1: ./target/release/ryan ./fuzz/corpus/roger/0385ba3512e77623555fabd0ec9340830cfbf947 1000
   Time (mean ± σ):     260.0 ms ±   2.9 ms    [User: 230.6 ms, System: 34.6 ms]
@@ -154,9 +163,12 @@ Benchmark 1: ./target/release/x800
 
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 Running with gold file input
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Running with gold file input
 
-Size, resolved path, and loop count are:
-4.0K	./fuzz/corpus/roger/0385ba3512e77623555fabd0ec9340830cfbf947 1000
+PATH:           /Users/evelynlewis/lab/x800/fuzz/corpus/roger/0385ba3512e77623555fabd0ec9340830cfbf947
+GAME SAVE SIZE: 747
+GAMES PER RUN:  1000
 
 Benchmark 1: ./target/release/ryan ./fuzz/corpus/roger/0385ba3512e77623555fabd0ec9340830cfbf947 1000
   Time (mean ± σ):     120.6 ms ±   0.3 ms    [User: 101.4 ms, System: 27.7 ms]
