@@ -57,8 +57,8 @@ else
 fi
 
 # Setup fuzzer environment variables
-# shellcheck source=fenv.sh
-. ./util/fenv.sh
+# shellcheck source=fuzzenv.sh
+. ./util/fuzzenv.sh
 WARMUP_DURATION="4"
 
 if pgrep "${FUZZER_NAME}"; then

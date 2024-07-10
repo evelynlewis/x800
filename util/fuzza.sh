@@ -23,19 +23,18 @@
 # SOFTWARE.
 
 #
-# Run one or more fuzzer input files with output
+# Multi-process fuzzing
 #
 # usage:
-# ./util/try.sh [FILES]
+# ./util/fuzza.sh
 #
-set -ex
-trap '' HUP
+set -e
 
-# shellcheck source=fenv.sh
-EXTRA_FUZZER_BUILD_ARGS="--no-default-features" \
-    . ./util/fenv.sh
+test -d ./util
 
-test -d ./fuzz
+command -v "./util/fuzzm.sh"
+command -v "./util/fuzzr.sh"
 
-# Run fuzzer using cargo-fuzz
-fuzz_check "$@"
+./util/fuzzm.sh
+./util/fuzzm.sh
+./util/fuzzr.sh

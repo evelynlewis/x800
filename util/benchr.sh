@@ -26,7 +26,7 @@
 # Run ryan benchmarks using various feature-sets
 #
 # usage:
-# ./util/rbench.sh [LOOPS]
+# ./util/benchr.sh [LOOPS]
 #
 set -e
 

@@ -24,7 +24,7 @@
 
 #
 # usage:
-# ./util/coverage.sh
+# ./util/cov.sh
 #
 set -e
 
@@ -33,8 +33,8 @@ test -d ./util/
 test -d ./fuzz/
 test -f Cargo.toml
 
-# shellcheck source=fenv.sh
-. util/fenv.sh
+# shellcheck source=fuzzenv.sh
+. util/fuzzenv.sh
 
 # Corpus selection. Corpus can be passed as first argument
 CORPUS="fuzz/corpus/${FUZZER_NAME}/"
@@ -46,7 +46,7 @@ echo "Using corpus directory: '${CORPUS}'"
 # Use HTML mode when invoked as such
 USE_HTML=0
 NAME="$(basename "$0")"
-HTML_BIN_NAME="htmlcov.sh"
+HTML_BIN_NAME="covhtml.sh"
 HTML_OUT_FILE="fuzz/target/roger.html"
 HTML_ARGS=""
 if [ "${NAME}" = "${HTML_BIN_NAME}" ]; then

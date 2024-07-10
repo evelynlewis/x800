@@ -35,19 +35,19 @@ jobs:
       - name: ryan benchmarks
         run: |
           echo "Running ryan benchmarks"
-          ./util/rbench.sh
+          ./util/benchr.sh
       - name: Basic shell benchmark
         run: |
           echo "Running basic shell benchmark"
-          ./util/bench.sh
+          ./util/benchs.sh
       - name: Mini shell benchmark
         run: |
           echo "Running mini shell benchmark"
-          ./util/mbench.sh
+          ./util/benchm.sh
       - name: Hyperfine benchmark
         run: |
           echo "Running hyperfine benchmark"
-          ./util/hyperfine.sh
+          ./util/benchhyperfine.sh
       - name: Divan benchmarks
         run: |
           echo "Running Divan benchmarks"
@@ -73,7 +73,7 @@ jobs:
           cargo fuzz run roger --sanitizer none --release -- -runs=0
       - name: Coverage
         run: |
-          ./util/coverage.sh
+          ./util/cov.sh
       - name: Profile
         run: |
           ./util/valgrind.sh

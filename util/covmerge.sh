@@ -20,32 +20,30 @@
 # AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE
+# SOFTWARE.
 
 #
-# Fuzz driver for hroger, a Honggfuzz driver
-# Builds and starts hroger in background
+# Merge archive corpus with main corpus
 #
 # usage:
-# ./util/hroger.sh
+# ./util/covmerge.sh
 #
-set -e
+set -ex
+test -d ./fuzz
+test -d ./util
 
-# See usage: should be run from x800 root
-if ! cd fuzz 2>/dev/null; then
-    echo "Error: must be run from root directory"
-    echo "usage:"
-    echo "./util/hroger.sh"
-    exit 1
-fi
+MAIN_DIR="./fuzz/corpus/roger/"
+ARCHIVE_DIR="./fuzz/corpus/roger-archive/"
 
-# Install required tooling
-cargo install honggfuzz
+mkdir -p "${MAIN_DIR}" "${ARCHIVE_DIR}"
+rsync -av "${MAIN_DIR}" "$@" "${ARCHIVE_DIR}"
 
-# Build first
-cargo hfuzz build
+# Merge corpus directories
+EXTRA_FUZZER_RUN_ARGS="-merge=1 ${MAIN_DIR} ${ARCHIVE_DIR} $*"
 
-# used by honggfuzz
-export HFUZZ_INPUT="./corpus/roger/"
-export HFUZZ_RUN_ARGS="-n 2"
-cargo hfuzz run hroger
+# shellcheck source=fuzzenv.sh
+. util/fuzzenv.sh
+
+# Merge all corpus directories
+# shellcheck disable=SC2119
+fuzz_run

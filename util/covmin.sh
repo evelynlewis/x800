@@ -23,25 +23,35 @@
 # SOFTWARE.
 
 #
-# Merge archive corpus with main corpus
+# Minimize fuzzer coverage
 #
 # usage:
-# ./util/merge.sh
+# ./util/covmin.sh [DIR]
 #
 set -ex
+
 test -d ./fuzz
 test -d ./util
 
 MAIN_DIR="./fuzz/corpus/roger/"
 ARCHIVE_DIR="./fuzz/corpus/roger-archive/"
+TMP_DIR="./fuzz/corpus/roger-tmp/"
 
 mkdir -p "${MAIN_DIR}" "${ARCHIVE_DIR}"
-rsync -av "${MAIN_DIR}" "$@" "${ARCHIVE_DIR}"
+rsync -a "${MAIN_DIR}" "${ARCHIVE_DIR}"
+
+rm -rf "${TMP_DIR}"
+rsync -a "${MAIN_DIR}" "${TMP_DIR}"
+
+# Clean out main dir
+rm -rf "${MAIN_DIR}"
+mkdir -p "${MAIN_DIR}"
 
 # Merge corpus directories
-# shellcheck source=fenv.sh
-EXTRA_FUZZER_RUN_ARGS="-merge=1 ${MAIN_DIR} ${ARCHIVE_DIR} $*" \
-    . util/fenv.sh
+EXTRA_FUZZER_RUN_ARGS="-merge=1 ${MAIN_DIR} ${TMP_DIR}"
+
+# shellcheck source=fuzzenv.sh
+. util/fuzzenv.sh
 
 # Merge all corpus directories
 # shellcheck disable=SC2119

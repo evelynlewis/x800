@@ -23,25 +23,40 @@
 # SOFTWARE.
 
 #
-# Fuzz driver for roger, a libfuzzer driver
-# Builds and starts roger in background
+# x800 shell benchmark
 #
 # usage:
-# ./util/fuzz.sh [ARGS]
+# ./util/benchs.sh [ARGS]
 #
 set -e
-trap '' HUP
 
-# shellcheck source=fenv.sh
-. ./util/fenv.sh
+# source environmental compatibility script
+# shellcheck source=compat.sh
+. ./util/compat.sh
 
-test -d ./fuzz
+# Setup tools
+BASE32=$(compat base32)
+TR=$(compat tr)
+DD=$(compat dd)
 
-# Do a blocking build first
-fuzz_build "$@"
+# Build
+echo "Building x800 executable."
+cargo build --release --features sink "${@}"
 
-# Reduce eventual child process priority by nice-ing ourselves
-renice -n 8 $$
+# Other params
+BS="8192"
+SLEEP="16"
+echo "Running benchmark for ${SLEEP} seconds."
 
-# Run fuzzer using cargo-fuzz
-fuzz_run "$@" 2>>./fuzz/target/roger-output.txt &
+# Configure cleanup
+trap 'kill $(pgrep -P $$) 2> /dev/null' EXIT INT
+
+# Run worker
+${BASE32} </dev/urandom |
+    ${TR} -dC 'ASDW' |
+    ${DD} conv=lcase bs=${BS} status=progress |
+    sh -c 'while true; do ./target/release/x800; done' &
+
+# Sleep and exit
+sleep ${SLEEP}
+exit 0

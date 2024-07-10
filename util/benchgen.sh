@@ -23,35 +23,33 @@
 # SOFTWARE.
 
 #
-# Minimize fuzzer coverage
+# x800 valid move generator script
+# Writes moves to stdout or a provided file
 #
 # usage:
-# ./util/cmin.sh [DIR]
+# benchgen.sh [OUTPUT_FILE]
 #
-set -ex
 
-test -d ./fuzz
-test -d ./util
+BS="8K"
+COUNT="1"
 
-MAIN_DIR="./fuzz/corpus/roger/"
-ARCHIVE_DIR="./fuzz/corpus/roger-archive/"
-TMP_DIR="./fuzz/corpus/roger-tmp/"
+# Use an output file if provided
+if [ -z "$1" ]; then
+	OUT="/dev/stdout"
+else
+	OUT="$1"
+fi
 
-mkdir -p "${MAIN_DIR}" "${ARCHIVE_DIR}"
-rsync -a "${MAIN_DIR}" "${ARCHIVE_DIR}"
+# shellcheck source=compat.sh
+. ./util/compat.sh
+# Setup tools
+BASE32=$(compat base32)
+TR=$(compat tr)
+DD=$(compat dd)
 
-rm -rf "${TMP_DIR}"
-rsync -a "${MAIN_DIR}" "${TMP_DIR}"
+${BASE32} </dev/urandom |
+	${TR} -dC 'ASDW' |
+	${DD} of="${OUT}" bs="${BS}" count="${COUNT}" 2>/dev/null &&
+	exit 0
 
-# Clean out main dir
-rm -rf "${MAIN_DIR}"
-mkdir -p "${MAIN_DIR}"
-
-# Merge corpus directories
-# shellcheck source=fenv.sh
-EXTRA_FUZZER_RUN_ARGS="-merge=1 ${MAIN_DIR} ${TMP_DIR}" \
-    . util/fenv.sh
-
-# Merge all corpus directories
-# shellcheck disable=SC2119
-fuzz_run
+exit 1

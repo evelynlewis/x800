@@ -26,7 +26,7 @@
 # Pre-push tests
 #
 # usage:
-# ./util/pre.sh
+# ./util/preflight.sh
 #
 
 set -e
@@ -91,12 +91,12 @@ plus_ok
 
 # Build and run hyperfine benchmarks
 plus_header "Now validating hyperfine benchmarks"
-xcall ./util/hyperfine.sh
+xcall ./util/benchhyperfine.sh
 plus_ok
 
 # Build and run hyperfine benchmarks
 plus_header "Now validating ryan benchmarks"
-xcall ./util/rbench.sh
+xcall ./util/benchr.sh
 plus_ok
 
 # Run fuzzer on known inputs

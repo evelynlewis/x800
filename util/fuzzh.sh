@@ -20,21 +20,32 @@
 # AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
+# SOFTWARE
 
 #
-# Multi-process fuzzing
+# Fuzz driver for hroger, a Honggfuzz driver
+# Builds and starts hroger in background
 #
 # usage:
-# ./util/multi.sh
+# ./util/fuzzh.sh
 #
 set -e
 
-test -d ./util
+# See usage: should be run from x800 root
+if ! cd fuzz 2>/dev/null; then
+    echo "Error: must be run from root directory"
+    echo "usage:"
+    echo "./util/fuzzh.sh"
+    exit 1
+fi
 
-command -v "./util/mini.sh"
-command -v "./util/fuzz.sh"
+# Install required tooling
+cargo install honggfuzz
 
-./util/mini.sh
-./util/mini.sh
-./util/fuzz.sh
+# Build first
+cargo hfuzz build
+
+# used by honggfuzz
+export HFUZZ_INPUT="./corpus/roger/"
+export HFUZZ_RUN_ARGS="-n 2"
+cargo hfuzz run hroger

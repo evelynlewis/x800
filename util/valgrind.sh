@@ -39,8 +39,8 @@ if ! test -d fuzz; then
 	exit 1
 fi
 
-# shellcheck source=fenv.sh
-. util/fenv.sh
+# shellcheck source=fuzzenv.sh
+. util/fuzzenv.sh
 
 cargo fuzz build --release --sanitizer none roger
 

@@ -22,41 +22,38 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-#
-# x800 shell benchmark
-#
-# usage:
-# ./util/bench.sh [ARGS]
-#
 set -e
 
-# source environmental compatibility script
-# shellcheck source=compat.sh
-. ./util/compat.sh
+test -d ./util/
+test -f ./util/benchgen.sh
 
-# Setup tools
-BASE32=$(compat base32)
-TR=$(compat tr)
-DD=$(compat dd)
+# shellcheck source=common.sh
+. ./util/common.sh
 
-# Build
-echo "Building x800 executable."
-cargo build --release --features sink "${@}"
+plus_header "Building project"
+cargo build -p x800 --release --features sink
 
-# Other params
-BS="8192"
-SLEEP="16"
-echo "Running benchmark for ${SLEEP} seconds."
+plus_header "Installing hyperfine"
+cargo install --quiet hyperfine
 
-# Configure cleanup
-trap 'kill $(pgrep -P $$) 2> /dev/null' EXIT INT
+plus_header "Running with random input"
+touch /tmp/moves
+hyperfine \
+	--prepare './util/benchgen.sh /tmp/moves' \
+	--warmup=256 \
+	--runs=256 \
+	--input='/tmp/moves' \
+	-N \
+	'./target/release/x800'
 
-# Run worker
-${BASE32} </dev/urandom |
-    ${TR} -dC 'ASDW' |
-    ${DD} conv=lcase bs=${BS} status=progress |
-    sh -c 'while true; do ./target/release/x800; done' &
+GOLD_FILE="$(realpath ./fuzz/corpus/roger/gold)"
+GOLD_LOOPS="1000"
+plus_header "Running with gold file input"
+echo "Size, resolved path, and loop count are:"
+printf "%s %s\n" "$(du -sh "${GOLD_FILE}")" "${GOLD_LOOPS}"
 
-# Sleep and exit
-sleep ${SLEEP}
-exit 0
+hyperfine \
+	--warmup=32 \
+	--runs=32 \
+	-N \
+	"./target/release/ryan ${GOLD_FILE} ${GOLD_LOOPS}"

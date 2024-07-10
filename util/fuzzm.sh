@@ -23,33 +23,15 @@
 # SOFTWARE.
 
 #
-# x800 valid move generator script
-# Writes moves to stdout or a provided file
+# Start roger fuzzer in mini mode`
 #
 # usage:
-# gen-moves.sh [OUTPUT_FILE]
+# ./util/min.sh
 #
 
-BS="8K"
-COUNT="1"
+set -e
+test -d ./fuzz
+test -d ./util
 
-# Use an output file if provided
-if [ -z "$1" ]; then
-	OUT="/dev/stdout"
-else
-	OUT="$1"
-fi
-
-# shellcheck source=compat.sh
-. ./util/compat.sh
-# Setup tools
-BASE32=$(compat base32)
-TR=$(compat tr)
-DD=$(compat dd)
-
-${BASE32} </dev/urandom |
-	${TR} -dC 'ASDW' |
-	${DD} of="${OUT}" bs="${BS}" count="${COUNT}" 2>/dev/null &&
-	exit 0
-
-exit 1
+# Call fuzzer in mini mode
+./util/fuzzr.sh --features mini

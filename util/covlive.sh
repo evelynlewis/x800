@@ -1,3 +1,4 @@
+#!/bin/sh
 # MIT License
 #
 # Copyright (c) 2024 Evelyn Lewis
@@ -21,44 +22,30 @@
 # SOFTWARE.
 
 #
-# Fuzzer environment configuration
-# This file should be sourced not run
-#
 # usage:
-# . fenv.sh
+# ./util/covlive.sh
 #
+set -e
 
-# shellcheck shell=sh
+test -d ./util/
+# shellcheck source=common.sh
+. ./util/common.sh
 
-FUZZER_NAME="roger"
+rm -r /tmp/roger/
 
-FUZZER_BUILD_ARGS="\
---sanitizer none \
---release \
-${EXTRA_FUZZER_BUILD_ARGS} \
-"
+PREVIOUS=""
+while true; do
+	rsync -a fuzz/corpus/roger/ /tmp/roger/
+	CURRENT="$(stat -c %Y fuzz/corpus/roger)"
+	if [ "${CURRENT}" != "${PREVIOUS}" ]; then
+		plus_header "Changes detected: processing..."
+		./util/covhtml.sh /tmp/roger
 
-FUZZER_RUN_ARGS="\
--dict=./fuzz/dictionary.txt \
--max_len=32768 \
--use_value_profile=1 \
-${EXTRA_FUZZER_RUN_ARGS} \
-"
-
-# Do a blocking build
-fuzz_build() {
-	# shellcheck disable=SC2086
-	cargo fuzz build "$@" ${FUZZER_BUILD_ARGS} "${FUZZER_NAME}"
-}
-
-# Run fuzzer using cargo-fuzz
-fuzz_run() {
-	# shellcheck disable=SC2086
-	cargo fuzz run "$@" ${FUZZER_BUILD_ARGS} "${FUZZER_NAME}" -- ${FUZZER_RUN_ARGS}
-}
-
-# Run fuzzer using cargo-fuzz
-fuzz_check() {
-	# shellcheck disable=SC2086
-	cargo fuzz run ${FUZZER_BUILD_ARGS} "${FUZZER_NAME}" "$@"
-}
+		PREVIOUS=${CURRENT}
+		plus_header "Waiting for changes..."
+	fi
+	# Sleeping is not ideal, but the coverage script
+	# takes around 3 seconds to run, so a one second
+	# maximum additional delay is okay her
+	sleep 1
+done

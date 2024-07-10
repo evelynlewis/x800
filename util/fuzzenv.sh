@@ -1,5 +1,3 @@
-#!/bin/sh
-
 # MIT License
 #
 # Copyright (c) 2024 Evelyn Lewis
@@ -23,15 +21,44 @@
 # SOFTWARE.
 
 #
-# Start roger fuzzer in mini mode`
+# Fuzzer environment configuration
+# This file should be sourced not run
 #
 # usage:
-# ./util/min.sh
+# . fuzzenv.sh
 #
 
-set -e
-test -d ./fuzz
-test -d ./util
+# shellcheck shell=sh
 
-# Call fuzzer in mini mode
-./util/fuzz.sh --features mini
+FUZZER_NAME="roger"
+
+FUZZER_BUILD_ARGS="\
+--sanitizer none \
+--release \
+${EXTRA_FUZZER_BUILD_ARGS} \
+"
+
+FUZZER_RUN_ARGS="\
+-dict=./fuzz/dictionary.txt \
+-max_len=32768 \
+-use_value_profile=1 \
+${EXTRA_FUZZER_RUN_ARGS} \
+"
+
+# Do a blocking build
+fuzz_build() {
+	# shellcheck disable=SC2086
+	cargo fuzz build "$@" ${FUZZER_BUILD_ARGS} "${FUZZER_NAME}"
+}
+
+# Run fuzzer using cargo-fuzz
+fuzz_run() {
+	# shellcheck disable=SC2086
+	cargo fuzz run "$@" ${FUZZER_BUILD_ARGS} "${FUZZER_NAME}" -- ${FUZZER_RUN_ARGS}
+}
+
+# Run fuzzer using cargo-fuzz
+fuzz_check() {
+	# shellcheck disable=SC2086
+	cargo fuzz run ${FUZZER_BUILD_ARGS} "${FUZZER_NAME}" "$@"
+}

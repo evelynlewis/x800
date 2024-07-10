@@ -22,38 +22,14 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+#
+# Benchmark without draw code
+#
+# usage:
+# ./util/benchm.sh
+#
+
 set -e
+test -d ./util
 
-test -d ./util/
-test -f ./util/gen-moves.sh
-
-# shellcheck source=common.sh
-. ./util/common.sh
-
-plus_header "Building project"
-cargo build -p x800 --release --features sink
-
-plus_header "Installing hyperfine"
-cargo install --quiet hyperfine
-
-plus_header "Running with random input"
-touch /tmp/moves
-hyperfine \
-	--prepare './util/gen-moves.sh /tmp/moves' \
-	--warmup=256 \
-	--runs=256 \
-	--input='/tmp/moves' \
-	-N \
-	'./target/release/x800'
-
-GOLD_FILE="$(realpath ./fuzz/corpus/roger/gold)"
-GOLD_LOOPS="1000"
-plus_header "Running with gold file input"
-echo "Size, resolved path, and loop count are:"
-printf "%s %s\n" "$(du -sh "${GOLD_FILE}")" "${GOLD_LOOPS}"
-
-hyperfine \
-	--warmup=32 \
-	--runs=32 \
-	-N \
-	"./target/release/ryan ${GOLD_FILE} ${GOLD_LOOPS}"
+./util/benchs.sh --features mini

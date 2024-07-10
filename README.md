@@ -8,7 +8,7 @@ x800 : /ˈɛks ˈeɪt ˈhəndɹəd/
 
 How fast? In one second, a Linux machine with an Intel Pentium CPU from 2013 was tested to play 3920 complete loops of a 739 move `x800` game, equivalent to 2.90 million moves-per-second. In the same test, a MacOS M1 MacBook Air runs at 6.43 million moves-per-second. Using the `mini` build feature to disable rendering, `x800` on the M1 machine runs at 10.3 million moves-per-second, or 97.4 nanoseconds per move, including amortized startup time. In this duration, light travels 29.2 metres: a distance which Usain Bolt ran in 2.38 [seconds](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10669785) in 2009 to set the current 100m sprint record.
 
-See also the benchmark [section](#benchmarks) below, and the [util/rbench.sh](./util/rbench.sh) script.
+See also the benchmark [section](#benchmarks) below, and the [util/benchr.sh](./util/benchr.sh) script.
 
 The project has few build dependencies. It doesn't use ncurses or an external Rust terminal library. It instead uses simple output buffering and standard [ANSI escape codes](https://en.wikipedia.org/wiki/ANSI_escape_code). The required POSIX-compatible [`libc`](https://docs.rs/libc/latest/libc/) crate is part of Rust's standard library on POSIX targets. The only other build dependency is [`fastrand`](https://crates.io/crates/fastrand), a simple non-cryptographic pseudorandom number generator crate without child dependencies.
 
@@ -120,7 +120,7 @@ These benchmarks require GNU `base32`, `tr`, `dd`, and a recent version of [`hyp
 #### `hyperfine` benchmark: Intel Pentium G3220T at 2.60GHz with Linux 6.5
 
 ```sh
-./util/hyperfine.sh
+./util/benchhyperfine.sh
 [...]
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 Running with random input
@@ -143,7 +143,7 @@ Benchmark 1: ./target/release/ryan ./fuzz/corpus/roger/0385ba3512e77623555fabd0e
 #### `hyperfine` benchmark: M1 MacBook Air with MacOS 14
 
 ```sh
-./util/hyperfine.sh
+./util/benchhyperfine.sh
 [...]
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 Running with random input
@@ -170,13 +170,13 @@ Requires POSIX `sh`, and GNU `base32`, `dd`, `tr`, and `grep`.
 > The required GNU shell tools are part of GNU `coreutils` and preinstalled on most Linux systems. Also note that in this configuration, these benchmarks may be close to the performance limit for the shell tools themselves.
 
 ```sh
-./util/bench.sh
+./util/benchs.sh
 ```
 
 ### Shell benchmark: Intel Pentium G3220T at 2.60GHz with Linux 6.5
 
 ```sh
-./util/bench.sh
+./util/benchs.sh
 Building x800 executable.
     Finished `release` profile [optimized] target(s) in 0.01s
 Running benchmark for 16 seconds.
@@ -186,7 +186,7 @@ Running benchmark for 16 seconds.
 ### Shell benchmark: M1 MacBook Air with MacOS 14
 
 ```sh
-./util/bench.sh
+./util/benchs.sh
 Building x800 executable.
     Finished `release` profile [optimized] target(s) in 0.01s
 Running benchmark for 16 seconds.
@@ -195,9 +195,9 @@ Running benchmark for 16 seconds.
 
 ## Fuzzing
 
-A fuzzer named `roger`, after the rabbit, is provided in the `fuzz/` directory. It's built using [`cargo-fuzz`](https://github.com/rust-fuzz/cargo-fuzz), which uses [LibFuzzer](https://llvm.org/docs/LibFuzzer.html), part of the LLVM project. A convenience script is under `util/fuzz.sh`.
+A fuzzer named `roger`, after the rabbit, is provided in the `fuzz/` directory. It's built using [`cargo-fuzz`](https://github.com/rust-fuzz/cargo-fuzz), which uses [LibFuzzer](https://llvm.org/docs/LibFuzzer.html), part of the LLVM project. A convenience script is under `util/fuzzr.sh`.
 
-A variant of `roger` using [honggfuzz](https://honggfuzz.dev) and [honggfuzz-rs](https://github.com/rust-fuzz/honggfuzz-rs) is also included. It's named `hroger`, and there's a convenience script under `util/hfuzz.sh`.
+A variant of `roger` using [honggfuzz](https://honggfuzz.dev) and [honggfuzz-rs](https://github.com/rust-fuzz/honggfuzz-rs) is also included. It's named `hroger`, and there's a convenience script under `util/fuzzh.sh`.
 
 Both a small dictionary and a minimized corpus with good coverage are checked into the repository. Both are compatible with each fuzzer.
 
