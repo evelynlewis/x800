@@ -62,7 +62,7 @@ pub fn play(input: &Input) {
     #[cfg(feature = "save")]
     let mut save: Vec<u8> = Vec::with_capacity(2048);
     #[cfg(feature = "save")]
-    save.extend(fastrand::get_seed().to_ne_bytes());
+    save.extend(fastrand::get_seed().to_le_bytes());
 
     // Closure called for program input
     let mut stdin_reader = || -> Action {

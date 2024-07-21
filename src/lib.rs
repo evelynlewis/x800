@@ -27,7 +27,7 @@ pub fn one_shot(data: &[u8]) {
         return;
     }
     // Generate 64 bit PRNG seed
-    let seed = Seed::from_ne_bytes(
+    let seed = Seed::from_le_bytes(
         data[..mem::size_of::<Seed>()]
             .try_into()
             .expect("Failed to generate seed"),
