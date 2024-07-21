@@ -25,8 +25,7 @@
 #
 # Fuzz driver for roger, a libfuzzer driver
 # Builds and starts roger in background.
-# This variant is designed for benchamrking and
-# does not use run arguments.
+# This variant is designed for benchmarking and does not use run arguments.
 #
 # usage:
 # ./util/fuzzu.sh [ARGS]
@@ -34,13 +33,10 @@
 set -e
 trap '' HUP
 
-# shellcheck source=fuzzenv.sh
-. ./util/fuzzenv.sh
-
 test -d ./fuzz
 
-# Do a blocking build first
-fuzz_build "$@"
+# shellcheck source=fuzzenv.sh
+. ./util/fuzzenv.sh
 
 # Reduce eventual child process priority by nice-ing ourselves
 renice -n 8 $$
