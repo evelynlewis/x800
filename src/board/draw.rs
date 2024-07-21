@@ -23,7 +23,7 @@
 //! Implementation of [Board] drawing
 
 use super::super::colour::Colour;
-use super::constants::{self, BOARD_AREA, BOARD_DIMENSION, NUMBER_TILES_PER_LINE};
+use super::constants;
 use super::Board;
 use std::{
     fmt,
@@ -35,7 +35,7 @@ use std::{
 
 /// Board drawing worker function
 pub fn draw(
-    board: sync::Arc<sync::Mutex<Board>>,
+    board: &sync::Arc<sync::Mutex<Board>>,
     done: &sync::Arc<atomic::AtomicBool>,
 ) -> fmt::Result {
     // Use one buffer for program duration
@@ -55,13 +55,13 @@ pub fn draw(
         cloned = board.lock().unwrap().clone();
 
         // Write out to string
-        cloned.draw_clear(buffer)?;
+        Board::draw_clear(buffer)?;
         cloned.draw_header(buffer)?;
         cloned.draw_tiles(buffer)?;
         cloned.draw_score(buffer)?;
 
         // Write out framebuffer
-        write!(output, "{}", buffer).expect("Failed to render");
+        write!(output, "{buffer}").expect("Failed to render");
         output.flush().expect("failed to flush board render");
         buffer.clear();
 
@@ -76,7 +76,7 @@ pub fn draw(
 
 impl Board {
     /// Draw a 'clear screen' control character to the output String
-    pub fn draw_clear(&self, output: &mut String) -> fmt::Result {
+    pub fn draw_clear(output: &mut String) -> fmt::Result {
         write!(
             output,
             "{}",
@@ -90,14 +90,14 @@ impl Board {
             output,
             "{}",
             format_args!(
-                "{}{}{:<colour_len$}{}\r\n\n",
-                constants::LEFT_SPACE,
+                "{}{}{:<colour_len$}{}\r\n{}{}\r\n",
+                constants::PRE_MARGIN,
                 Colour::from_power(self.max_tile),
-                "",
+                String::new(),
                 Colour::default(),
-                colour_len = (NUMBER_TILES_PER_LINE * constants::TILES_WIDTH)
-                    + (2 * constants::LR_EDGE_WIDTH)
-                    + constants::LEFT_SPACE.len()
+                constants::PRE_MARGIN,
+                "─".repeat(constants::PRINT_LINE_LEN),
+                colour_len = constants::PRINT_LINE_LEN
             )
         )
     }
@@ -105,23 +105,24 @@ impl Board {
     /// Draw all [`Board`] Tiles to the output String
     fn draw_tiles(&self, output: &mut String) -> fmt::Result {
         // Allow bounds-checking elision
-        assert_eq!(self.tiles.0.len(), BOARD_AREA);
-
+        assert_eq!(self.tiles.len(), constants::TILES_AREA);
         // Iterate over each row and column, then print
-        for i in 0..BOARD_DIMENSION {
-            for j in 0..BOARD_DIMENSION {
-                write!(output, "{}", self.tiles[(i, j)])?;
+        write!(output, "      ")?;
+        for i in 0..constants::TILES_PER_LINE {
+            for j in 0..constants::TILES_PER_LINE {
+                write!(output, "{}", self.tiles[constants::TILES_PER_LINE * i + j])?;
             }
+            write!(output, "\r\n      ")?;
         }
         Ok(())
     }
 
     /// Draw the current score to the output String
     pub fn draw_score(&self, output: &mut String) -> fmt::Result {
-        let space = constants::LEFT_SPACE;
+        const LENGTH: usize = constants::PRINT_LINE_LEN - SCORE_TEXT.len();
+        const SPACE: &str = constants::PRE_MARGIN;
+        const SCORE_TEXT: &str = constants::SCORE_TEXT;
         let score_colour = Colour::from_power(self.max_tile);
-        let score_text = constants::SCORE_TEXT;
-        let length = constants::DISPLAY_LINE_LENGTH;
         let no_colour = Colour::default();
         let header = if self.max_tile >= constants::WIN_POWER {
             constants::WIN_MESSAGE
@@ -131,9 +132,11 @@ impl Board {
 
         write!(
             output,
-            "{before}{score:<length$}{after}",
+            "{}{}{before}{score:<LENGTH$}{after}",
+            constants::PRE_MARGIN,
+            "─".repeat(constants::PRINT_LINE_LEN),
             score = self.score,
-            before = format_args!("{space}{header}{space}{score_colour}{score_text}"),
+            before = format_args!("{SPACE}{header}{SPACE}{score_colour}{SCORE_TEXT}"),
             after = format_args!("{no_colour}\r\n"),
         )
     }

@@ -20,81 +20,29 @@
   SOFTWARE.
 */
 
-//! Data structures and functions needed to define, index, and display a [Tile] or [Tiles]
+//! Data structures and functions needed to define, index, and display a [Tile]
+
+use super::constants;
+use crate::colour::Colour;
+use std::fmt;
+use std::hash::Hash;
 
 /// The power-of-two of a [`Tile`]
 pub type Power = u32;
 /// The move number which created a [`Tile`]
 pub type Generation = u64;
 
-use super::constants::{
-    BOARD_AREA, BOARD_DIMENSION, BOTTOM_EDGE, BOTTOM_LEFT_CORNER, BOTTOM_RIGHT_CORNER, EMPTY_TILE,
-    LEFT_EDGE, LEFT_SPACE, RIGHT_EDGE, TOP_EDGE, TOP_LEFT_CORNER, TOP_RIGHT_CORNER,
-};
-use super::TileIndex;
-use crate::colour::Colour;
-use std::fmt;
-use std::ops;
-
-/// Types of [`Edge`]
-#[derive(Clone, Copy, PartialEq, Eq)]
-pub enum Edge {
-    Top,
-    Bottom,
-    Left,
-    Right,
-}
-
-/// Types of [`Corner`]
-#[derive(Clone, Copy, PartialEq, Eq)]
-pub enum Corner {
-    TopLeft,
-    TopRight,
-    BottomLeft,
-    BottomRight,
-}
-
 /// Basic [`super::Board`] block
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
 pub enum Tile {
     Empty(),
     Number(Power, Generation),
-    Edge(Edge),
-    Corner(Corner),
-}
-
-/// A [`Tile::Empty`] [`Tile`] is the [`Default`]
-impl Default for Tile {
-    fn default() -> Self {
-        Self::Empty()
-    }
-}
-
-#[derive(Clone)]
-pub struct Tiles(pub [Tile; BOARD_AREA]);
-
-impl ops::Index<TileIndex> for Tiles {
-    /// The [`Tiles`] structure contains [`Tile`] structs
-    type Output = Tile;
-
-    /// Return a non-mutable reference to a [`Tile`] element of [`Tiles`]
-    #[inline]
-    fn index(&self, index: TileIndex) -> &Self::Output {
-        &(self.0[index.0 * BOARD_DIMENSION + index.1])
-    }
-}
-
-impl ops::IndexMut<TileIndex> for Tiles {
-    /// Return a mutable reference to a [`Tile`] element of [`Tiles`]
-    #[inline]
-    fn index_mut(&mut self, index: TileIndex) -> &mut Self::Output {
-        &mut (self.0[index.0 * BOARD_DIMENSION + index.1])
-    }
 }
 
 impl fmt::Display for Tile {
     /// Format [`Tile`] to be displayed
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        use constants::EMPTY_TILE;
         match self {
             Self::Number(num, _) => {
                 write!(
@@ -103,32 +51,8 @@ impl fmt::Display for Tile {
                     Colour::from_power(*num),
                     u32::pow(2, *num),
                     Colour::default(),
-                    width = BOARD_DIMENSION,
+                    width = EMPTY_TILE.len(),
                 )
-            }
-            Self::Edge(Edge::Left) => {
-                write!(f, "{LEFT_SPACE}{LEFT_EDGE}")
-            }
-            Self::Edge(Edge::Right) => {
-                write!(f, "{RIGHT_EDGE}")
-            }
-            Self::Edge(Edge::Top) => {
-                write!(f, "{TOP_EDGE}")
-            }
-            Self::Edge(Edge::Bottom) => {
-                write!(f, "{BOTTOM_EDGE}")
-            }
-            Self::Corner(Corner::TopLeft) => {
-                write!(f, "{LEFT_SPACE}{TOP_LEFT_CORNER}")
-            }
-            Self::Corner(Corner::TopRight) => {
-                write!(f, "{TOP_RIGHT_CORNER}")
-            }
-            Self::Corner(Corner::BottomLeft) => {
-                write!(f, "{LEFT_SPACE}{BOTTOM_LEFT_CORNER}")
-            }
-            Self::Corner(Corner::BottomRight) => {
-                write!(f, "{BOTTOM_RIGHT_CORNER}")
             }
             Self::Empty() => {
                 write!(f, "{EMPTY_TILE}")

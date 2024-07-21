@@ -21,8 +21,6 @@
 */
 
 //! A minimal program entry point
-use libc;
-use std::process;
 
 use play::{play, Input};
 
@@ -32,13 +30,5 @@ mod play;
 
 /// The main program entry point
 fn main() {
-    match play(&Input::Interactive) {
-        Err(_) => {
-            eprintln!("{}", board::constants::GAME_FAILURE_MESSAGE);
-            process::exit(libc::EXIT_FAILURE);
-        }
-        Ok(_) => {
-            process::exit(libc::EXIT_SUCCESS);
-        }
-    }
+    play(&Input::Interactive);
 }

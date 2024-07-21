@@ -22,99 +22,39 @@
 
 //! Various constants used by [Board]
 
-use super::tile::{Corner, Edge, Power, Tile, Tiles};
+use super::tile::{Power, Tile};
 use super::Board;
+use std::io;
 
 // Internal constants
 /// Text printed for an empty [`Tile`] in the board
 pub(super) const EMPTY_TILE: &str = "      ";
-/// Text printed for the left edge of the board
-pub(super) const LEFT_EDGE: &str = "│";
-/// Text printed for the right edge of the board
-pub(super) const RIGHT_EDGE: &str = "│\r\n";
-/// Text printed for the top edge of the board
-pub(super) const TOP_EDGE: &str = "──────";
-/// Text printed for the bottom edge of the board
-pub(super) const BOTTOM_EDGE: &str = "──────";
-/// Text printed at the bottom-right corner
-pub(super) const BOTTOM_RIGHT_CORNER: &str = "┘\r\n";
-/// Text printed at the top-right corner
-pub(super) const TOP_RIGHT_CORNER: &str = "┐\r\n";
-/// Text printed at the bottom-left corner
-pub(super) const BOTTOM_LEFT_CORNER: &str = "└";
-/// Text printed at the top-left corner
-pub(super) const TOP_LEFT_CORNER: &str = "┌";
-/// Width of the left and right [`Board`] edges
-pub(super) const LR_EDGE_WIDTH: usize = 1;
 /// Text printed to indicate score
 pub(super) const SCORE_TEXT: &str = "score is ";
-/// Message printed after merging a [`Tile`] WIN_POWER times
-pub(super) const WIN_MESSAGE: &str = "- - - - you win!! - - - -\r\n";
+/// Message printed after merging a [`Tile`] [`WIN_POWER`] times
+pub(super) const WIN_MESSAGE: &str = "─────── you win! ───────\r\n";
 /// Power-of-two required to win the game
 pub(super) const WIN_POWER: Power = 11;
 /// The width of a single [`Tile`]
 pub(super) const TILES_WIDTH: usize = 4;
 /// The number of [Tile]s in a given [`Board`] row or column
-pub(super) const BOARD_DIMENSION: usize = NUMBER_TILES_PER_LINE + 2 * LR_EDGE_WIDTH;
+pub(super) const TILES_PER_LINE: usize = 4;
 /// The area of playable tiles
-pub(super) const BOARD_AREA: usize = BOARD_DIMENSION * BOARD_DIMENSION;
-pub(super) const NUMBER_TILES_RANGE: std::ops::Range<usize> =
-    LR_EDGE_WIDTH..(LR_EDGE_WIDTH + NUMBER_TILES_PER_LINE);
+pub(super) const TILES_AREA: usize = TILES_PER_LINE * TILES_PER_LINE;
+// Length of a complete output line, as-displayed, and including borders and whitespace
+pub(super) const PRINT_LINE_LEN: usize = (TILES_PER_LINE * TILES_WIDTH) + PRE_MARGIN.len();
 
 // Public constants
-/// The number of [`Tile`]s per row or column
-pub const NUMBER_TILES_PER_LINE: usize = 4;
 /// Text printed to the left of the board
-pub const LEFT_SPACE: &str = "\r      ";
+pub const PRE_MARGIN: &str = "\r\r      ";
 /// Text printed to mark the end of a game
-pub const GAME_OVER: &str = "- - - - game over - - - -\r\n";
+pub const GAME_OVER: &str = "─── the game is over ───\r\n";
 // Input character which ends gameplay
-pub const END_OF_GAME_CHARACTER: u8 = '\u{3}' as u8;
-// Length of a complete output line, as-displayed, and including borders and whitespace
-pub const DISPLAY_LINE_LENGTH: usize =
-    (NUMBER_TILES_PER_LINE * TILES_WIDTH) + (2 * LR_EDGE_WIDTH) + LEFT_SPACE.len()
-        - SCORE_TEXT.len();
+pub const END_OF_GAME_CHARACTER: u8 = 3;
 
 /// Default starting [`Board`] structure
 pub const DEFAULT_BOARD: &Board = &Board {
-    tiles: Tiles([
-        Tile::Corner(Corner::TopLeft),
-        Tile::Edge(Edge::Top),
-        Tile::Edge(Edge::Top),
-        Tile::Edge(Edge::Top),
-        Tile::Edge(Edge::Top),
-        Tile::Corner(Corner::TopRight),
-        Tile::Edge(Edge::Left),
-        Tile::Empty(),
-        Tile::Empty(),
-        Tile::Empty(),
-        Tile::Empty(),
-        Tile::Edge(Edge::Right),
-        Tile::Edge(Edge::Left),
-        Tile::Empty(),
-        Tile::Empty(),
-        Tile::Empty(),
-        Tile::Empty(),
-        Tile::Edge(Edge::Right),
-        Tile::Edge(Edge::Left),
-        Tile::Empty(),
-        Tile::Empty(),
-        Tile::Empty(),
-        Tile::Empty(),
-        Tile::Edge(Edge::Right),
-        Tile::Edge(Edge::Left),
-        Tile::Empty(),
-        Tile::Empty(),
-        Tile::Empty(),
-        Tile::Empty(),
-        Tile::Edge(Edge::Right),
-        Tile::Corner(Corner::BottomLeft),
-        Tile::Edge(Edge::Bottom),
-        Tile::Edge(Edge::Bottom),
-        Tile::Edge(Edge::Bottom),
-        Tile::Edge(Edge::Bottom),
-        Tile::Corner(Corner::BottomRight),
-    ]),
+    tiles: [Tile::Empty(); TILES_AREA],
     open_tiles: 16,
     score: 0,
     max_tile: 0,
@@ -123,14 +63,14 @@ pub const DEFAULT_BOARD: &Board = &Board {
 // Print output to stdout
 #[cfg(not(feature = "sink"))]
 /// Function to create a writer object
-pub const WRITER: fn() -> std::io::Stdout = std::io::stdout;
+pub const WRITER: fn() -> io::Stdout = io::stdout;
 
 // Send all output to a null sink
 #[cfg(feature = "sink")]
 /// Function to create a writer object
-pub const WRITER: fn() -> std::io::Sink = std::io::sink;
+pub const WRITER: fn() -> io::Sink = io::sink;
 
 /// Size of a complete buffer needed to print a [`Board`] frame to the terminal
-pub(super) const DISPLAY_BUFFER_SIZE: usize = (BOARD_DIMENSION + 6) * (BOARD_DIMENSION + 4);
+pub(super) const DISPLAY_BUFFER_SIZE: usize = (TILES_PER_LINE + 6) * (TILES_PER_LINE + 4);
 /// Message printed on various game failures
 pub const GAME_FAILURE_MESSAGE: &str = " an ongoing game problem \r\n";

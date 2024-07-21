@@ -91,10 +91,7 @@ impl fmt::Display for Colour {
         let (bg, fg) = if *self == Self::default() {
             (0_u32, 15_u32)
         } else {
-            (
-                16_u32 + self.column as u32 + (self.row as u32 * 36_u32),
-                0_u32,
-            )
+            (16_u32 + self.column + (self.row * 36_u32), 0_u32)
         };
 
         write!(f, "\u{1B}[48;5;{bg}m\u{1B}[38;5;{fg}m")

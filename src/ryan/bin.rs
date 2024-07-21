@@ -23,14 +23,13 @@
 // Include README.md docs inline
 #![doc = include_str!("./README.md")]
 
-use std::env;
-use std::fs;
-use std::path;
-use std::process;
+use std::{env, fs, hint, path, process};
+
+const RYAN_MINIMUM_ARG_COUNT: usize = 1;
 
 fn main() {
     // Used in debug messages
-    let bin_name = || env::args().nth(0).expect("Failed to get binary name");
+    let bin_name = || env::args().next().expect("Failed to get binary name");
     // Print program usage message
     let usage = || {
         println!(
@@ -54,16 +53,14 @@ usage:
     let args: Vec<String> = env::args().skip(1).collect();
 
     // Command-line parsing bookkeeping
-    const WANT_ARG_COUNT: usize = 1;
     let len = args.len();
     let loops;
 
     match len {
         0 => {
-            assert_eq!(WANT_ARG_COUNT, 1);
+            assert_eq!(RYAN_MINIMUM_ARG_COUNT, 1);
             error(format!(
-                "Need at least {WANT_ARG_COUNT} arguments, but {} found",
-                len
+                "Need at least {RYAN_MINIMUM_ARG_COUNT} arguments, but {len} found"
             ));
         }
         1 => {
@@ -92,7 +89,8 @@ usage:
             for _ in 0..loops {
                 // Run x800 with the file contents
                 // Use `black_box` to avoid optimizing away the loop
-                std::hint::black_box(x800::one_shot(&d));
+                #[allow(clippy::unit_arg)]
+                hint::black_box(x800::one_shot(&d));
             }
         }
     }

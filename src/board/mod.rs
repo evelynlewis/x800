@@ -22,30 +22,23 @@
 
 //! Data structures and functions needed to implement the x800 board
 
-use std::{cmp, collections, mem};
+use std::{cmp, vec};
 
 pub mod constants;
-use constants::{END_OF_GAME_CHARACTER, NUMBER_TILES_RANGE};
 mod draw;
 pub use draw::draw;
 pub mod tile;
 use tile::{Generation, Tile};
 
-/// A row-major [`Tile`] index
-type TileIndex = (usize, usize);
-
-/// ScanPair.0 is the current
-type ScanPair = (TileIndex, TileIndex);
-
 #[derive(Clone)]
 pub struct Board {
-    tiles: tile::Tiles,
-    score: u32,
+    tiles: [Tile; constants::TILES_AREA],
+    score: u64,
     open_tiles: usize,
     max_tile: tile::Power,
 }
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub(super) enum Direction {
     Up,
     Down,
@@ -61,199 +54,134 @@ pub(super) enum Action {
 }
 
 impl Action {
-    #[inline(always)]
     pub(super) const fn parse(input: u8) -> Self {
         match input {
             b'w' => Action::Direction(Direction::Up),
             b'a' => Action::Direction(Direction::Left),
             b'd' => Action::Direction(Direction::Right),
             b's' => Action::Direction(Direction::Down),
-            END_OF_GAME_CHARACTER => Action::Shutdown,
+            constants::END_OF_GAME_CHARACTER => Action::Shutdown,
             _ => Action::Continue,
         }
     }
 }
 
 impl Board {
+    /// Update the [`Board`], given a move [`Direction`] and [`Generation`], and its current state.
+    pub fn update(&mut self, direction: Direction, generation: Generation) -> bool {
+        const LEFT_INDEX: [[usize; constants::TILES_PER_LINE]; constants::TILES_PER_LINE] =
+            [[0, 1, 2, 3], [4, 5, 6, 7], [8, 9, 10, 11], [12, 13, 14, 15]];
+        const RIGHT_INDEX: [[usize; constants::TILES_PER_LINE]; constants::TILES_PER_LINE] =
+            [[3, 2, 1, 0], [7, 6, 5, 4], [11, 10, 9, 8], [15, 14, 13, 12]];
+        const UP_INDEX: [[usize; constants::TILES_PER_LINE]; constants::TILES_PER_LINE] =
+            [[0, 4, 8, 12], [1, 5, 9, 13], [2, 6, 10, 14], [3, 7, 11, 15]];
+        const DOWN_INDEX: [[usize; constants::TILES_PER_LINE]; constants::TILES_PER_LINE] =
+            [[12, 8, 4, 0], [13, 9, 5, 1], [14, 10, 6, 2], [15, 11, 7, 3]];
+
+        let index_table = match direction {
+            Direction::Up => UP_INDEX,
+            Direction::Down => DOWN_INDEX,
+            Direction::Left => LEFT_INDEX,
+            Direction::Right => RIGHT_INDEX,
+        };
+
+        let mut mod_line: vec::Vec<Tile> = Vec::with_capacity(constants::TILES_PER_LINE);
+        let mut state_changed = false;
+
+        for index_line in index_table {
+            // Get the effective line
+            for sub_index in index_line {
+                if let Tile::Number(_, _) = self.tiles[sub_index] {
+                    mod_line.push(self.tiles[sub_index]);
+                }
+            }
+
+            let mut end_index = mod_line.len().saturating_sub(1);
+
+            let mut index: usize = 0;
+            // While there are still elements at (index, index + 1)
+            while index < end_index {
+                let (a_index, b_index) = (index, index + 1);
+                match (mod_line[a_index], mod_line[b_index]) {
+                    (Tile::Empty(), _) | (_, Tile::Empty()) => {
+                        unreachable!();
+                    }
+                    (Tile::Number(a_pow, a_gen), Tile::Number(b_pow, b_gen)) => {
+                        if a_pow == b_pow && ((a_gen != generation) && (b_gen != generation)) {
+                            // New next-power block
+                            let next_pow = a_pow + 1;
+                            mod_line[a_index] = Tile::Number(next_pow, generation);
+
+                            // One fewer element
+                            mod_line.remove(b_index);
+                            end_index -= 1;
+
+                            // Update statistics
+                            self.open_tiles += 1;
+                            self.score += 1 << next_pow;
+                            self.max_tile = cmp::max(next_pow, self.max_tile);
+                        }
+                    }
+                }
+                index += 1;
+            }
+
+            // Re-add empty tiles to the end of the vector
+            mod_line.resize(constants::TILES_PER_LINE, Tile::Empty());
+
+            // Apply to tiles
+            for (i, super_i) in index_line.into_iter().enumerate() {
+                if self.tiles[super_i] != mod_line[i] {
+                    state_changed = true;
+                    self.tiles[super_i] = mod_line[i];
+                }
+            }
+
+            // Clear the vector for next time
+            mod_line.clear();
+        }
+        state_changed
+    }
+
+    /// Check if the [`Board`] has one or more [`Tile::Empty`] [`Tile`]s
     pub fn has_space(&self) -> bool {
         self.open_tiles != 0
     }
 
-    #[inline]
-    /// Adjacent tiles have a difference of plus or minus 1 in their minor indexes and have the same major index.
-    /// Direction determines the choice of major and minor axis, and if the second [`ScanPair`] element is one more or less that the first.
-    fn pair(major: usize, minor: usize, direction: Direction) -> ScanPair {
-        match direction {
-            Direction::Left => ((major, minor), (major, minor + 1)),
-            Direction::Right => ((major, minor), (major, minor - 1)),
-            Direction::Up => ((minor, major), (minor + 1, major)),
-            Direction::Down => ((minor, major), (minor - 1, major)),
-        }
-    }
-
-    /// Pick up slack between adjacent tiles in a given major axis (row or column).
-    /// See [`Board::pair`].
-    #[inline(always)]
-    fn collect(
-        &mut self,
-        major: usize,
-        minor: usize,
-        direction: Direction,
-        empty_queue: &mut collections::VecDeque<(usize, usize)>,
-    ) -> bool {
-        let current = Self::pair(major, minor, direction).0;
-
-        match self.tiles[current] {
-            Tile::Empty() => {
-                empty_queue.push_back(current);
-                false
-            }
-            Tile::Number(_, _) => {
-                if empty_queue.is_empty() {
-                    false
-                } else {
-                    let index = empty_queue.pop_front().expect("Bad queue");
-
-                    // Move current Tile into the popped index and replace it with an empty one
-                    // This is more efficient than the manual version
-                    self.tiles[index] = mem::take(&mut self.tiles[current]);
-
-                    empty_queue.push_back(current);
-                    true
-                }
-            }
-            Tile::Corner(_) | Tile::Edge(_) => false,
-        }
-    }
-
-    /// Merge two adjacent tiles which have collided on the wall side (ie. opposite the direction of movement).
-    /// See [`Board::pair`].
-    #[inline(always)]
-    fn merge(
-        &mut self,
-        major: usize,
-        minor: usize,
-        direction: Direction,
-        empty_queue: &mut collections::VecDeque<(usize, usize)>,
-        generation: Generation,
-    ) -> bool {
-        let (current, next) = Self::pair(major, minor, direction);
-        match (self.tiles[current], self.tiles[next]) {
-            (Tile::Number(n, a), Tile::Number(m, b)) => {
-                if (n == m) && ((a != generation) && (b != generation)) {
-                    // Block accounting
-                    self.tiles[current] = Tile::Number(n + 1, generation);
-                    self.tiles[next] = Tile::Empty();
-                    empty_queue.push_back(next);
-
-                    // Updating stats
-                    self.open_tiles += 1;
-                    self.score += 1 << (n + 1);
-                    self.max_tile = cmp::max(self.max_tile, n + 1);
-                    true
-                } else {
-                    false
-                }
-            }
-            (Tile::Empty(), Tile::Number(_, _)) => {
-                empty_queue.push_back(next);
-                let index = empty_queue.pop_front().expect("Bad queue");
-                self.tiles[index] = self.tiles[next];
-                self.tiles[next] = Tile::Empty();
-                false
-            }
-            (Tile::Edge(_), _)
-            | (Tile::Corner(_), _)
-            | (_, Tile::Empty())
-            | (_, Tile::Edge(_))
-            | (_, Tile::Corner(_)) => false,
-        }
-    }
-
-    /// Update the [`Board`], given a move [`Direction`] and [`Generation`], and its current state.
-    #[inline(always)]
-    pub fn update(
-        &mut self,
-        direction: Direction,
-        generation: Generation,
-        empty_queue: &mut collections::VecDeque<(usize, usize)>,
-    ) -> bool {
-        let mut moved = false;
-        let mut empty_count = 0;
-
-        // Iterate in row or column major order. First scan removes slack; second does one merge
-        match direction {
-            Direction::Left | Direction::Up => {
-                const MIDDLE_TILE: usize = 2;
-                for major in NUMBER_TILES_RANGE {
-                    empty_queue.clear();
-                    for minor in NUMBER_TILES_RANGE {
-                        moved |= self.collect(major, minor, direction, empty_queue);
-                    }
-                    for minor in NUMBER_TILES_RANGE {
-                        moved |= self.merge(major, minor, direction, empty_queue, generation);
-                    }
-                    // Allow a final middle merge
-                    moved |= self.merge(major, MIDDLE_TILE, direction, empty_queue, generation);
-                    // Ensure empty_count coherency
-                    empty_count += empty_queue.len();
-                }
-            }
-            Direction::Right | Direction::Down => {
-                const MIDDLE_TILE: usize = 3;
-                for major in NUMBER_TILES_RANGE.rev() {
-                    empty_queue.clear();
-                    for minor in NUMBER_TILES_RANGE.rev() {
-                        moved |= self.collect(major, minor, direction, empty_queue);
-                    }
-                    for minor in NUMBER_TILES_RANGE.rev() {
-                        moved |= self.merge(major, minor, direction, empty_queue, generation);
-                    }
-                    // Allow a final middle merge
-                    moved |= self.merge(major, MIDDLE_TILE, direction, empty_queue, generation);
-                    // Ensure empty_count coherency
-                    empty_count += empty_queue.len();
-                }
-            }
-        }
-        // Ensure empty_count coherency
-        assert_eq!(empty_count, self.open_tiles);
-        moved
-    }
-
-    // Create a new '2' or '4' number tile in a blank space
-    #[inline]
+    /// Create a new '2' or '4' number tile in a blank space
     pub fn spawn_tile(&mut self, generation: Generation) -> bool {
+        // Values
+        const CHANCE_OF_FOUR_TILES: u64 = 4;
+        let open_tiles: usize = self.open_tiles;
+
         if !self.has_space() {
             return false;
         }
 
+        #[allow(clippy::cast_possible_truncation)]
         // Collect random numbers
-        const CHANCE_OF_FOUR_TILES: u64 = 4;
-        let insert_index = fastrand::u64(..self.open_tiles as u64);
+        let insert_index = fastrand::u64(..open_tiles as u64) as usize;
         let insert_value = if fastrand::u64(..CHANCE_OF_FOUR_TILES) == (CHANCE_OF_FOUR_TILES - 1) {
             2 // '4' tile
         } else {
             1 // '2' tile
         };
 
-        let mut cursor = 0;
-
-        // Brute force isn't great, but it's an exceptionally small board (about 16 loops maximum)
-        for r in NUMBER_TILES_RANGE {
-            for c in NUMBER_TILES_RANGE {
-                if self.tiles[(r, c)] == Tile::Empty() {
-                    if cursor == insert_index {
-                        self.tiles[(r, c)] = Tile::Number(insert_value, generation);
-                        self.open_tiles -= 1;
-                        self.max_tile = cmp::max(insert_value, self.max_tile);
-                        // Return early
-                        return true;
-                    }
-                    cursor += 1;
+        // Insert at location
+        let mut offset: usize = 0;
+        for tile in self.tiles.as_mut() {
+            if *tile == Tile::Empty() {
+                if offset == insert_index {
+                    *tile = Tile::Number(insert_value, generation);
+                    self.max_tile = cmp::max(insert_value, self.max_tile);
+                    self.open_tiles -= 1;
+                    return true;
                 }
+                offset += 1;
             }
         }
-        unreachable!("Failed to spawn tile");
+
+        // Should never happen since insert_index is less than open_tiles
+        unreachable!("Failed to insert tile at offset {}", insert_index);
     }
 }

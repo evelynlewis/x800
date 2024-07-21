@@ -33,9 +33,12 @@ use play::play;
 
 pub fn driver(input: &[u8], seed: u64) {
     fastrand::seed(seed);
-    play(&play::Input::Slice(input)).unwrap();
+    play(&play::Input::Slice(input));
 }
 
+/// # Panics
+///
+/// Will panic if `data.len()` is less than `8`
 #[inline(always)]
 pub fn one_shot(data: &[u8]) {
     type Seed = u64;
@@ -48,5 +51,5 @@ pub fn one_shot(data: &[u8]) {
             .try_into()
             .expect("Failed to generate seed"),
     );
-    driver(&data[(mem::size_of::<Seed>() - 1)..], seed)
+    driver(&data[(mem::size_of::<Seed>() - 1)..], seed);
 }

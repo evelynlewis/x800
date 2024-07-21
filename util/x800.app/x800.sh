@@ -60,7 +60,7 @@ while true; do
 	# Prompt for new game input
 	# Note that the embedded newline and spaces are intentional
 	echo
-	echo "      press enter for a new game"
+	echo "     press enter for a new game"
 	echo
 	# Wait for user input
 	prompt

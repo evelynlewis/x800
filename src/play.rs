@@ -23,25 +23,17 @@
 //! Implementation of x800 core event loop
 
 use std::{
-    collections,
     io::{self, Read, Write},
-    mem,
-    sync::{self, atomic},
-    thread,
+    mem, slice, sync, thread, time,
 };
 
-use crate::board::{
-    self,
-    constants::{self, DEFAULT_BOARD, END_OF_GAME_CHARACTER, NUMBER_TILES_PER_LINE},
-    tile::Generation,
-    Action,
-};
+use crate::board::{self, constants, tile::Generation, Action};
 
 /// The number of tiles to generate at startup
 const INITIAL_TILES_COUNT: u32 = 2;
 
 /// Minimum wait between non-terminal draws
-const MIN_DRAW_DELAY: std::time::Duration = std::time::Duration::from_millis(4);
+const MIN_DRAW_DELAY: time::Duration = time::Duration::from_millis(4);
 
 /// Configures terminal as needed
 fn io_config(input: &Input) -> Option<Io> {
@@ -78,10 +70,11 @@ pub enum Input<'a> {
 struct Io(libc::c_int, libc::termios);
 
 /// Main program event loop
-#[inline(always)]
-pub fn play(input: &Input) -> Result<(), ()> {
+#[inline]
+#[allow(clippy::too_many_lines)]
+pub fn play(input: &Input) {
     // Runtime storage
-    let board = sync::Arc::new(sync::Mutex::new(DEFAULT_BOARD.clone()));
+    let board = sync::Arc::new(sync::Mutex::new(constants::DEFAULT_BOARD.clone()));
     let mut stdin = io::stdin();
 
     // Game save setup
@@ -96,7 +89,7 @@ pub fn play(input: &Input) -> Result<(), ()> {
         let mut buffer = [0_u8; 1];
         match stdin.read_exact(&mut buffer) {
             Err(_) => Action::Shutdown,
-            Ok(_) => {
+            Ok(()) => {
                 #[cfg(feature = "save")]
                 save.push(buffer[0]);
                 Action::parse(buffer[0])
@@ -107,7 +100,7 @@ pub fn play(input: &Input) -> Result<(), ()> {
     // Pre-setup for slice input
     let mut iter = match input {
         Input::Slice(slice) => slice.iter(),
-        Input::Interactive => Default::default(),
+        Input::Interactive => slice::Iter::default(),
     };
 
     let io = io_config(input);
@@ -122,36 +115,36 @@ pub fn play(input: &Input) -> Result<(), ()> {
     }
 
     // Bookkeeping for board-drawing thread
-    let draw_quit = sync::Arc::new(atomic::AtomicBool::new(false));
-    let draw_join;
-    let draw_thread;
-
-    // Spawn board-drawing thread
+    let draw_quit = sync::Arc::new(sync::atomic::AtomicBool::new(false));
     let board_arg = sync::Arc::clone(&board);
     let quit_arg = sync::Arc::clone(&draw_quit);
-    draw_join = if cfg!(not(feature = "mini")) {
+    // Spawn board-drawing thread
+    let draw_join = if cfg!(not(feature = "mini")) {
         Some(thread::spawn(move || {
-            board::draw(board_arg, &quit_arg).expect(constants::GAME_FAILURE_MESSAGE);
+            board::draw(&board_arg, &quit_arg).expect(constants::GAME_FAILURE_MESSAGE);
         }))
     } else {
         None
     };
-
     // We need the thread handle separately
-    draw_thread = draw_join.as_ref().map(|t| t.thread());
+    let draw_thread = draw_join.as_ref().map(thread::JoinHandle::thread);
 
+    // Draw timestamp
+    let mut last_draw = time::Instant::now();
     // Initially draw the board
-    let mut last_draw = std::time::Instant::now();
-    draw_thread.map(|t| t.unpark());
-
-    let mut moved;
-    let mut empty_queue = collections::VecDeque::with_capacity(NUMBER_TILES_PER_LINE);
+    if let Some(t) = draw_thread {
+        t.unpark();
+    }
 
     // The main event loop
     loop {
         generation += 1;
         let action = match input {
-            Input::Slice(_) => Action::parse(iter.next().copied().unwrap_or(END_OF_GAME_CHARACTER)),
+            Input::Slice(_) => Action::parse(
+                iter.next()
+                    .copied()
+                    .unwrap_or(constants::END_OF_GAME_CHARACTER),
+            ),
             Input::Interactive => stdin_reader(),
         };
 
@@ -159,16 +152,14 @@ pub fn play(input: &Input) -> Result<(), ()> {
         match action {
             Action::Direction(direction) => {
                 let mut unlocked = board.lock().unwrap();
-                moved = unlocked.update(direction, generation, &mut empty_queue);
+                let moved = unlocked.update(direction, generation);
 
-                // If the move had no effect on a non-full board,
-                // skip adding a new tile
+                // Skip adding a tile after invalid move
                 if !moved && unlocked.has_space() {
                     continue;
                 }
 
-                // Add new starting tile if possible
-                // Has the player already used their last move?
+                // Add new tile if the board has space
                 if !unlocked.spawn_tile(generation) {
                     break;
                 }
@@ -182,25 +173,30 @@ pub fn play(input: &Input) -> Result<(), ()> {
         };
 
         // In case of update, draw the board
-        draw_thread.map(|t| {
-            if (std::time::Instant::now() - last_draw) > MIN_DRAW_DELAY {
+        if let Some(t) = draw_thread {
+            if last_draw.elapsed() > MIN_DRAW_DELAY {
                 t.unpark();
-                last_draw = std::time::Instant::now();
+                last_draw = time::Instant::now();
             }
-        });
+        }
     }
 
     // Handle graceful shutdown
     // Signal and join board-drawing thread, if it exists
-    draw_quit.store(true, atomic::Ordering::Relaxed);
-    draw_thread.map(|t| t.unpark());
-    draw_join.map(|h| h.join().unwrap());
+    draw_quit.store(true, sync::atomic::Ordering::Relaxed);
+    if let Some(t) = draw_thread {
+        t.unpark();
+    }
+
+    if let Some(h) = draw_join {
+        h.join().unwrap();
+    }
 
     // Print end-of-game message
     write!(
         constants::WRITER(),
         "{}{}",
-        board::constants::LEFT_SPACE,
+        board::constants::PRE_MARGIN,
         board::constants::GAME_OVER
     )
     .expect("Failed to write to output stream");
@@ -222,6 +218,4 @@ pub fn play(input: &Input) -> Result<(), ()> {
             .write(&save)
             .expect("Failed to write game save file");
     }
-
-    Ok(())
 }
