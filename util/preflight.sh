@@ -64,6 +64,10 @@ plus_header "Now validating build"
 xcall cargo build
 plus_ok
 
+plus_header "Now validiating clippy"
+xcall cargo clippy -- -Dwarnings
+plus_ok
+
 plus_header "Now validating build with sink feature"
 xcall cargo build --features sink
 plus_ok
