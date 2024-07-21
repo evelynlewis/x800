@@ -25,17 +25,17 @@ use std::fs;
 use x800::one_shot;
 
 mod shared;
-#[divan::bench]
+#[divan::bench(sample_count = 10, sample_size = 1000)]
 pub fn timed_startup(c: Bencher) {
     timed_file(c, shared::STARTUP_FILE);
 }
 
-#[divan::bench]
+#[divan::bench(sample_count = 10, sample_size = 1000)]
 pub fn timed_short(c: Bencher) {
     timed_file(c, shared::SHORT_FILE);
 }
 
-#[divan::bench]
+#[divan::bench(sample_count = 10, sample_size = 1000)]
 pub fn timed_gold(c: Bencher) {
     timed_file(c, shared::GOLD_FILE);
 }

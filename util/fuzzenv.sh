@@ -57,6 +57,12 @@ fuzz_run() {
 	cargo fuzz run "$@" ${FUZZER_BUILD_ARGS} "${FUZZER_NAME}" -- ${FUZZER_RUN_ARGS}
 }
 
+# Run fuzzer using cargo-fuzz without args
+fuzz_run_bench() {
+	# shellcheck disable=SC2086
+	cargo fuzz run "$@" ${FUZZER_BUILD_ARGS} "${FUZZER_NAME}"
+}
+
 # Run fuzzer using cargo-fuzz
 fuzz_check() {
 	# shellcheck disable=SC2086

@@ -40,7 +40,7 @@ test -d ./fuzz/
 # Require one argument
 if [ $# -eq 0 ]; then
 	echo "Please provide an argument. An example:"
-	echo "$0 fuzz"
+	echo "$0 fuzzu"
 	exit 1
 elif [ $# -gt 1 ]; then
 	echo "Too many arguments provided"

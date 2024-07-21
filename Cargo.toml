@@ -44,7 +44,6 @@ strip = "symbols"
 
 [dev-dependencies]
 divan = { version = "0.1.14", default-features = false }
-iai = { version = "0.1.1", default-features = false }
 x800 = { path = ".", features = ["sink"] }
 
 [features]
@@ -55,10 +54,5 @@ save = []
 
 [[bench]]
 name = "timed"
-harness = false
-required-features = ["sink"]
-
-[[bench]]
-name = "count"
 harness = false
 required-features = ["sink"]

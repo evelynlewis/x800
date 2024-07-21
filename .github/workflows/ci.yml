@@ -29,8 +29,6 @@ jobs:
       - uses: actions/checkout@v4
       - name: Setup
         run: |
-          sudo apt update
-          sudo apt install -y valgrind
           rustup toolchain install stable --profile minimal
       - name: ryan benchmarks
         run: |
@@ -52,10 +50,6 @@ jobs:
         run: |
           echo "Running Divan benchmarks"
           cargo bench --bench timed
-      - name: Iai benchmarks
-        run: |
-          echo "Running iai benchmarks"
-          cargo bench --bench count
 
   etc:
     runs-on: ubuntu-latest
