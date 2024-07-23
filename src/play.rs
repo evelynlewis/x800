@@ -199,4 +199,7 @@ pub fn play(input: &Input) {
             .write(&save)
             .expect("Failed to write game save file");
     }
+
+    #[cfg(feature = "score")]
+    println!("{}", board.lock().unwrap().score());
 }

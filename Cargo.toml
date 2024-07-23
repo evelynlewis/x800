@@ -50,6 +50,7 @@ x800 = { path = ".", features = ["sink"] }
 default = []
 sink = []
 mini = ["sink"]
+score = ["sink"]
 save = []
 
 [[bench]]

@@ -165,4 +165,9 @@ impl Board {
         // Should never happen since insert_index is less than open_tiles
         unreachable!("Failed to insert tile at offset {}", insert_index);
     }
+
+    #[allow(dead_code)]
+    pub fn score(&self) -> u64 {
+        self.score
+    }
 }
