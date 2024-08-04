@@ -60,7 +60,7 @@ pub fn play(input: &Input) {
 
     // Game save setup
     #[cfg(feature = "save")]
-    let mut save: Vec<u8> = Vec::with_capacity(2048);
+    let mut save: Vec<u8> = Vec::new();
     #[cfg(feature = "save")]
     save.extend(fastrand::get_seed().to_le_bytes());
 

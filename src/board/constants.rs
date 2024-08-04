@@ -36,8 +36,9 @@ pub const END_OF_GAME_CHARACTER: u8 = 3;
 /// Default starting [`Board`] structure
 pub const DEFAULT_BOARD: &Board = &Board {
     tiles: [Tile::Empty(); TILES_AREA],
-    open_tiles: 16,
+    line: vec![],
     score: 0,
+    open_tiles: 16,
     max_tile: 0,
 };
 

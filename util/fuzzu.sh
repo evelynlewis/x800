@@ -19,8 +19,5 @@ test -d ./fuzz
 # shellcheck source=fuzzenv.sh
 . ./util/fuzzenv.sh
 
-# Reduce eventual child process priority by nice-ing ourselves
-renice -n 8 $$
-
 # Run fuzzer using cargo-fuzz
 fuzz_run_bench "$@" 2>>./fuzz/target/roger-output.txt &

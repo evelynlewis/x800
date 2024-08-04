@@ -14,6 +14,7 @@ use tile::{Generation, Tile};
 #[derive(Clone)]
 pub struct Board {
     tiles: [Tile; constants::TILES_AREA],
+    line: vec::Vec<Tile>,
     score: u64,
     open_tiles: usize,
     max_tile: tile::Power,
@@ -66,24 +67,26 @@ impl Board {
             Direction::Right => RIGHT_INDEX,
         };
 
-        let mut mod_line: vec::Vec<Tile> = Vec::with_capacity(constants::TILES_PER_LINE);
         let mut state_changed = false;
 
         for index_line in index_table {
+            // Clear the vector to begin
+            self.line.clear();
+
             // Get the effective line
             for sub_index in index_line {
                 if let Tile::Number(_, _) = self.tiles[sub_index] {
-                    mod_line.push(self.tiles[sub_index]);
+                    self.line.push(self.tiles[sub_index]);
                 }
             }
 
-            let mut end_index = mod_line.len().saturating_sub(1);
+            let mut end_index = self.line.len().saturating_sub(1);
 
             let mut index: usize = 0;
             // While there are still elements at (index, index + 1)
             while index < end_index {
                 let (a_index, b_index) = (index, index + 1);
-                match (mod_line[a_index], mod_line[b_index]) {
+                match (self.line[a_index], self.line[b_index]) {
                     (Tile::Empty(), _) | (_, Tile::Empty()) => {
                         unreachable!();
                     }
@@ -91,10 +94,10 @@ impl Board {
                         if a_pow == b_pow && ((a_gen != generation) && (b_gen != generation)) {
                             // New next-power block
                             let next_pow = a_pow + 1;
-                            mod_line[a_index] = Tile::Number(next_pow, generation);
+                            self.line[a_index] = Tile::Number(next_pow, generation);
 
                             // One fewer element
-                            mod_line.remove(b_index);
+                            self.line.remove(b_index);
                             end_index -= 1;
 
                             // Update statistics
@@ -108,18 +111,16 @@ impl Board {
             }
 
             // Re-add empty tiles to the end of the vector
-            mod_line.resize(constants::TILES_PER_LINE, Tile::Empty());
+            self.line.resize(constants::TILES_PER_LINE, Tile::Empty());
 
             // Apply to tiles
-            for (i, super_i) in index_line.into_iter().enumerate() {
-                if self.tiles[super_i] != mod_line[i] {
+            for (line_i, tiles_i) in index_line.into_iter().enumerate() {
+                let line_tile = self.line[line_i];
+                if self.tiles[tiles_i] != line_tile {
                     state_changed = true;
-                    self.tiles[super_i] = mod_line[i];
+                    self.tiles[tiles_i] = line_tile;
                 }
             }
-
-            // Clear the vector for next time
-            mod_line.clear();
         }
         state_changed
     }
