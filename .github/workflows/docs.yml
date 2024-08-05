@@ -30,8 +30,8 @@ jobs:
       - name: Setup preview image
         run: |
           ls -d target/doc/x800/
-          mkdir -p target/doc/x800/util/
-          cp -f util/screenshot.jpeg target/doc/x800/util/
+          mkdir -p target/doc/x800/etc/
+          cp -f etc/screen.png target/doc/x800/etc/
       - name: Remove doc lock
         run: rm target/doc/.lock
       - name: Upload artifact
