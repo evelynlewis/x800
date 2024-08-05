@@ -58,10 +58,20 @@ const COLOUR_RIGHT_COLUMN: Power = COLOUR_LEFT_COLUMN + 5;
 
 #[test]
 fn power_to_colour_cycle_test() {
-    for power in 0..=255_u8 {
+    for power in 0..=u16::MAX {
         assert_eq!(
             Colour::from_power(power as Power),
             Colour::from_power(power as Power % 12)
+        );
+    }
+}
+
+#[test]
+fn power_to_colour_difference() {
+    for power in 0..u16::MAX {
+        assert_ne!(
+            Colour::from_power(power as Power),
+            Colour::from_power(power as Power + 1)
         );
     }
 }

@@ -4,16 +4,19 @@
 //! Implementation of x800 core event loop
 
 use std::{
-    io::{self, Read, Write},
+    io::{self, Read},
     mem, slice, sync, thread, time,
 };
+
+#[cfg(feature = "save")]
+use std::io::Write;
 
 use crate::board::{self, constants, tile::Generation, Action};
 
 /// The number of tiles to generate at startup
 const INITIAL_TILES_COUNT: u32 = 2;
 
-/// Minimum wait between non-terminal draws
+/// Minimum wait between non-final draws
 const MIN_DRAW_DELAY: time::Duration = time::Duration::from_millis(4);
 
 /// Configures terminal as needed
@@ -162,25 +165,14 @@ pub fn play(input: &Input) {
         }
     }
 
-    // Handle graceful shutdown
     // Signal and join board-drawing thread, if it exists
-    draw_quit.store(true, sync::atomic::Ordering::Relaxed);
     if let Some(t) = draw_thread {
+        draw_quit.store(true, sync::atomic::Ordering::Relaxed);
         t.unpark();
+        if let Some(h) = draw_join {
+            h.join().unwrap();
+        }
     }
-
-    if let Some(h) = draw_join {
-        h.join().unwrap();
-    }
-
-    // Print end-of-game message
-    write!(
-        constants::WRITER(),
-        "{}{}",
-        board::constants::PRE_MARGIN,
-        board::constants::GAME_OVER
-    )
-    .expect("Failed to write to output stream");
 
     // Reset terminal
     if io.is_some() {

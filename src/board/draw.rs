@@ -54,8 +54,16 @@ pub fn draw(
         output.flush().expect("failed to flush board render");
         buffer.clear();
 
-        // Exit now to ensure we have always written prior
+        // Exit after to ensure we have always written prior
         if exit_after {
+            // Print end-of-game message first
+            write!(
+                constants::WRITER(),
+                "{}{}",
+                constants::PRE_MARGIN,
+                constants::GAME_OVER
+            )
+            .expect("Failed to write to output stream");
             break;
         }
     }
