@@ -26,11 +26,19 @@ pub fn draw(
     let mut output = constants::WRITER();
 
     // Our own personal local board
-    let mut cloned;
+    let mut cloned: Board;
+
+    // Make a clean exit
+    let mut exit_after = false;
 
     loop {
         // Wait for wakeup
         thread::park();
+
+        // Leave the loop, but only after drawing
+        if done.load(atomic::Ordering::Relaxed) {
+            exit_after = true;
+        }
 
         // Clone for drawing
         cloned = board.lock().unwrap().clone();
@@ -46,8 +54,8 @@ pub fn draw(
         output.flush().expect("failed to flush board render");
         buffer.clear();
 
-        // Leave the loop
-        if done.load(atomic::Ordering::Relaxed) {
+        // Exit now to ensure we have always written prior
+        if exit_after {
             break;
         }
     }

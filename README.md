@@ -16,7 +16,7 @@ The project started in part as a hands-on spike project for the author to learn 
 
 ## Preview
 
-![`x800` gameplay](util/screenshot.jpeg)
+![`x800` gameplay](etc/screen.png)
 
 ## Quick start
 
