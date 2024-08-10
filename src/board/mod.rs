@@ -81,8 +81,8 @@ impl Board {
             }
 
             let mut end_index = self.line.len().saturating_sub(1);
-
             let mut index: usize = 0;
+
             // While there are still elements at (index, index + 1)
             while index < end_index {
                 let (a_index, b_index) = (index, index + 1);

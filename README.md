@@ -10,7 +10,7 @@ x800 : /ˈɛks ˈeɪt ˈhəndɹəd/
 
 Using the `mini` build feature to disable rendering, `x800` on the M1 machine runs at 11.9 million moves-per-second, or 83.9 nanoseconds per move, including amortized startup time. In this duration, light travels 25.2 metres: a distance which Usain Bolt ran in 2.05 [seconds](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10669785) in 2009 to set the current 100m sprint record. See also the benchmark [section](#benchmarks) below, and the [util/benchr.sh](./util/benchr.sh) script.
 
-The project has few build dependencies. Rather than ncurses or an external Rust terminal library, `x800` uses simple output buffering and standard [ANSI escape codes](https://en.wikipedia.org/wiki/ANSI_escape_code). The required POSIX-compatible [`libc`](https://docs.rs/libc/latest/libc/) crate is part of Rust's standard library on POSIX targets. The only external build dependency is [`fastrand`](https://crates.io/crates/fastrand), a simple non-cryptographic pseudorandom number generator crate without child dependencies. The project CI builds and tests `x800` on 25 cross-compiled targets, plus `ubuntu-latest` and `macos-latest`.
+The project has few build dependencies. Rather than ncurses or an external Rust terminal library, `x800` uses simple output buffering and standard [ANSI escape codes](https://en.wikipedia.org/wiki/ANSI_escape_code). The required POSIX-compatible [`libc`](https://docs.rs/libc/latest/libc/) crate is part of Rust's standard library on POSIX targets. The only external build dependency is [fastrand](https://crates.io/crates/fastrand), a simple non-cryptographic pseudorandom number generator crate without child dependencies. The project CI builds and tests `x800` on 25 cross-compiled targets, plus `ubuntu-latest` and `macos-latest`.
 
 The project started in part as a hands-on spike project for the author to learn [Rust](https://rust-lang.org) as a systems software developer experienced in C and C++. The name `x800` is the number 2048 in base sixteen, modified to comply with Cargo's package naming rules which disallow a leading digit.
 
@@ -48,9 +48,9 @@ cargo uninstall x800
 
 A description of 2048 gameplay, from [Wikipedia](<https://en.wikipedia.org/wiki/2048_(video_game)>):
 
-> 2048 is played on a plain 4×4 grid, with numbered tiles that slide when a player moves them using the four arrow keys. The game begins with two tiles already in the grid, having a value of either 2 or 4, and another such tile appears in a random empty space after each turn. Tiles slide as far as possible in the chosen direction until they are stopped by either another tile or the edge of the grid. If two tiles of the same number collide while moving, they will merge into a tile with the total value of the two tiles that collided. The resulting tile cannot merge with another tile again in the same move. Higher-scoring tiles emit a soft glow; the largest possible tile is 131,072.
+> 2048 is played on a plain 4×4 grid, with numbered tiles that slide when a player moves them using the four arrow keys. The game begins with two tiles already in the grid, having a value of either 2 or 4, and another such tile appears in a random empty space after each turn. Tiles slide as far as possible in the chosen direction until they are stopped by either another tile or the edge of the grid. If two tiles of the same number collide while moving, they will merge into a tile with the total value of the two tiles that collided. The resulting tile cannot merge with another tile again in the same move.
 >
-> …
+> […]
 >
 > The game is won when a tile with a value of 2048 appears on the board. Players can continue beyond that to reach higher scores. When the player has no legal moves (there are no empty spaces and no adjacent tiles with the same value), the game ends.
 
@@ -80,6 +80,8 @@ This means that Linux, MacOS, and other BSDs should all work on a variety of arc
 
 In case you wanted to play 2048 on a somewhat more underpowered or unique platform, the [`cross`](https://github.com/cross-rs/cross) crate can be used to cross-compile for the target on a better-supported host.
 
+The project CI `compatibility` jobs use `cross` to build and test `x800` on a wide range of target architectures and operating systems - at the time of writing, all POSIX platforms supported by the latest release of `cross`, `v0.2.5`.
+
 This example was tested on both an x86-64 Linux box and an arm64 MacOS host. It builds `x800` to target a Raspberry Pi Zero W with target triple `arm-unknown-linux-gnueabihf`:
 
 ```sh
@@ -103,9 +105,11 @@ See-also the development shell scripts in the `util/` directory.
 
 ## Benchmarks
 
-Since `x800` takes input from standard input, or `stdin`, and exits at the completion of a game, random games can be played by sending a stream of random moves to `stdin`. Monitoring the speed of characters being read from standard input and the typical time required to finish a game provides a reasonable performance benchmark.
+> **Note on benchmarks with random input**
+>
+> Since `x800` takes input from standard input, or `stdin`, and exits at the completion of a game, random games can be played by sending a stream of random moves to `stdin`. Monitoring the speed of characters being read from standard input and the typical time required to finish a game provides a reasonable performance benchmark.
 
-### Benchmarks using the `hyperfine` tool
+### Random input and 'gold file' input benchmarks using the `hyperfine` tool
 
 _The Rust Performance Book_ [describes](<(https://nnethercote.github.io/perf-book/benchmarking.html)>) `hyperfine` as "an excellent general-purpose benchmarking tool." It seems to deliver.
 
@@ -117,11 +121,11 @@ The `hyperfine` 'random input' latency numbers correspond to the duration of a c
 
 These benchmarks require GNU `base32`, `tr`, `dd`, and a recent version of [`hyperfine`](https://github.com/sharkdp/hyperfine).
 
-> The required GNU shell tools are part of GNU `coreutils` and preinstalled on most Linux systems. The `hyperfine` binary can be installed via your system package manager or with `cargo install hyperfine`. Your package manager's version may be too old.
+The required GNU shell tools are part of GNU `coreutils` and preinstalled on most Linux systems.The `hyperfine` binary can be installed via your system package manager or with `cargo install hyperfine`.
 
-#### `hyperfine` with gold file input
+#### `hyperfine` with 'gold file' input
 
-The 'gold file input' latency numbers correspond to a large number of loops of a known high-scoring, (ie. "gold"), `x800` save file. This is done through the the [`ryan`](./src/ryan/README.md) reproducible `x800` driver.
+The "gold file" benchmark latency numbers correspond to a large number of loops of a known high-scoring, (ie. "gold"), `x800` save file. The number of iterations is listed in the test results below under `GAMES PER RUN`. These tests are run through the the [`ryan`](./src/ryan/README.md) reproducible `x800` driver.
 
 #### `hyperfine` benchmark: Intel Pentium G3220T at 2.60GHz with Linux 6.5
 
@@ -181,11 +185,11 @@ Benchmark 1: ./target/release/ryan /Users/evelynlewis/lab/x800/fuzz/corpus/roger
   Range (min … max):   108.5 ms … 111.4 ms    32 runs
 ```
 
-### Benchmarks using shell tools
+### Random-input throughput benchmarks using shell tools
 
 Requires POSIX `sh`, and GNU `base32`, `dd`, `tr`, and `grep`.
 
-> The required GNU shell tools are part of GNU `coreutils` and preinstalled on most Linux systems. Also note that in this configuration, these benchmarks may be close to the performance limit for the shell tools themselves.
+The required GNU shell tools are part of GNU `coreutils` and preinstalled on most Linux systems.
 
 ```sh
 ./util/benchs.sh
@@ -221,7 +225,7 @@ Both a small dictionary and a minimized corpus with good coverage are checked in
 
 ## Flame graphs
 
-Flame graphs, first created by [Brendan Gregg](https://www.brendangregg.com/flamegraphs.html), are a powerful and intuitive performance-visualization tool. This project makes use of the Rust [`flamegraph`](https://github.com/flamegraph-rs/flamegraph) crate for its straightforward flame graph support.
+Flame graphs, first created by [Brendan Gregg](https://www.brendangregg.com/flamegraphs.html), are a powerful and intuitive performance-visualization tool. This project makes use of the Rust [flamegraph](https://github.com/flamegraph-rs/flamegraph) crate for its straightforward flame graph support.
 
 The helper script at `util/flamegraph.sh` allows for easy sampling of `x800`. In its default configuration, the script uses the `roger` fuzzer as the binary under test.
 
