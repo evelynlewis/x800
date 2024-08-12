@@ -10,7 +10,7 @@
 # benchgen.sh [OUTPUT_FILE]
 #
 
-BS="8K"
+BS="16K"
 COUNT="1"
 
 # Use an output file if provided
@@ -29,7 +29,7 @@ DD=$(compat dd)
 
 ${BASE32} </dev/urandom |
 	${TR} -dC 'ASDW' |
-	${DD} of="${OUT}" bs="${BS}" count="${COUNT}" 2>/dev/null &&
+	${DD} of="${OUT}" bs="${BS}" count="${COUNT}" conv=lcase 2>/dev/null &&
 	exit 0
 
 exit 1

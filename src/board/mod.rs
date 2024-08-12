@@ -134,15 +134,14 @@ impl Board {
     pub fn spawn_tile(&mut self, generation: Generation) -> bool {
         // Values
         const CHANCE_OF_FOUR_TILES: u64 = 4;
-        let open_tiles: usize = self.open_tiles;
 
         if !self.has_space() {
             return false;
         }
 
-        #[allow(clippy::cast_possible_truncation)]
         // Collect random numbers
-        let insert_index = fastrand::u64(..open_tiles as u64) as usize;
+        #[allow(clippy::cast_possible_truncation)]
+        let insert_index = fastrand::u64(..self.open_tiles as u64) as usize;
         let insert_value = if fastrand::u64(..CHANCE_OF_FOUR_TILES) == (CHANCE_OF_FOUR_TILES - 1) {
             2 // '4' tile
         } else {
@@ -151,7 +150,7 @@ impl Board {
 
         // Insert at location
         let mut offset: usize = 0;
-        for tile in self.tiles.as_mut() {
+        for tile in &mut self.tiles {
             if *tile == Tile::Empty() {
                 if offset == insert_index {
                     *tile = Tile::Number(insert_value, generation);

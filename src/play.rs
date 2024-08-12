@@ -59,7 +59,6 @@ struct Io(libc::c_int, libc::termios);
 pub fn play(input: &Input) {
     // Runtime storage
     let board = sync::Arc::new(sync::Mutex::new(constants::DEFAULT_BOARD.clone()));
-    let mut stdin = io::stdin();
 
     // Game save setup
     #[cfg(feature = "save")]
@@ -68,6 +67,7 @@ pub fn play(input: &Input) {
     save.extend(fastrand::get_seed().to_le_bytes());
 
     // Closure called for program input
+    let mut stdin = io::stdin();
     let mut stdin_reader = || -> Action {
         // Read one byte from stdin
         let mut buffer = [0_u8; 1];
