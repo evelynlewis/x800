@@ -86,10 +86,12 @@ plus_ok
 
 # Run fuzzer on known inputs
 plus_header "Now validating fuzzer in default mode"
+cargo install cargo-fuzz
 xcall cargo fuzz run roger --sanitizer none --release -- -runs=0
 plus_ok
 
 plus_header "Now validating fuzzer in mini mode"
+cargo install cargo-fuzz
 xcall cargo fuzz run roger --sanitizer none --release --features mini -- -runs=0
 plus_ok
 

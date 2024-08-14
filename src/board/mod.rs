@@ -67,7 +67,11 @@ impl Board {
             Direction::Right => RIGHT_INDEX,
         };
 
+        // Loop bookkeeping
         let mut state_changed = false;
+        let mut end_index: usize;
+        let mut index: usize;
+        let mut line_tile: Tile;
 
         for index_line in index_table {
             // Clear the vector to begin
@@ -80,8 +84,8 @@ impl Board {
                 }
             }
 
-            let mut end_index = self.line.len().saturating_sub(1);
-            let mut index: usize = 0;
+            end_index = self.line.len().saturating_sub(1);
+            index = 0;
 
             // While there are still elements at (index, index + 1)
             while index < end_index {
@@ -115,7 +119,7 @@ impl Board {
 
             // Apply to tiles
             for (line_i, tiles_i) in index_line.into_iter().enumerate() {
-                let line_tile = self.line[line_i];
+                line_tile = self.line[line_i];
                 if self.tiles[tiles_i] != line_tile {
                     state_changed = true;
                     self.tiles[tiles_i] = line_tile;

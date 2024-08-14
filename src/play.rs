@@ -91,6 +91,8 @@ pub fn play(input: &Input) {
 
     // Clear screen and generate initial tiles
     let mut generation: Generation = 0;
+
+    // Limit scope for lock
     {
         let mut unlocked = board.lock().unwrap();
         for _ in 0..INITIAL_TILES_COUNT {
@@ -120,10 +122,14 @@ pub fn play(input: &Input) {
         t.unpark();
     }
 
+    // Loop storage
+    let mut action: Action;
+    let mut moved;
+
     // The main event loop
     loop {
         generation += 1;
-        let action = match input {
+        action = match input {
             Input::Slice(_) => Action::parse(
                 iter.next()
                     .copied()
@@ -136,7 +142,7 @@ pub fn play(input: &Input) {
         match action {
             Action::Direction(direction) => {
                 let mut unlocked = board.lock().unwrap();
-                let moved = unlocked.update(direction, generation);
+                moved = unlocked.update(direction, generation);
 
                 // Skip adding a tile after invalid move
                 if !moved && unlocked.has_space() {
