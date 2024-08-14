@@ -23,10 +23,12 @@ fi
 # Install required tooling
 cargo install honggfuzz
 
+# Used by honggfuzz
+export HFUZZ_INPUT="./corpus/roger/"
+export HFUZZ_RUN_ARGS="$@"
+
 # Build first
 cargo hfuzz build
 
-# used by honggfuzz
-export HFUZZ_INPUT="./corpus/roger/"
-export HFUZZ_RUN_ARGS="-n 2"
 cargo hfuzz run hroger
+
