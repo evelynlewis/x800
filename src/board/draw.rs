@@ -26,7 +26,7 @@ pub fn draw(
     let mut output = constants::WRITER();
 
     // Our own personal local board
-    let mut cloned: Board;
+    let mut local_board: Board = Board::default();
 
     // Make a clean exit
     let mut exit_after = false;
@@ -41,13 +41,13 @@ pub fn draw(
         }
 
         // Clone for drawing
-        cloned = board.lock().unwrap().clone();
+        local_board.clone_from(&board.lock().unwrap());
 
         // Write out to string
         Board::draw_clear(buffer)?;
-        cloned.draw_header(buffer)?;
-        cloned.draw_tiles(buffer)?;
-        cloned.draw_score(buffer)?;
+        local_board.draw_header(buffer)?;
+        local_board.draw_tiles(buffer)?;
+        local_board.draw_score(buffer)?;
 
         // Write out framebuffer
         write!(output, "{buffer}").expect("Failed to render");

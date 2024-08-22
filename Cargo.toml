@@ -42,6 +42,11 @@ lto = "fat"
 panic = "abort"
 strip = "symbols"
 
+[profile.release-debuginfo]
+inherits = "release"
+debug = true
+strip = "none"
+
 [dev-dependencies]
 divan = { version = "0.1.14", default-features = false }
 x800 = { path = ".", features = ["sink"] }

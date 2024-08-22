@@ -1,24 +1,23 @@
 // Copyright (c) 2024 Evelyn Lewis
 // SPDX-License-Identifier: MIT
 
-//! Various constants used by [Board]
+//! Various constants used by [`super::Board`]
 
-use super::tile::{Power, Tile};
-use super::Board;
+use super::tile::Power;
 use std::io;
 
 // Internal constants
-/// Text printed for an empty [`Tile`] in the board
+/// Text printed for an empty [`super::Tile`] in the board
 pub(super) const EMPTY_TILE: &str = "      ";
 /// Text printed to indicate score
 pub(super) const SCORE_TEXT: &str = "score is ";
-/// Message printed after merging a [`Tile`] [`WIN_POWER`] times
+/// Message printed after merging a [`super::Tile`] [`WIN_POWER`] times
 pub(super) const WIN_MESSAGE: &str = "─────── you win! ───────\r\n";
 /// Power-of-two required to win the game
 pub(super) const WIN_POWER: Power = 11;
-/// The width of a single [`Tile`]
+/// The width of a single [`super::Tile`]
 pub(super) const TILES_WIDTH: usize = 4;
-/// The number of [Tile]s in a given [`Board`] row or column
+/// The number of [`super::Tile`]s in a given [`super::Board`] row or column
 pub(super) const TILES_PER_LINE: usize = 4;
 /// The area of playable tiles
 pub(super) const TILES_AREA: usize = TILES_PER_LINE * TILES_PER_LINE;
@@ -33,15 +32,6 @@ pub const GAME_OVER: &str = "─── the game is over ───\r\n";
 // Input character which ends gameplay
 pub const END_OF_GAME_CHARACTER: u8 = 3;
 
-/// Default starting [`Board`] structure
-pub const DEFAULT_BOARD: &Board = &Board {
-    tiles: [Tile::Empty(); TILES_AREA],
-    line: vec![],
-    score: 0,
-    open_tiles: 16,
-    max_tile: 0,
-};
-
 // Print output to stdout
 #[cfg(not(feature = "sink"))]
 /// Function to create a writer object
@@ -52,7 +42,7 @@ pub const WRITER: fn() -> io::Stdout = io::stdout;
 /// Function to create a writer object
 pub const WRITER: fn() -> io::Sink = io::sink;
 
-/// Size of a complete buffer needed to print a [`Board`] frame to the terminal
+/// Size of a complete buffer needed to print a [`super::Board`] frame to the terminal
 pub(super) const DISPLAY_BUFFER_SIZE: usize = (TILES_PER_LINE + 6) * (TILES_PER_LINE + 4);
 /// Message printed on various game failures
 pub const GAME_FAILURE_MESSAGE: &str = " an ongoing game problem \r\n";

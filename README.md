@@ -149,12 +149,12 @@ Benchmark 1: ./target/release/x800
 ================================================================================
 Running with gold file input
 
-PATH:           /home/evelyn/lab/x800/fuzz/corpus/roger/gold
-GAME SAVE SIZE: 747
+PATH:           /home/evelyn/lab/x800/fuzz/corpus/roger/300d1141b7e23f27727781bc7af9b3a1ad7a2c2e
+GAME SAVE SIZE: 746
 GAMES PER RUN:  1000
-Benchmark 1: ./target/release/ryan /home/evelyn/lab/x800/fuzz/corpus/roger/gold 1000
-  Time (mean ± σ):     210.1 ms ±   2.7 ms    [User: 185.3 ms, System: 30.6 ms]
-  Range (min … max):   204.2 ms … 214.8 ms    32 runs
+Benchmark 1: ./target/release/ryan /home/evelyn/lab/x800/fuzz/corpus/roger/300d1141b7e23f27727781bc7af9b3a1ad7a2c2e 1000
+  Time (mean ± σ):     210.0 ms ±   3.0 ms    [User: 183.3 ms, System: 32.8 ms]
+  Range (min … max):   205.5 ms … 219.6 ms    32 runs
 ```
 
 #### `hyperfine` benchmark: M1 MacBook Air with MacOS 14
@@ -173,17 +173,17 @@ Running with random input
 
 Benchmark 1: ./target/release/x800
   Time (mean ± σ):       1.2 ms ±   0.1 ms    [User: 0.5 ms, System: 0.4 ms]
-  Range (min … max):     1.1 ms …   1.4 ms    256 runs
+  Range (min … max):     1.1 ms …   1.5 ms    256 runs
 
 ================================================================================
 Running with gold file input
 
-PATH:           /Users/evelynlewis/lab/x800/fuzz/corpus/roger/gold
-GAME SAVE SIZE: 747
+PATH:           /Users/evelynlewis/lab/x800/fuzz/corpus/roger/300d1141b7e23f27727781bc7af9b3a1ad7a2c2e
+GAME SAVE SIZE: 746
 GAMES PER RUN:  1000
-Benchmark 1: ./target/release/ryan /Users/evelynlewis/lab/x800/fuzz/corpus/roger/gold 1000
-  Time (mean ± σ):     105.0 ms ±   0.4 ms    [User: 87.0 ms, System: 27.0 ms]
-  Range (min … max):   104.1 ms … 106.2 ms    32 runs
+Benchmark 1: ./target/release/ryan /Users/evelynlewis/lab/x800/fuzz/corpus/roger/300d1141b7e23f27727781bc7af9b3a1ad7a2c2e 1000
+  Time (mean ± σ):     104.5 ms ±   0.5 ms    [User: 86.8 ms, System: 26.6 ms]
+  Range (min … max):   103.3 ms … 105.4 ms    32 runs
 ```
 
 ### Random-input throughput benchmarks using shell tools
@@ -201,9 +201,9 @@ The required GNU shell tools are part of GNU `coreutils` and preinstalled on mos
 ```sh
 ./util/benchs.sh
 Building x800 executable.
-    Finished `release` profile [optimized] target(s) in 0.01s
+    Finished `release` profile [optimized] target(s) in 0.69s
 Running benchmark for 16 seconds.
-120176640 bytes (120 MB, 115 MiB) copied, 16 s, 7.5 MB/s
+120315904 bytes (120 MB, 115 MiB) copied, 16 s, 7.5 MB/s
 ```
 
 ### Shell benchmark: M1 MacBook Air with MacOS 14
@@ -213,7 +213,7 @@ Running benchmark for 16 seconds.
 Building x800 executable.
     Finished `release` profile [optimized] target(s) in 0.00s
 Running benchmark for 16 seconds.
-101818368 bytes (102 MB, 97 MiB) copied, 16 s, 6.4 MB/s
+101449728 bytes (101 MB, 97 MiB) copied, 16 s, 6.3 MB/s
 ```
 
 ## Fuzzing

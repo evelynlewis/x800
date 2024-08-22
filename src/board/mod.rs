@@ -11,15 +11,35 @@ pub use draw::draw;
 pub mod tile;
 use tile::{Generation, Tile};
 
+/// Storage for an x800 board
 #[derive(Clone)]
 pub struct Board {
+    /// All tiles on a board, in row-major order
     tiles: [Tile; constants::TILES_AREA],
+    /// Storage used during board operations
     line: vec::Vec<Tile>,
+    /// Current game score
     score: u64,
+    /// Number of unoccupied tile spaces
     open_tiles: usize,
+    /// Value of the highest-value number tile
     max_tile: tile::Power,
 }
 
+/// Default starting [`Board`] structure
+impl Board {
+    pub const fn default() -> Board {
+        Board {
+            tiles: [Tile::Empty(); constants::TILES_AREA],
+            line: vec![],
+            score: 0,
+            open_tiles: 16,
+            max_tile: 0,
+        }
+    }
+}
+
+/// Directions the player can move
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub(super) enum Direction {
     Up,
@@ -28,6 +48,7 @@ pub(super) enum Direction {
     Right,
 }
 
+/// [`Board`] operations
 #[derive(PartialEq, Eq)]
 pub(super) enum Action {
     Direction(Direction),
@@ -126,10 +147,14 @@ impl Board {
                 }
             }
         }
+        // Clear so clone_from is trivial
+        self.line.clear();
+
         state_changed
     }
 
     /// Check if the [`Board`] has one or more [`Tile::Empty`] [`Tile`]s
+    #[inline]
     pub fn has_space(&self) -> bool {
         self.open_tiles != 0
     }

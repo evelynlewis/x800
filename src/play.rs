@@ -11,7 +11,7 @@ use std::{
 #[cfg(feature = "save")]
 use std::io::Write;
 
-use crate::board::{self, constants, tile::Generation, Action};
+use crate::board::{self, constants, tile::Generation, Action, Board};
 
 /// The number of tiles to generate at startup
 const INITIAL_TILES_COUNT: u32 = 2;
@@ -58,7 +58,7 @@ struct Io(libc::c_int, libc::termios);
 #[allow(clippy::too_many_lines)]
 pub fn play(input: &Input) {
     // Runtime storage
-    let board = sync::Arc::new(sync::Mutex::new(constants::DEFAULT_BOARD.clone()));
+    let board = sync::Arc::new(sync::Mutex::new(Board::default()));
 
     // Game save setup
     #[cfg(feature = "save")]
@@ -67,10 +67,10 @@ pub fn play(input: &Input) {
     save.extend(fastrand::get_seed().to_le_bytes());
 
     // Closure called for program input
-    let mut stdin = io::stdin();
+    let mut stdin = io::stdin().lock();
+    let mut buffer = [0_u8; 1];
     let mut stdin_reader = || -> Action {
         // Read one byte from stdin
-        let mut buffer = [0_u8; 1];
         match stdin.read_exact(&mut buffer) {
             Err(_) => Action::Shutdown,
             Ok(()) => {
@@ -130,12 +130,12 @@ pub fn play(input: &Input) {
     loop {
         generation += 1;
         action = match input {
+            Input::Interactive => stdin_reader(),
             Input::Slice(_) => Action::parse(
                 iter.next()
                     .copied()
                     .unwrap_or(constants::END_OF_GAME_CHARACTER),
             ),
-            Input::Interactive => stdin_reader(),
         };
 
         // Read input and take action
