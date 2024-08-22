@@ -17,7 +17,17 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os:
+          [
+            ubuntu-latest,
+            ubuntu-24.04,
+            ubuntu-22.04,
+            ubuntu-20.04,
+            macos-latest,
+            macos-14,
+            macos-13,
+            macos-12,
+          ]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -29,6 +39,17 @@ jobs:
         run: cargo test --verbose
       - name: Build docs
         run: cargo doc --verbose
+      - name: ${{ matrix.os }} release build
+        run: |
+          cargo clean --verbose
+          cargo build --verbose --release
+      - name: ${{ matrix.os }} release build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: x800-${{ matrix.os }}
+          path: |
+            target/release/x800
+            target/release/ryan
 
   portability:
     env:
@@ -36,8 +57,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        target:
-          [
+        target: [
             aarch64-unknown-linux-gnu,
             aarch64-unknown-linux-musl,
             arm-unknown-linux-gnueabi,
@@ -82,10 +102,19 @@ jobs:
         run: |
           rustup toolchain install stable --profile minimal
           rustup component add llvm-tools-preview
-      - name: Build
-        run: cross build --verbose --target ${{ matrix.target }}
-      - name: Check score
+      - name: Gold game end-to-end test
         run: sh -x ./util/gold.sh ${{ matrix.target }}
+      - name: ${{ matrix.target }} release build
+        run: |
+          cargo clean --verbose
+          cross build --release --verbose --target ${{ matrix.target }}
+      - name: ${{ matrix.target }} release build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: x800-${{ matrix.target }}
+          path: |
+            target/${{ matrix.target }}/release/x800
+            target/${{ matrix.target }}/release/ryan
 
   benchmark:
     runs-on: ubuntu-latest
