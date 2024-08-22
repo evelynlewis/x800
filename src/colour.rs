@@ -24,44 +24,56 @@ pub struct Colour {
 impl Colour {
     /// Generate a colour based on a Tile's power-of-two
     pub const fn from_power(power: Power) -> Self {
-        let limited = power % 12;
+        let limited = power % 18;
+        let offset = (power % 3) * 2;
         match limited {
             // first, left-most column, upwards (ie. /|\)
             0..=2 => Colour {
-                row: 5 - (limited * 2),
+                row: 5 - offset,
                 column: COLOUR_LEFT_COLUMN,
             },
             // top-most row (ie. '>->')
             3..=5 => Colour {
                 row: 0,
-                column: COLOUR_LEFT_COLUMN + ((limited - 3) * 2),
+                column: COLOUR_LEFT_COLUMN + offset,
             },
             // right-most column, downwards (ie. '\|/')
             6..=8 => Colour {
-                row: (limited - 6) * 2,
+                row: offset,
                 column: COLOUR_RIGHT_COLUMN,
             },
             // bottom-most row (ie. '<-<')
             9..=11 => Colour {
                 row: 5,
-                column: COLOUR_RIGHT_COLUMN + ((limited - 9) * 2),
+                column: COLOUR_RIGHT_COLUMN - offset,
+            },
+            // final, game-win row (ie. '>-> >->')
+            12..=17 => Colour {
+                row: 5,
+                column: COLOUR_WIN_COLUMN + offset,
             },
             _ => Self::from_power(0 as Power),
         }
     }
 }
 
-/// See <https://en.wikipedia.org/wiki/ANSI_escape_code#8-bit>
-const COLOUR_LEFT_COLUMN: Power = 34 - 16;
-/// See <https://en.wikipedia.org/wiki/ANSI_escape_code#8-bit>
+/// <https://en.wikipedia.org/wiki/ANSI_escape_code#8-bit>
+const COLOUR_LEFT_COLUMN: Power = 34;
+
+/// <https://en.wikipedia.org/wiki/ANSI_escape_code#8-bit>
+const COLOUR_WIN_COLUMN: Power = COLOUR_LEFT_COLUMN + 6;
+
+/// <https://en.wikipedia.org/wiki/ANSI_escape_code#8-bit>
 const COLOUR_RIGHT_COLUMN: Power = COLOUR_LEFT_COLUMN + 5;
+
 
 #[test]
 fn power_to_colour_cycle_test() {
     for power in 0..=u16::MAX {
+        println!("{power}");
         assert_eq!(
             Colour::from_power(power as Power),
-            Colour::from_power(power as Power % 12)
+            Colour::from_power(power as Power % 18)
         );
     }
 }
@@ -82,7 +94,7 @@ impl fmt::Display for Colour {
         let (bg, fg) = if *self == Self::default() {
             (0_u32, 15_u32)
         } else {
-            (16_u32 + self.column + (self.row * 36_u32), 0_u32)
+            (self.column + (self.row * 36_u32), 0_u32)
         };
 
         write!(f, "\u{1B}[48;5;{bg}m\u{1B}[38;5;{fg}m")
