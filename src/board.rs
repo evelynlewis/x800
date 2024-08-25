@@ -41,7 +41,7 @@ impl Board {
 
 /// Directions the player can move
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
-pub(super) enum Direction {
+pub enum Direction {
     Up,
     Down,
     Left,
@@ -50,7 +50,7 @@ pub(super) enum Direction {
 
 /// [`Board`] operations
 #[derive(PartialEq, Eq)]
-pub(super) enum Action {
+pub enum Action {
     Direction(Direction),
     Continue,
     Shutdown,
