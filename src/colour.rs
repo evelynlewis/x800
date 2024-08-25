@@ -47,10 +47,10 @@ impl Colour {
                 row: 5,
                 column: COLOUR_RIGHT_COLUMN - offset,
             },
-            // final, game-win row (ie. '>-> >->')
+            // finally, cut across the win square
             12..=17 => Colour {
-                row: 5,
-                column: COLOUR_WIN_COLUMN + offset,
+                row: 5 - (limited - 12),
+                column: COLOUR_WIN_COLUMN + (limited - 12),
             },
             _ => Self::from_power(0 as Power),
         }
@@ -66,28 +66,6 @@ const COLOUR_WIN_COLUMN: Power = COLOUR_LEFT_COLUMN + 6;
 /// <https://en.wikipedia.org/wiki/ANSI_escape_code#8-bit>
 const COLOUR_RIGHT_COLUMN: Power = COLOUR_LEFT_COLUMN + 5;
 
-
-#[test]
-fn power_to_colour_cycle_test() {
-    for power in 0..=u16::MAX {
-        println!("{power}");
-        assert_eq!(
-            Colour::from_power(power as Power),
-            Colour::from_power(power as Power % 18)
-        );
-    }
-}
-
-#[test]
-fn power_to_colour_difference() {
-    for power in 0..u16::MAX {
-        assert_ne!(
-            Colour::from_power(power as Power),
-            Colour::from_power(power as Power + 1)
-        );
-    }
-}
-
 impl fmt::Display for Colour {
     /// Generate and print foreground and background escape codes for a Colour
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -98,5 +76,127 @@ impl fmt::Display for Colour {
         };
 
         write!(f, "\u{1B}[48;5;{bg}m\u{1B}[38;5;{fg}m")
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{Colour, Power, COLOUR_LEFT_COLUMN, COLOUR_RIGHT_COLUMN, COLOUR_WIN_COLUMN};
+
+    #[test]
+    fn cycle_colours() {
+        for power in 0..=u16::MAX {
+            println!("{power}");
+            assert_eq!(
+                Colour::from_power(power as Power),
+                Colour::from_power(power as Power % 18),
+            );
+        }
+    }
+
+    #[test]
+    fn unique_colours() {
+        for power in 0..u16::MAX {
+            for skip in 1..=17 {
+                assert_ne!(
+                    Colour::from_power(power as Power),
+                    Colour::from_power(power as Power + skip),
+                    "With {power}, skipping {skip}",
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn parameterized_colour_values() {
+        let pairs = std::collections::HashMap::from([
+            (
+                0,
+                Colour {
+                    row: 5,
+                    column: COLOUR_LEFT_COLUMN,
+                },
+            ),
+            (
+                1,
+                Colour {
+                    row: 3,
+                    column: COLOUR_LEFT_COLUMN,
+                },
+            ),
+            (
+                2,
+                Colour {
+                    row: 1,
+                    column: COLOUR_LEFT_COLUMN,
+                },
+            ),
+            (
+                3,
+                Colour {
+                    row: 0,
+                    column: COLOUR_LEFT_COLUMN,
+                },
+            ),
+            (
+                5,
+                Colour {
+                    row: 0,
+                    column: COLOUR_LEFT_COLUMN + 4,
+                },
+            ),
+            (
+                6,
+                Colour {
+                    row: 0,
+                    column: COLOUR_RIGHT_COLUMN,
+                },
+            ),
+            (
+                8,
+                Colour {
+                    row: 4,
+                    column: COLOUR_RIGHT_COLUMN,
+                },
+            ),
+            (
+                9,
+                Colour {
+                    row: 5,
+                    column: COLOUR_RIGHT_COLUMN,
+                },
+            ),
+            (
+                11,
+                Colour {
+                    row: 5,
+                    column: COLOUR_RIGHT_COLUMN - 4,
+                },
+            ),
+            (
+                12,
+                Colour {
+                    row: 5,
+                    column: COLOUR_WIN_COLUMN,
+                },
+            ),
+            (
+                13,
+                Colour {
+                    row: 4,
+                    column: COLOUR_WIN_COLUMN + 1,
+                },
+            ),
+            (
+                17,
+                Colour {
+                    row: 0,
+                    column: COLOUR_WIN_COLUMN + 5,
+                },
+            ),
+        ]);
+        for (v, c) in pairs {
+            assert_eq!(Colour::from_power(v), c);
+        }
     }
 }
