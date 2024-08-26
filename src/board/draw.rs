@@ -50,7 +50,7 @@ pub fn draw(
         local_board.draw_score(buffer)?;
 
         // Write out framebuffer
-        write!(output, "{buffer}").expect("Failed to render");
+        output.write_all(buffer.as_bytes()).expect("Failed to render");
         output.flush().expect("failed to flush board render");
         buffer.clear();
 
@@ -58,7 +58,7 @@ pub fn draw(
         if exit_after {
             // Print end-of-game message first
             write!(
-                constants::WRITER(),
+                output,
                 "{}{}",
                 constants::PRE_MARGIN,
                 constants::GAME_OVER
@@ -104,12 +104,12 @@ impl Board {
         // Allow bounds-checking elision
         assert_eq!(self.tiles.len(), constants::TILES_AREA);
         // Iterate over each row and column, then print
-        write!(output, "      ")?;
+        output.write_str("      ")?;
         for i in 0..constants::TILES_PER_LINE {
             for j in 0..constants::TILES_PER_LINE {
                 write!(output, "{}", self.tiles[constants::TILES_PER_LINE * i + j])?;
             }
-            write!(output, "\r\n      ")?;
+            output.write_str("\r\n      ")?;
         }
         Ok(())
     }
