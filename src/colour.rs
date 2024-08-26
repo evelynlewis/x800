@@ -16,14 +16,14 @@ use std::fmt;
 
 /// Information which fully specifies a given Colour
 #[derive(Debug, PartialEq, Eq, Default)]
-pub struct Colour {
+pub(super) struct Colour {
     row: Power,
     column: Power,
 }
 
 impl Colour {
     /// Generate a colour based on a Tile's power-of-two
-    pub const fn from_power(power: Power) -> Self {
+    pub(super) const fn from_power(power: Power) -> Self {
         let limited = power % 18;
         let offset = (power % 3) * 2;
         match limited {

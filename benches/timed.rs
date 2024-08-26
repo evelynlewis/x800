@@ -5,19 +5,24 @@ use divan::{black_box, Bencher};
 use std::fs;
 use x800::one_shot;
 
-mod shared;
+mod shared {
+    pub const STARTUP_FILE: &str = "fuzz/corpus/roger/startup";
+    pub const GOLD_FILE: &str = "fuzz/corpus/roger/gold";
+    pub const SHORT_FILE: &str = "fuzz/corpus/roger/short";
+}
+
 #[divan::bench(sample_count = 10, sample_size = 1000)]
-pub fn timed_startup(c: Bencher) {
+fn timed_startup(c: Bencher) {
     timed_file(c, shared::STARTUP_FILE);
 }
 
 #[divan::bench(sample_count = 10, sample_size = 1000)]
-pub fn timed_short(c: Bencher) {
+fn timed_short(c: Bencher) {
     timed_file(c, shared::SHORT_FILE);
 }
 
 #[divan::bench(sample_count = 10, sample_size = 1000)]
-pub fn timed_gold(c: Bencher) {
+fn timed_gold(c: Bencher) {
     timed_file(c, shared::GOLD_FILE);
 }
 

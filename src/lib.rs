@@ -12,7 +12,7 @@ mod colour;
 mod play;
 use play::play;
 
-pub fn driver(input: &[u8], seed: u64) {
+fn driver(input: &[u8], seed: u64) {
     fastrand::seed(seed);
     play(&play::Input::Slice(input));
 }

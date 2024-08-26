@@ -5,15 +5,17 @@
 
 use std::{cmp, vec};
 
-pub mod constants;
+pub(super) mod constants;
+pub(super) mod tile;
+
 mod draw;
-pub use draw::draw;
-pub mod tile;
+pub(super) use draw::draw;
+
 use tile::{Generation, Tile};
 
 /// Storage for an x800 board
 #[derive(Clone)]
-pub struct Board {
+pub(super) struct Board {
     /// All tiles on a board, in row-major order
     tiles: [Tile; constants::TILES_AREA],
     /// Storage used during board operations
@@ -28,7 +30,7 @@ pub struct Board {
 
 /// Default starting [`Board`] structure
 impl Board {
-    pub const fn default() -> Board {
+    pub(super) const fn default() -> Board {
         Board {
             tiles: [Tile::Empty(); constants::TILES_AREA],
             line: vec![],
@@ -41,7 +43,7 @@ impl Board {
 
 /// Directions the player can move
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
-pub enum Direction {
+pub(super) enum Direction {
     Up,
     Down,
     Left,
@@ -50,7 +52,7 @@ pub enum Direction {
 
 /// [`Board`] operations
 #[derive(PartialEq, Eq)]
-pub enum Action {
+pub(super) enum Action {
     Direction(Direction),
     Continue,
     Shutdown,
@@ -71,7 +73,7 @@ impl Action {
 
 impl Board {
     /// Update the [`Board`], given a move [`Direction`] and [`Generation`], and its current state.
-    pub fn update(&mut self, direction: Direction, generation: Generation) -> bool {
+    pub(super) fn update(&mut self, direction: Direction, generation: Generation) -> bool {
         const LEFT_INDEX: [[usize; constants::TILES_PER_LINE]; constants::TILES_PER_LINE] =
             [[0, 1, 2, 3], [4, 5, 6, 7], [8, 9, 10, 11], [12, 13, 14, 15]];
         const RIGHT_INDEX: [[usize; constants::TILES_PER_LINE]; constants::TILES_PER_LINE] =
@@ -155,12 +157,12 @@ impl Board {
 
     /// Check if the [`Board`] has one or more [`Tile::Empty`] [`Tile`]s
     #[inline]
-    pub fn has_space(&self) -> bool {
+    pub(super) fn has_space(&self) -> bool {
         self.open_tiles != 0
     }
 
     /// Create a new '2' or '4' number tile in a blank space
-    pub fn spawn_tile(&mut self, generation: Generation) -> bool {
+    pub(super) fn spawn_tile(&mut self, generation: Generation) -> bool {
         // Values
         const CHANCE_OF_FOUR_TILES: u64 = 4;
 
@@ -196,7 +198,7 @@ impl Board {
     }
 
     #[allow(dead_code)]
-    pub fn score(&self) -> u64 {
+    pub(super) fn score(&self) -> u64 {
         self.score
     }
 }

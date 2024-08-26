@@ -45,7 +45,7 @@ fn io_config(input: &Input) -> Option<Io> {
 /// Defines input mode
 #[allow(dead_code)]
 #[derive(PartialEq, Eq)]
-pub enum Input<'a> {
+pub(crate) enum Input<'a> {
     Slice(&'a [u8]),
     Interactive,
 }
@@ -56,7 +56,7 @@ struct Io(libc::c_int, libc::termios);
 /// Main program event loop
 #[inline]
 #[allow(clippy::too_many_lines)]
-pub fn play(input: &Input) {
+pub(crate) fn play(input: &Input) {
     // Runtime storage
     let board = sync::Arc::new(sync::Mutex::new(Board::default()));
 

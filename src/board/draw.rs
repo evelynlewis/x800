@@ -15,7 +15,7 @@ use std::{
 };
 
 /// Board drawing worker function
-pub fn draw(
+pub(crate) fn draw(
     board: &sync::Arc<sync::Mutex<Board>>,
     done: &sync::Arc<atomic::AtomicBool>,
 ) -> fmt::Result {
@@ -73,7 +73,7 @@ pub fn draw(
 
 impl Board {
     /// Draw a 'clear screen' control character to the output String
-    pub fn draw_clear(output: &mut String) -> fmt::Result {
+    fn draw_clear(output: &mut String) -> fmt::Result {
         write!(
             output,
             "{}",
@@ -115,7 +115,7 @@ impl Board {
     }
 
     /// Draw the current score to the output String
-    pub fn draw_score(&self, output: &mut String) -> fmt::Result {
+    fn draw_score(&self, output: &mut String) -> fmt::Result {
         const LENGTH: usize = constants::PRINT_LINE_LEN - SCORE_TEXT.len();
         const SPACE: &str = constants::PRE_MARGIN;
         const SCORE_TEXT: &str = constants::SCORE_TEXT;

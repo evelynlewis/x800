@@ -9,13 +9,13 @@ use std::fmt;
 use std::hash::Hash;
 
 /// The power-of-two of a [`Tile`]
-pub type Power = u32;
+pub(crate) type Power = u32;
 /// The move number which created a [`Tile`]
-pub type Generation = u64;
+pub(crate) type Generation = u64;
 
 /// Basic [`super::Board`] block
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
-pub enum Tile {
+pub(crate) enum Tile {
     Empty(),
     Number(Power, Generation),
 }
