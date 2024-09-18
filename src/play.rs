@@ -102,12 +102,15 @@ pub(crate) fn play(input: &Input) {
 
     // Bookkeeping for board-drawing thread
     let draw_quit = sync::Arc::new(sync::atomic::AtomicBool::new(false));
+    let draw_scan = sync::Arc::new(sync::atomic::AtomicBool::new(false));
+    // Shared argument clones
     let board_arg = sync::Arc::clone(&board);
     let quit_arg = sync::Arc::clone(&draw_quit);
+    let scan_arg = sync::Arc::clone(&draw_scan);
     // Spawn board-drawing thread
     let draw_join = if cfg!(not(feature = "mini")) {
         Some(thread::spawn(move || {
-            board::draw(&board_arg, &quit_arg).expect(constants::GAME_FAILURE_MESSAGE);
+            board::draw(&board_arg, &quit_arg, &scan_arg).expect(constants::GAME_FAILURE_MESSAGE);
         }))
     } else {
         None
@@ -119,6 +122,7 @@ pub(crate) fn play(input: &Input) {
     let mut last_draw = time::Instant::now();
     // Initially draw the board
     if let Some(t) = draw_thread {
+        draw_scan.store(true, sync::atomic::Ordering::Relaxed);
         t.unpark();
     }
 
@@ -165,6 +169,7 @@ pub(crate) fn play(input: &Input) {
         // In case of update, draw the board
         if let Some(t) = draw_thread {
             if last_draw.elapsed() > MIN_DRAW_DELAY {
+                draw_scan.store(true, sync::atomic::Ordering::Relaxed);
                 t.unpark();
                 last_draw = time::Instant::now();
             }
@@ -173,6 +178,7 @@ pub(crate) fn play(input: &Input) {
 
     // Signal and join board-drawing thread, if it exists
     if let Some(t) = draw_thread {
+        draw_scan.store(true, sync::atomic::Ordering::Relaxed);
         draw_quit.store(true, sync::atomic::Ordering::Relaxed);
         t.unpark();
         if let Some(h) = draw_join {

@@ -18,6 +18,7 @@ use std::{
 pub(crate) fn draw(
     board: &sync::Arc<sync::Mutex<Board>>,
     done: &sync::Arc<atomic::AtomicBool>,
+    scan: &sync::Arc<atomic::AtomicBool>,
 ) -> fmt::Result {
     // Use one buffer for program duration
     let buffer = &mut String::with_capacity(constants::DISPLAY_BUFFER_SIZE);
@@ -34,6 +35,10 @@ pub(crate) fn draw(
     loop {
         // Wait for wakeup
         thread::park();
+        // Avoid spurious wakeup
+        if false == scan.swap(false, atomic::Ordering::Relaxed) {
+            continue;
+        }
 
         // Leave the loop, but only after drawing
         if done.load(atomic::Ordering::Relaxed) {
@@ -50,20 +55,17 @@ pub(crate) fn draw(
         local_board.draw_score(buffer)?;
 
         // Write out framebuffer
-        output.write_all(buffer.as_bytes()).expect("Failed to render");
+        output
+            .write_all(buffer.as_bytes())
+            .expect("Failed to render");
         output.flush().expect("failed to flush board render");
         buffer.clear();
 
         // Exit after to ensure we have always written prior
         if exit_after {
             // Print end-of-game message first
-            write!(
-                output,
-                "{}{}",
-                constants::PRE_MARGIN,
-                constants::GAME_OVER
-            )
-            .expect("Failed to write to output stream");
+            write!(output, "{}{}", constants::PRE_MARGIN, constants::GAME_OVER)
+                .expect("Failed to write to output stream");
             break;
         }
     }
