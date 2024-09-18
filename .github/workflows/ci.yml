@@ -24,6 +24,7 @@ jobs:
             ubuntu-22.04,
             ubuntu-20.04,
             macos-latest,
+            macos-15,
             macos-14,
             macos-13,
             macos-12,
