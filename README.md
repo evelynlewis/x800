@@ -6,9 +6,9 @@ x800 : /ˈɛks ˈeɪt ˈhəndɹəd/
 
 2048 is played by merging a four-by-four grid of power-of-two tiles, to maximize the sum of merged tile values.
 
-`x800` can evaluate millions of moves per second, even on modest hardware. A Linux machine with an Intel Pentium CPU from 2013 was tested to play 3774 complete loops of a 1100 move `x800` game in one second, or 4.15 million moves-per-second. In the same test, a M1 MacBook Air with MacOS completes 8.53 million moves-per-second.
+`x800` can evaluate millions of moves per second, even on modest hardware. A Linux machine with an Intel Pentium CPU from 2013 was tested to play 3861 complete loops of a 1100 move `x800` game in one second, or 4.25 million moves-per-second. In the same test, a M1 MacBook Air with MacOS completes 8.73 million moves-per-second.
 
-Using the `mini` build feature to disable rendering, `x800` on the M1 machine runs at 13.6 million moves-per-second, or 73.6 nanoseconds per move, including amortized startup time. In this duration, light travels 22.1 metres: a distance which Usain Bolt ran in 1.80 [seconds](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10669785) in 2009 to set the current 100m sprint record. See also the benchmark [section](#benchmarks) below, and the [util/benchr.sh](./util/benchr.sh) script.
+Using the `mini` build feature to disable rendering, `x800` on the M1 machine runs at 13.8 million moves-per-second, or 72.7 nanoseconds per move, including amortized startup time. In this duration, light travels 21.8 metres: a distance which Usain Bolt ran in 1.78 [seconds](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10669785) in 2009 to set the current 100m sprint record. See also the benchmark [section](#benchmarks) below, and the [util/benchr.sh](./util/benchr.sh) script.
 
 The project has few build dependencies. Rather than ncurses or an external Rust terminal library, `x800` uses simple output buffering and standard [ANSI escape codes](https://en.wikipedia.org/wiki/ANSI_escape_code). The required POSIX-compatible [`libc`](https://docs.rs/libc/latest/libc/) crate is part of Rust's standard library on POSIX targets. The only external build dependency is [fastrand](https://crates.io/crates/fastrand), a simple non-cryptographic pseudorandom number generator crate without child dependencies. The project CI builds and tests `x800` on 25 cross-compiled targets, plus `ubuntu-latest` and `macos-latest`.
 
@@ -135,8 +135,7 @@ The "gold file" benchmark latency numbers correspond to a large number of loops 
 ================================================================================
 Building project
 
-   Compiling x800 v0.1.0 (/home/evelyn/lab/x800)
-    Finished `release` profile [optimized] target(s) in 5.99s
+    Finished `release` profile [optimized] target(s) in 0.03s
 ================================================================================
 Installing hyperfine
 
@@ -144,8 +143,8 @@ Installing hyperfine
 Running with random input
 
 Benchmark 1: ./target/release/x800
-  Time (mean ± σ):     998.2 µs ±  32.2 µs    [User: 286.3 µs, System: 576.1 µs]
-  Range (min … max):   935.2 µs … 1117.5 µs    256 runs
+  Time (mean ± σ):       1.0 ms ±   0.0 ms    [User: 0.3 ms, System: 0.6 ms]
+  Range (min … max):     1.0 ms …   1.2 ms    256 runs
 
 ================================================================================
 Running with gold file input
@@ -154,18 +153,18 @@ PATH:           /home/evelyn/lab/x800/fuzz/corpus/roger/1ae2a1d8d4bf9db9c858c19c
 GAME SAVE SIZE: 1108
 GAMES PER RUN:  1000
 Benchmark 1: ./target/release/ryan /home/evelyn/lab/x800/fuzz/corpus/roger/1ae2a1d8d4bf9db9c858c19c24b79a94439a3a1a 1000
-  Time (mean ± σ):     269.4 ms ±   3.8 ms    [User: 241.1 ms, System: 33.7 ms]
-  Range (min … max):   263.7 ms … 277.1 ms    32 runs
+  Time (mean ± σ):     262.0 ms ±   3.5 ms    [User: 232.6 ms, System: 34.7 ms]
+  Range (min … max):   256.2 ms … 266.6 ms    32 runs
 ```
 
-#### `hyperfine` benchmark: M1 MacBook Air with MacOS 14
+#### `hyperfine` benchmark: M1 MacBook Air with MacOS 15
 
 ```sh
 ./util/benchhyperfine.sh
 ================================================================================
 Building project
 
-    Finished `release` profile [optimized] target(s) in 0.00s
+    Finished `release` profile [optimized] target(s) in 0.01s
 ================================================================================
 Installing hyperfine
 
@@ -173,8 +172,8 @@ Installing hyperfine
 Running with random input
 
 Benchmark 1: ./target/release/x800
-  Time (mean ± σ):       1.2 ms ±   0.1 ms    [User: 0.5 ms, System: 0.4 ms]
-  Range (min … max):     1.1 ms …   1.5 ms    256 runs
+  Time (mean ± σ):       1.4 ms ±   0.1 ms    [User: 0.7 ms, System: 0.5 ms]
+  Range (min … max):     1.3 ms …   1.7 ms    256 runs
 
 ================================================================================
 Running with gold file input
@@ -183,8 +182,8 @@ PATH:           /Users/evelynlewis/lab/x800/fuzz/corpus/roger/1ae2a1d8d4bf9db9c8
 GAME SAVE SIZE: 1108
 GAMES PER RUN:  1000
 Benchmark 1: ./target/release/ryan /Users/evelynlewis/lab/x800/fuzz/corpus/roger/1ae2a1d8d4bf9db9c858c19c24b79a94439a3a1a 1000
-  Time (mean ± σ):     136.8 ms ±   0.7 ms    [User: 118.4 ms, System: 28.3 ms]
-  Range (min … max):   135.5 ms … 138.7 ms    32 runs
+  Time (mean ± σ):     133.5 ms ±   0.5 ms    [User: 114.9 ms, System: 29.1 ms]
+  Range (min … max):   132.4 ms … 134.5 ms    32 runs
 ```
 
 ### Random-input throughput benchmarks using shell tools
@@ -202,19 +201,19 @@ The required GNU shell tools are part of GNU `coreutils` and preinstalled on mos
 ```sh
 ./util/benchs.sh
 Building x800 executable.
-    Finished `release` profile [optimized] target(s) in 0.01s
+    Finished `release` profile [optimized] target(s) in 0.04s
 Running benchmark for 16 seconds.
-120545280 bytes (121 MB, 115 MiB) copied, 16 s, 7.5 MB/s
+118505472 bytes (119 MB, 113 MiB) copied, 16 s, 7.4 MB/s
 ```
 
-### Shell benchmark: M1 MacBook Air with MacOS 14
+### Shell benchmark: M1 MacBook Air with MacOS 15
 
 ```sh
 ./util/benchs.sh
 Building x800 executable.
     Finished `release` profile [optimized] target(s) in 0.01s
 Running benchmark for 16 seconds.
-101343232 bytes (101 MB, 97 MiB) copied, 16 s, 6.3 MB/s
+89243648 bytes (89 MB, 85 MiB) copied, 16 s, 5.6 MB/s
 ```
 
 ## Fuzzing
