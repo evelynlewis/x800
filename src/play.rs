@@ -103,14 +103,15 @@ pub(crate) fn play(input: &Input) {
     // Bookkeeping for board-drawing thread
     let draw_quit = sync::Arc::new(sync::atomic::AtomicBool::new(false));
     let draw_scan = sync::Arc::new(sync::atomic::AtomicBool::new(false));
-    // Shared argument clones
-    let board_arg = sync::Arc::clone(&board);
-    let quit_arg = sync::Arc::clone(&draw_quit);
-    let scan_arg = sync::Arc::clone(&draw_scan);
     // Spawn board-drawing thread
     let draw_join = if cfg!(not(feature = "mini")) {
-        Some(thread::spawn(move || {
-            board::draw(&board_arg, &quit_arg, &scan_arg).expect(constants::GAME_FAILURE_MESSAGE);
+        Some(thread::spawn({
+            let board = board.clone();
+            let draw_quit = draw_quit.clone();
+            let draw_scan = draw_scan.clone();
+            move || {
+                board::draw(&board, &draw_quit, &draw_scan).expect(constants::GAME_FAILURE_MESSAGE);
+            }
         }))
     } else {
         None
