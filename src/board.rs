@@ -18,12 +18,10 @@ use tile::{Generation, Tile};
 pub(super) struct Board {
     /// All tiles on a board, in row-major order
     tiles: [Tile; constants::TILES_AREA],
-    /// Storage used during board operations
-    line: vec::Vec<Tile>,
-    /// Current game score
-    score: u64,
     /// Number of unoccupied tile spaces
     open_tiles: usize,
+    /// Current game score
+    score: u32,
     /// Value of the highest-value number tile
     max_tile: tile::Power,
 }
@@ -33,7 +31,6 @@ impl Board {
     pub(super) const fn default() -> Board {
         Board {
             tiles: [Tile::Empty(); constants::TILES_AREA],
-            line: vec![],
             score: 0,
             open_tiles: 16,
             max_tile: 0,
@@ -73,7 +70,12 @@ impl Action {
 
 impl Board {
     /// Update the [`Board`], given a move [`Direction`] and [`Generation`], and its current state.
-    pub(super) fn update(&mut self, direction: Direction, generation: Generation) -> bool {
+    pub(super) fn update(
+        &mut self,
+        direction: Direction,
+        generation: Generation,
+        work_line: &mut vec::Vec<Tile>,
+    ) -> bool {
         const LEFT_INDEX: [[usize; constants::TILES_PER_LINE]; constants::TILES_PER_LINE] =
             [[0, 1, 2, 3], [4, 5, 6, 7], [8, 9, 10, 11], [12, 13, 14, 15]];
         const RIGHT_INDEX: [[usize; constants::TILES_PER_LINE]; constants::TILES_PER_LINE] =
@@ -98,22 +100,22 @@ impl Board {
 
         for index_line in index_table {
             // Clear the vector to begin
-            self.line.clear();
+            work_line.clear();
 
             // Get the effective line
             for sub_index in index_line {
                 if let Tile::Number(_, _) = self.tiles[sub_index] {
-                    self.line.push(self.tiles[sub_index]);
+                    work_line.push(self.tiles[sub_index]);
                 }
             }
 
-            end_index = self.line.len().saturating_sub(1);
+            end_index = work_line.len().saturating_sub(1);
             index = 0;
 
             // While there are still elements at (index, index + 1)
             while index < end_index {
                 let (a_index, b_index) = (index, index + 1);
-                match (self.line[a_index], self.line[b_index]) {
+                match (work_line[a_index], work_line[b_index]) {
                     (Tile::Empty(), _) | (_, Tile::Empty()) => {
                         unreachable!();
                     }
@@ -121,10 +123,10 @@ impl Board {
                         if a_pow == b_pow && ((a_gen != generation) && (b_gen != generation)) {
                             // New next-power block
                             let next_pow = a_pow + 1;
-                            self.line[a_index] = Tile::Number(next_pow, generation);
+                            work_line[a_index] = Tile::Number(next_pow, generation);
 
                             // One fewer element
-                            self.line.remove(b_index);
+                            work_line.remove(b_index);
                             end_index -= 1;
 
                             // Update statistics
@@ -138,11 +140,11 @@ impl Board {
             }
 
             // Re-add empty tiles to the end of the vector
-            self.line.resize(constants::TILES_PER_LINE, Tile::Empty());
+            work_line.resize(constants::TILES_PER_LINE, Tile::Empty());
 
             // Apply to tiles
             for (line_i, tiles_i) in index_line.into_iter().enumerate() {
-                line_tile = self.line[line_i];
+                line_tile = work_line[line_i];
                 if self.tiles[tiles_i] != line_tile {
                     state_changed = true;
                     self.tiles[tiles_i] = line_tile;
@@ -150,7 +152,7 @@ impl Board {
             }
         }
         // Clear so clone_from is trivial
-        self.line.clear();
+        work_line.clear();
 
         state_changed
     }
@@ -198,7 +200,7 @@ impl Board {
     }
 
     #[allow(dead_code)]
-    pub(super) fn score(&self) -> u64 {
+    pub(super) fn score(&self) -> u32 {
         self.score
     }
 }

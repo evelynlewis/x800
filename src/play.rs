@@ -11,7 +11,11 @@ use std::{
 #[cfg(feature = "save")]
 use std::io::Write;
 
-use crate::board::{self, constants, tile::Generation, Action, Board};
+use crate::board::{
+    self, constants,
+    tile::{Generation, Tile},
+    Action, Board,
+};
 
 /// The number of tiles to generate at startup
 const INITIAL_TILES_COUNT: u32 = 2;
@@ -130,6 +134,8 @@ pub(crate) fn play(input: &Input) {
     // Loop storage
     let mut action: Action;
     let mut moved;
+    // Storage used during board operations
+    let mut work_line: Vec<Tile> = vec![];
 
     // The main event loop
     loop {
@@ -147,7 +153,7 @@ pub(crate) fn play(input: &Input) {
         match action {
             Action::Direction(direction) => {
                 let mut unlocked = board.lock().unwrap();
-                moved = unlocked.update(direction, generation);
+                moved = unlocked.update(direction, generation, &mut work_line);
 
                 // Skip adding a tile after invalid move
                 if !moved && unlocked.has_space() {
