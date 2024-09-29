@@ -180,7 +180,7 @@ pub(crate) fn play(input: &Input) {
     // Signal and join board-drawing thread, if it exists
     if let Some(t) = draw_thread {
         draw_scan.store(true, sync::atomic::Ordering::Relaxed);
-        draw_quit.store(true, sync::atomic::Ordering::Relaxed);
+        draw_quit.store(true, sync::atomic::Ordering::Release);
         t.unpark();
         if let Some(h) = draw_join {
             h.join().unwrap();

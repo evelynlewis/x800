@@ -36,12 +36,15 @@ pub(crate) fn draw(
         // Wait for wakeup
         thread::park();
         // Avoid spurious wakeup
-        if false == scan.swap(false, atomic::Ordering::Relaxed) {
-            continue;
-        }
-
-        // Leave the loop, but only after drawing
-        if done.load(atomic::Ordering::Relaxed) {
+        if !scan.swap(false, atomic::Ordering::Relaxed) {
+            // So we're not supposed to wake up, but should we exit?
+            if done.load(atomic::Ordering::Acquire) {
+                exit_after = true;
+            } else {
+                continue;
+            }
+        } else if done.load(atomic::Ordering::Acquire) {
+            // We should exit after
             exit_after = true;
         }
 
