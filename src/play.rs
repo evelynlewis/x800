@@ -25,25 +25,23 @@ const MIN_DRAW_DELAY: time::Duration = time::Duration::from_millis(4);
 
 /// Configures terminal as needed
 fn io_config(input: &Input) -> Option<Io> {
-    if cfg!(feature = "mini") {
+    if cfg!(feature = "mini") || *input != Input::Interactive {
         return None;
     }
-    let fd = libc::STDIN_FILENO;
+    const FD: libc::c_int = libc::STDIN_FILENO;
     let return_ios: libc::termios;
     unsafe {
         let mut ios: libc::termios = mem::zeroed();
         // Read current configuration
-        libc::tcgetattr(fd, &mut ios);
-        // Copy
+        libc::tcgetattr(FD, &mut ios);
+        // Save initial value for later use
         return_ios = ios;
 
         // Enable and set raw mode in case of terminal
-        if let Input::Interactive = input {
-            libc::cfmakeraw(&mut ios);
-            libc::tcsetattr(fd, libc::TCSANOW, &ios);
-        }
+        libc::cfmakeraw(&mut ios);
+        libc::tcsetattr(FD, libc::TCSANOW, &ios);
     }
-    Some(Io(fd, return_ios))
+    Some(Io(FD, return_ios))
 }
 
 /// Defines input mode
@@ -131,11 +129,11 @@ pub(crate) fn play(input: &Input) {
         t.unpark();
     }
 
+    // Storage used during board operations
+    let mut work_line: Vec<Tile> = vec![];
     // Loop storage
     let mut action: Action;
     let mut moved;
-    // Storage used during board operations
-    let mut work_line: Vec<Tile> = vec![];
 
     // The main event loop
     loop {
@@ -194,8 +192,7 @@ pub(crate) fn play(input: &Input) {
     }
 
     // Reset terminal
-    if io.is_some() {
-        let io = io.unwrap();
+    if let Some(io) = io {
         unsafe {
             libc::tcsetattr(io.0, libc::TCSANOW, &io.1);
         }
