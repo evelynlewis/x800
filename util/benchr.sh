@@ -29,7 +29,7 @@ test_ryan() {
     echo "Running ${LOOPS} iterations:"
     # Allow for best of a few iterations
     i=0
-    while [ $i -lt 5 ]; do
+    while [ $i -lt 8 ]; do
 	echo
         time -p ./target/release/ryan ./fuzz/corpus/roger/gold "${LOOPS}" >/dev/null
         i=$((i + 1))
