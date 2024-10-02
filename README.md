@@ -6,9 +6,9 @@ x800 : /ˈɛks ˈeɪt ˈhəndɹəd/
 
 2048 is played by merging a four-by-four grid of power-of-two tiles, to maximize the sum of merged tile values.
 
-`x800` can evaluate millions of moves per second, even on modest hardware. A Linux machine with an Intel Pentium CPU from 2013 was tested to play 3861 complete loops of a 1100 move `x800` game in one second, or 4.25 million moves-per-second. In the same test, a M1 MacBook Air with MacOS completes 8.73 million moves-per-second.
+`x800` can evaluate millions of moves per second, even on modest hardware. A Linux machine with an Intel Pentium CPU from 2013 was tested to play 3968 complete loops of a 1100 move `x800` game in one second, or 4.37 million moves-per-second. In the same test, a M1 MacBook Air with MacOS completes 9.02 million moves-per-second.
 
-Using the `mini` build feature to disable rendering, `x800` on the M1 machine runs at 13.8 million moves-per-second, or 72.7 nanoseconds per move, including amortized startup time. In this duration, light travels 21.8 metres: a distance which Usain Bolt ran in 1.78 [seconds](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10669785) in 2009 to set the current 100m sprint record. See also the benchmark [section](#benchmarks) below, and the [util/benchr.sh](./util/benchr.sh) script.
+Using the `mini` build feature to disable rendering, `x800` on the M1 machine runs at 14.3 million moves-per-second, or 70.0 nanoseconds per move, including amortized startup time. In this duration, light travels 21.0 metres: a distance which Usain Bolt ran in 1.71 [seconds](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10669785) in 2009 to set the current 100m sprint record. See also the benchmark [section](#benchmarks) below, and the [util/benchr.sh](./util/benchr.sh) script.
 
 The project has few build dependencies. Rather than ncurses or an external Rust terminal library, `x800` uses simple output buffering and standard [ANSI escape codes](https://en.wikipedia.org/wiki/ANSI_escape_code). The required POSIX-compatible [`libc`](https://docs.rs/libc/latest/libc/) crate is part of Rust's standard library on POSIX targets. The only external build dependency is [fastrand](https://crates.io/crates/fastrand), a simple non-cryptographic pseudorandom number generator crate without child dependencies. The project CI builds and tests `x800` on 25 cross-compiled targets, plus `ubuntu-latest` and `macos-latest`.
 
@@ -203,7 +203,7 @@ The required GNU shell tools are part of GNU `coreutils` and preinstalled on mos
 Building x800 executable.
     Finished `release` profile [optimized] target(s) in 0.04s
 Running benchmark for 16 seconds.
-118505472 bytes (119 MB, 113 MiB) copied, 16 s, 7.4 MB/s
+118620160 bytes (119 MB, 113 MiB) copied, 16 s, 7.4 MB/s
 ```
 
 ### Shell benchmark: M1 MacBook Air with MacOS 15
@@ -211,9 +211,9 @@ Running benchmark for 16 seconds.
 ```sh
 ./util/benchs.sh
 Building x800 executable.
-    Finished `release` profile [optimized] target(s) in 0.01s
+    Finished `release` profile [optimized] target(s) in 0.00s
 Running benchmark for 16 seconds.
-89243648 bytes (89 MB, 85 MiB) copied, 16 s, 5.6 MB/s
+89251840 bytes (89 MB, 85 MiB) copied, 16 s, 5.6 MB/s
 ```
 
 ## Fuzzing
