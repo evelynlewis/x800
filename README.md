@@ -135,7 +135,7 @@ The "gold file" benchmark latency numbers correspond to a large number of loops 
 ================================================================================
 Building project
 
-    Finished `release` profile [optimized] target(s) in 0.03s
+    Finished `release` profile [optimized] target(s) in 0.01s
 ================================================================================
 Installing hyperfine
 
@@ -144,7 +144,7 @@ Running with random input
 
 Benchmark 1: ./target/release/x800
   Time (mean ± σ):       1.0 ms ±   0.0 ms    [User: 0.3 ms, System: 0.6 ms]
-  Range (min … max):     1.0 ms …   1.2 ms    256 runs
+  Range (min … max):     0.9 ms …   1.1 ms    256 runs
 
 ================================================================================
 Running with gold file input
@@ -153,8 +153,8 @@ PATH:           /home/evelyn/lab/x800/fuzz/corpus/roger/1ae2a1d8d4bf9db9c858c19c
 GAME SAVE SIZE: 1108
 GAMES PER RUN:  1000
 Benchmark 1: ./target/release/ryan /home/evelyn/lab/x800/fuzz/corpus/roger/1ae2a1d8d4bf9db9c858c19c24b79a94439a3a1a 1000
-  Time (mean ± σ):     262.0 ms ±   3.5 ms    [User: 232.6 ms, System: 34.7 ms]
-  Range (min … max):   256.2 ms … 266.6 ms    32 runs
+  Time (mean ± σ):     262.0 ms ±   2.5 ms    [User: 230.3 ms, System: 36.7 ms]
+  Range (min … max):   255.2 ms … 266.4 ms    32 runs
 ```
 
 #### `hyperfine` benchmark: M1 MacBook Air with MacOS 15
@@ -164,7 +164,7 @@ Benchmark 1: ./target/release/ryan /home/evelyn/lab/x800/fuzz/corpus/roger/1ae2a
 ================================================================================
 Building project
 
-    Finished `release` profile [optimized] target(s) in 0.01s
+    Finished `release` profile [optimized] target(s) in 0.00s
 ================================================================================
 Installing hyperfine
 
@@ -172,7 +172,7 @@ Installing hyperfine
 Running with random input
 
 Benchmark 1: ./target/release/x800
-  Time (mean ± σ):       1.4 ms ±   0.1 ms    [User: 0.7 ms, System: 0.5 ms]
+  Time (mean ± σ):       1.4 ms ±   0.1 ms    [User: 0.6 ms, System: 0.5 ms]
   Range (min … max):     1.3 ms …   1.7 ms    256 runs
 
 ================================================================================
@@ -182,8 +182,8 @@ PATH:           /Users/evelynlewis/lab/x800/fuzz/corpus/roger/1ae2a1d8d4bf9db9c8
 GAME SAVE SIZE: 1108
 GAMES PER RUN:  1000
 Benchmark 1: ./target/release/ryan /Users/evelynlewis/lab/x800/fuzz/corpus/roger/1ae2a1d8d4bf9db9c858c19c24b79a94439a3a1a 1000
-  Time (mean ± σ):     133.5 ms ±   0.5 ms    [User: 114.9 ms, System: 29.1 ms]
-  Range (min … max):   132.4 ms … 134.5 ms    32 runs
+  Time (mean ± σ):     128.6 ms ±   0.6 ms    [User: 115.3 ms, System: 23.0 ms]
+  Range (min … max):   127.5 ms … 130.0 ms    32 runs
 ```
 
 ### Random-input throughput benchmarks using shell tools
