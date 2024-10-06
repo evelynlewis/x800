@@ -25,10 +25,10 @@ const MIN_DRAW_DELAY: time::Duration = time::Duration::from_millis(4);
 
 /// Configures terminal as needed
 fn io_config(input: &Input) -> Option<Io> {
+    const FD: libc::c_int = libc::STDIN_FILENO;
     if cfg!(feature = "mini") || *input != Input::Interactive {
         return None;
     }
-    const FD: libc::c_int = libc::STDIN_FILENO;
     let return_ios: libc::termios;
     unsafe {
         let mut ios: libc::termios = mem::zeroed();
