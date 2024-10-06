@@ -95,8 +95,7 @@ impl Board {
 
         // Loop bookkeeping
         let mut state_changed = false;
-        let mut end_index: usize;
-        let mut index: usize;
+        let mut init_end: usize;
         let mut line_tile: Tile;
 
         for index_line in index_table {
@@ -110,25 +109,32 @@ impl Board {
                 }
             }
 
-            end_index = work_line.len().saturating_sub(1);
-            index = 0;
+            init_end = work_line.len().saturating_sub(1);
+            let mut cleared: usize = 0;
 
             // While there are still elements at (index, index + 1)
-            while index < end_index {
+            for index in 0..init_end {
+                // Use constant end index with early break to allow vectorization
+                if index + 1 + cleared > init_end {
+                    break;
+                }
                 let (a_index, b_index) = (index, index + 1);
                 match (work_line[a_index], work_line[b_index]) {
                     (Tile::Empty(), _) | (_, Tile::Empty()) => {
                         unreachable!();
                     }
                     (Tile::Number(a_pow, a_gen), Tile::Number(b_pow, b_gen)) => {
-                        if a_pow == b_pow && ((a_gen != generation) && (b_gen != generation)) {
+                        // Breaking this up allows for vectorization
+                        if a_pow != b_pow {
+                            continue;
+                        } else if (a_gen != generation) && (b_gen != generation) {
                             // New next-power block
                             let next_pow = a_pow + 1;
                             work_line[a_index] = Tile::Number(next_pow, generation);
 
                             // One fewer element
                             work_line.remove(b_index);
-                            end_index -= 1;
+                            cleared += 1;
 
                             // Update statistics
                             self.open_tiles += 1;
@@ -137,7 +143,6 @@ impl Board {
                         }
                     }
                 }
-                index += 1;
             }
 
             // Re-add empty tiles to the end of the vector

@@ -6,7 +6,7 @@ x800 : /ˈɛks ˈeɪt ˈhəndɹəd/
 
 2048 is played by merging a four-by-four grid of power-of-two tiles, to maximize the sum of merged tile values.
 
-`x800` can evaluate millions of moves per second, even on modest hardware. A Linux machine with an Intel Pentium CPU from 2013 was tested to play 3968 complete loops of a 1100 move `x800` game in one second, or 4.37 million moves-per-second. In the same test, a M1 MacBook Air with MacOS completes 9.02 million moves-per-second.
+`x800` can evaluate millions of moves per second, even on modest hardware. A Linux machine with an Intel Pentium CPU from 2013 was tested to play 3984 complete loops of a 1100 move `x800` game in one second, or 4.38 million moves-per-second. In the same test, a M1 MacBook Air with MacOS completes 9.32 million moves-per-second.
 
 Using the `mini` build feature to disable rendering, `x800` on the M1 machine runs at 14.3 million moves-per-second, or 70.0 nanoseconds per move, including amortized startup time. In this duration, light travels 21.0 metres: a distance which Usain Bolt ran in 1.71 [seconds](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10669785) in 2009 to set the current 100m sprint record. See also the benchmark [section](#benchmarks) below, and the [util/benchr.sh](./util/benchr.sh) script.
 
@@ -153,8 +153,8 @@ PATH:           /home/evelyn/lab/x800/fuzz/corpus/roger/1ae2a1d8d4bf9db9c858c19c
 GAME SAVE SIZE: 1108
 GAMES PER RUN:  1000
 Benchmark 1: ./target/release/ryan /home/evelyn/lab/x800/fuzz/corpus/roger/1ae2a1d8d4bf9db9c858c19c24b79a94439a3a1a 1000
-  Time (mean ± σ):     262.0 ms ±   2.5 ms    [User: 230.3 ms, System: 36.7 ms]
-  Range (min … max):   255.2 ms … 266.4 ms    32 runs
+  Time (mean ± σ):     259.6 ms ±   3.2 ms    [User: 230.7 ms, System: 34.4 ms]
+  Range (min … max):   253.5 ms … 264.0 ms    32 runs
 ```
 
 #### `hyperfine` benchmark: M1 MacBook Air with MacOS 15
@@ -173,7 +173,7 @@ Running with random input
 
 Benchmark 1: ./target/release/x800
   Time (mean ± σ):       1.4 ms ±   0.1 ms    [User: 0.6 ms, System: 0.5 ms]
-  Range (min … max):     1.3 ms …   1.7 ms    256 runs
+  Range (min … max):     1.3 ms …   1.9 ms    256 runs
 
 ================================================================================
 Running with gold file input
@@ -182,8 +182,8 @@ PATH:           /Users/evelynlewis/lab/x800/fuzz/corpus/roger/1ae2a1d8d4bf9db9c8
 GAME SAVE SIZE: 1108
 GAMES PER RUN:  1000
 Benchmark 1: ./target/release/ryan /Users/evelynlewis/lab/x800/fuzz/corpus/roger/1ae2a1d8d4bf9db9c858c19c24b79a94439a3a1a 1000
-  Time (mean ± σ):     128.6 ms ±   0.6 ms    [User: 115.3 ms, System: 23.0 ms]
-  Range (min … max):   127.5 ms … 130.0 ms    32 runs
+  Time (mean ± σ):     125.3 ms ±   0.6 ms    [User: 111.7 ms, System: 22.5 ms]
+  Range (min … max):   124.3 ms … 127.0 ms    32 runs
 ```
 
 ### Random-input throughput benchmarks using shell tools
@@ -201,9 +201,9 @@ The required GNU shell tools are part of GNU `coreutils` and preinstalled on mos
 ```sh
 ./util/benchs.sh
 Building x800 executable.
-    Finished `release` profile [optimized] target(s) in 0.04s
+    Finished `release` profile [optimized] target(s) in 0.01s
 Running benchmark for 16 seconds.
-118620160 bytes (119 MB, 113 MiB) copied, 16 s, 7.4 MB/s
+119857152 bytes (120 MB, 114 MiB) copied, 16 s, 7.5 MB/s
 ```
 
 ### Shell benchmark: M1 MacBook Air with MacOS 15
