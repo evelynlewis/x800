@@ -60,4 +60,4 @@ sleep ${WARMUP_DURATION}
 echo "
 Sampling '${FUZZER_NAME}' process with flamegraph: press CTRL-C to stop.
 "
-sh -cx "flamegraph --deterministic --root --open --pid $(pgrep "${FUZZER_NAME}")"
+sh -cx "flamegraph --deterministic --root --open --pid $(pgrep ${FUZZER_NAME})"
