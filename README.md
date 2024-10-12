@@ -10,7 +10,9 @@ x800 : /ˈɛks ˈeɪt ˈhəndɹəd/
 
 Using the `mini` build feature to disable rendering, `x800` on the M1 machine runs at 14.3 million moves-per-second, or 70.0 nanoseconds per move, including amortized startup time. In this duration, light travels 21.0 metres: a distance which Usain Bolt ran in 1.71 [seconds](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10669785) in 2009 to set the current 100m sprint record. See also the benchmark [section](#benchmarks) below, and the [util/benchr.sh](./util/benchr.sh) script.
 
-The project has few build dependencies. Rather than ncurses or an external Rust terminal library, `x800` uses simple output buffering and standard [ANSI escape codes](https://en.wikipedia.org/wiki/ANSI_escape_code). The required POSIX-compatible [`libc`](https://docs.rs/libc/latest/libc/) crate is part of Rust's standard library on POSIX targets. The only external build dependency is [fastrand](https://crates.io/crates/fastrand), a simple non-cryptographic pseudorandom number generator crate without child dependencies. The project CI builds and tests `x800` on 25 cross-compiled targets, plus `ubuntu-latest` and `macos-latest`.
+The project has few build dependencies. Rather than ncurses or an external Rust terminal library, `x800` uses simple output buffering and standard [ANSI escape codes](https://en.wikipedia.org/wiki/ANSI_escape_code). The required POSIX-compatible [`libc`](https://docs.rs/libc/latest/libc/) crate is part of Rust's standard library on POSIX targets. The only external build dependency is [fastrand](https://crates.io/crates/fastrand), a simple non-cryptographic pseudorandom number generator crate without child dependencies.
+
+the project CI builds and tests `x800` on 25 cross-compiled POSIX targets - that is, all `rust-std` POSIX targets supported by the latest stable version of the widely-used `cross` cross-compilation [tool](https://github.com/cross-rs/cross). The project is also built and tested natively on all standard GitHub-hosted Linux or macOS [runners](https://docs.github.com/en/actions/using-github-hosted-runners/using-github-hosted-runners/about-github-hosted-runners#standard-github-hosted-runners-for-public-repositories). Binary tarballs for any supported platform can be downloaded from the latest GitHub Actions [`build-bot`](https://github.com/evelynlewis/x800/actions/workflows/ci.yml) run.
 
 The project started in part as a hands-on spike project for the author to learn [Rust](https://rust-lang.org) as a systems software developer experienced in C and C++. The name `x800` is the number 2048 in base sixteen, modified to comply with Cargo's package naming rules which disallow a leading digit.
 
@@ -254,19 +256,20 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-## References
+## Some references
 
 - [_Multicomponent Velocity Measurement for Linear Sprinting: Usain Bolt’s 100 m World-Record Analysis_, _Bioengineering (Basel, Switzerland)_, National Library of Medicine](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10669785)
 - [_ANSI escape code_, Wikipedia](https://en.wikipedia.org/wiki/ANSI_escape_code)
 - [_The TTY demystified_, Linus Åkesson](http://www.linusakesson.net/programming/tty/)
 - [_Zero-dependency random number generation in Rust_, Orhun Parmaksız](https://blog.orhun.dev/zero-deps-random-in-rust/)
 - [_termios(3) — Linux manual page_, man7.org](https://man7.org/linux/man-pages/man3/termios.3.html)
+- [_Performance Analysis and Tuning on Modern CPUs, 1st Edition_, Denis Bakhvalov](https://easyperf.net)
 - [_The Rust Performance Book_, Nicholas Nethercote](https://nnethercote.github.io/perf-book)
-- [_Clippy's Lints_, Clippy Documentation](https://doc.rust-lang.org/stable/clippy/lints.html)
-- [_hyperfine_, GitHub](https://github.com/sharkdp/hyperfine)
 - [_Rust Fuzz Book_, The Rust Fuzzing Authority](https://rust-fuzz.github.io/book)
-- [_LibFuzzer_, llvm.org](https://llvm.org/docs/LibFuzzer.html)
+- [_cross_, GitHub](https://github.com/cross-rs/cross)
+- [_hyperfine_, GitHub](https://github.com/sharkdp/hyperfine)
 - [_cargo-fuzz_, GitHub](https://github.com/rust-fuzz/cargo-fuzz)
+- [_LibFuzzer_, llvm.org](https://llvm.org/docs/LibFuzzer.html)
 - [_honggfuzz_, honggfuzz.dev](https://honggfuzz.dev)
 - [_honggfuzz-rs_, GitHub](https://github.com/rust-fuzz/honggfuzz-rs)
 - [_Flame Graphs_, Brendan Gregg](https://www.brendangregg.com/flamegraphs.html)
