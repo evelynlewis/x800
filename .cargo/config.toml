@@ -2,4 +2,4 @@
 # SPDX-License-Identifier: MIT
 
 [build]
-rustdocflags = ["--document-private-items", "-Dwarnings"]
+rustdocflags = ["--document-private-items", "-Dwarnings", "--default-theme=ayu"]
