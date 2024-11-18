@@ -3,9 +3,10 @@
 
 //! Implementation of x800 core event loop
 
+use core::slice;
 use std::{
     io::{self, Read},
-    mem, slice, sync, thread, time,
+    mem, sync, thread, time,
 };
 
 #[cfg(feature = "save")]
@@ -68,26 +69,13 @@ pub(crate) fn play(input: &Input) {
     #[cfg(feature = "save")]
     save.extend(fastrand::get_seed().to_le_bytes());
 
-    // Closure called for program input
-    let mut stdin = io::stdin().lock();
-    let mut buffer = [0_u8; 1];
-    let mut stdin_reader = || -> Action {
-        // Read one byte from stdin
-        match stdin.read_exact(&mut buffer) {
-            Err(_) => Action::Shutdown,
-            Ok(()) => {
-                #[cfg(feature = "save")]
-                save.push(buffer[0]);
-                Action::parse(buffer[0])
-            }
-        }
+    // Moves input iterator setup
+    let mut moves_slice = if let Input::Slice(slice) = input {
+        slice.iter()
+    } else {
+        slice::Iter::default()
     };
-
-    // Pre-setup for slice input
-    let mut iter = match input {
-        Input::Slice(slice) => slice.iter(),
-        Input::Interactive => slice::Iter::default(),
-    };
+    let mut moves_stdin = io::stdin().lock().bytes();
 
     let io = io_config(input);
 
@@ -139,12 +127,21 @@ pub(crate) fn play(input: &Input) {
     loop {
         generation += 1;
         action = match input {
-            Input::Interactive => stdin_reader(),
             Input::Slice(_) => Action::parse(
-                iter.next()
+                moves_slice
+                    .next()
                     .copied()
                     .unwrap_or(constants::END_OF_GAME_CHARACTER),
             ),
+            Input::Interactive => Action::parse({
+                let move_byte = moves_stdin
+                    .next()
+                    .unwrap_or(Ok(constants::END_OF_GAME_CHARACTER))
+                    .expect(constants::GAME_FAILURE_MESSAGE);
+                #[cfg(feature = "save")]
+                save.push(move_byte);
+                move_byte
+            }),
         };
 
         // Read input and take action
