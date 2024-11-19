@@ -3,7 +3,6 @@
 
 //! Implementation of x800 core event loop
 
-use core::slice;
 use std::{
     io::{self, Read},
     mem, sync, thread, time,
@@ -69,14 +68,7 @@ pub(crate) fn play(input: &Input) {
     #[cfg(feature = "save")]
     save.extend(fastrand::get_seed().to_le_bytes());
 
-    // Moves input iterator setup
-    let mut moves_slice = if let Input::Slice(slice) = input {
-        slice.iter()
-    } else {
-        slice::Iter::default()
-    };
-    let mut moves_stdin = io::stdin().lock().bytes();
-
+    // Configure terminal
     let io = io_config(input);
 
     // Clear screen and generate initial tiles
@@ -117,6 +109,18 @@ pub(crate) fn play(input: &Input) {
         t.unpark();
     }
 
+    // Moves input iterator setup
+    let mut moves_slice = if let Input::Slice(slice) = input {
+        Some(slice.iter())
+    } else {
+        None
+    };
+    let mut moves_stdin = if let Input::Interactive = input {
+        Some(io::stdin().lock().bytes())
+    } else {
+        None
+    };
+
     // Storage used during board operations
     let mut work_line: Vec<Tile> = vec![];
     // Loop storage
@@ -129,12 +133,16 @@ pub(crate) fn play(input: &Input) {
         action = match input {
             Input::Slice(_) => Action::parse(
                 moves_slice
+                    .as_mut()
+                    .unwrap()
                     .next()
                     .copied()
                     .unwrap_or(constants::END_OF_GAME_CHARACTER),
             ),
             Input::Interactive => Action::parse({
                 let move_byte = moves_stdin
+                    .as_mut()
+                    .unwrap()
                     .next()
                     .unwrap_or(Ok(constants::END_OF_GAME_CHARACTER))
                     .expect(constants::GAME_FAILURE_MESSAGE);
