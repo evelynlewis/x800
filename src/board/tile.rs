@@ -6,7 +6,6 @@
 use super::constants;
 use crate::colour::Colour;
 use std::fmt;
-use std::hash::Hash;
 
 /// The power-of-two of a [`Tile`]
 pub(crate) type Power = u32;
@@ -14,7 +13,7 @@ pub(crate) type Power = u32;
 pub(crate) type Generation = u64;
 
 /// Basic [`super::Board`] block
-#[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub(crate) enum Tile {
     Empty(),
     Number(Power, Generation),

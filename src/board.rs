@@ -24,6 +24,8 @@ pub(super) struct Board {
     score: u32,
     /// Value of the highest-value number tile
     max_tile: tile::Power,
+    /// Generation of the board
+    pub(super) generation: Generation,
 }
 
 /// Default starting [`Board`] structure
@@ -34,12 +36,19 @@ impl Board {
             score: 0,
             open_tiles: 16,
             max_tile: 0,
+            generation: 0,
+        }
+    }
+    #[inline]
+    pub(super) fn clone_from(&mut self, source: &Self) {
+        if self.generation != source.generation {
+            *self = source.clone();
         }
     }
 }
 
 /// Directions the player can move
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub(super) enum Direction {
     Up,
     Down,
@@ -48,7 +57,7 @@ pub(super) enum Direction {
 }
 
 /// [`Board`] operations
-#[derive(PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub(super) enum Action {
     Direction(Direction),
     Continue,
@@ -70,13 +79,8 @@ impl Action {
 }
 
 impl Board {
-    /// Update the [`Board`], given a move [`Direction`] and [`Generation`], and its current state.
-    pub(super) fn update(
-        &mut self,
-        direction: Direction,
-        generation: Generation,
-        work_line: &mut vec::Vec<Tile>,
-    ) -> bool {
+    /// Update the [`Board`], given a move [`Direction`] and its current state.
+    pub(super) fn update(&mut self, direction: Direction, work_line: &mut vec::Vec<Tile>) -> bool {
         const LEFT_INDEX: [[usize; constants::TILES_PER_LINE]; constants::TILES_PER_LINE] =
             [[0, 1, 2, 3], [4, 5, 6, 7], [8, 9, 10, 11], [12, 13, 14, 15]];
         const RIGHT_INDEX: [[usize; constants::TILES_PER_LINE]; constants::TILES_PER_LINE] =
@@ -127,10 +131,10 @@ impl Board {
                         // Breaking this up allows for vectorization
                         if a_pow != b_pow {
                             continue;
-                        } else if (a_gen != generation) && (b_gen != generation) {
+                        } else if (a_gen != self.generation) && (b_gen != self.generation) {
                             // New next-power block
                             let next_pow = a_pow + 1;
-                            work_line[a_index] = Tile::Number(next_pow, generation);
+                            work_line[a_index] = Tile::Number(next_pow, self.generation);
 
                             // One fewer element
                             work_line.remove(b_index);
@@ -170,7 +174,7 @@ impl Board {
     }
 
     /// Create a new '2' or '4' number tile in a blank space
-    pub(super) fn spawn_tile(&mut self, generation: Generation) -> bool {
+    pub(super) fn spawn_tile(&mut self) -> bool {
         // Values
         const CHANCE_OF_FOUR_TILES: u64 = 4;
 
@@ -192,9 +196,11 @@ impl Board {
         for tile in &mut self.tiles {
             if *tile == Tile::Empty() {
                 if offset == insert_index {
-                    *tile = Tile::Number(insert_value, generation);
-                    self.max_tile = cmp::max(insert_value, self.max_tile);
+                    *tile = Tile::Number(insert_value, self.generation);
+                    // Update bookkeeping variables
+                    self.generation += 1;
                     self.open_tiles -= 1;
+                    self.max_tile = cmp::max(insert_value, self.max_tile);
                     return true;
                 }
                 offset += 1;

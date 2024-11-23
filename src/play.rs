@@ -11,11 +11,7 @@ use std::{
 #[cfg(feature = "save")]
 use std::io::Write;
 
-use crate::board::{
-    self, constants,
-    tile::{Generation, Tile},
-    Action, Board,
-};
+use crate::board::{self, constants, tile::Tile, Action, Board};
 
 /// The number of tiles to generate at startup
 const INITIAL_TILES_COUNT: u32 = 2;
@@ -71,14 +67,11 @@ pub(crate) fn play(input: &Input) {
     // Configure terminal
     let io = io_config(input);
 
-    // Clear screen and generate initial tiles
-    let mut generation: Generation = 0;
-
     // Limit scope for lock
     {
         let mut unlocked = board.lock().unwrap();
         for _ in 0..INITIAL_TILES_COUNT {
-            unlocked.spawn_tile(generation);
+            unlocked.spawn_tile();
         }
     }
 
@@ -129,7 +122,6 @@ pub(crate) fn play(input: &Input) {
 
     // The main event loop
     loop {
-        generation += 1;
         action = match input {
             Input::Slice(_) => Action::parse(
                 moves_slice
@@ -156,15 +148,13 @@ pub(crate) fn play(input: &Input) {
         match action {
             Action::Direction(direction) => {
                 let mut unlocked = board.lock().unwrap();
-                moved = unlocked.update(direction, generation, &mut work_line);
-
+                moved = unlocked.update(direction, &mut work_line);
                 // Skip adding a tile after invalid move
                 if !moved && unlocked.has_space() {
                     continue;
                 }
-
                 // Add new tile if the board has space
-                if !unlocked.spawn_tile(generation) {
+                if !unlocked.spawn_tile() {
                     break;
                 }
             }

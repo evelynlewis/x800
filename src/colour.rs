@@ -15,7 +15,7 @@ use super::board::tile::Power;
 use std::fmt;
 
 /// Information which fully specifies a given Colour
-#[derive(Debug, PartialEq, Eq, Default)]
+#[derive(PartialEq, Eq, Default, Debug)]
 pub(super) struct Colour {
     row: Power,
     column: Power,
@@ -68,6 +68,7 @@ const COLOUR_RIGHT_COLUMN: Power = COLOUR_LEFT_COLUMN + 5;
 
 impl fmt::Display for Colour {
     /// Generate and print foreground and background escape codes for a Colour
+    #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let (bg, fg) = if *self == Self::default() {
             (0_u32, 15_u32)
