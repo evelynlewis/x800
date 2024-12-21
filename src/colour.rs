@@ -15,42 +15,51 @@ use super::board::tile::Power;
 use std::fmt;
 
 /// Information which fully specifies a given Colour
-#[derive(PartialEq, Eq, Default, Debug)]
+#[derive(PartialEq, Eq, Debug, Default)]
 pub(super) struct Colour {
     row: Power,
     column: Power,
 }
 
+const COLOUR_COUNT: u32 = 18;
+
 impl Colour {
     /// Generate a colour based on a Tile's power-of-two
+    #[inline]
     pub(super) const fn from_power(power: Power) -> Self {
-        let limited = power % 18;
+        let limited = power % COLOUR_COUNT;
+        // Skip every second colour
         let offset = (power % 3) * 2;
         match limited {
-            // first, left-most column, upwards (ie. /|\)
+            // First, left-most column, upwards (ie. /|\)
             0..=2 => Colour {
                 row: 5 - offset,
                 column: COLOUR_LEFT_COLUMN,
             },
-            // top-most row (ie. '>->')
+            // Top-most row (ie. '>->')
             3..=5 => Colour {
                 row: 0,
                 column: COLOUR_LEFT_COLUMN + offset,
             },
-            // right-most column, downwards (ie. '\|/')
+            // Right-most column, downwards (ie. '\|/')
             6..=8 => Colour {
                 row: offset,
                 column: COLOUR_RIGHT_COLUMN,
             },
-            // bottom-most row (ie. '<-<')
+            // Bottom-most row (ie. '<-<')
             9..=11 => Colour {
                 row: 5,
                 column: COLOUR_RIGHT_COLUMN - offset,
             },
-            // finally, cut across the win square
-            12..=17 => Colour {
-                row: 5 - (limited - 12),
-                column: COLOUR_WIN_COLUMN + (limited - 12),
+            // Across win row
+            12..=14 => Colour {
+                row: 5,
+                column: COLOUR_WIN_COLUMN + offset,
+            },
+            // Up the other side
+            15..=17 => Colour {
+                row: 5 - offset,
+                column: COLOUR_WIN_COLUMN + 5,
             },
             _ => Self::from_power(0 as Power),
         }
@@ -82,7 +91,9 @@ impl fmt::Display for Colour {
 
 #[cfg(test)]
 mod tests {
-    use super::{Colour, Power, COLOUR_LEFT_COLUMN, COLOUR_RIGHT_COLUMN, COLOUR_WIN_COLUMN};
+    use super::{
+        Colour, Power, COLOUR_COUNT, COLOUR_LEFT_COLUMN, COLOUR_RIGHT_COLUMN, COLOUR_WIN_COLUMN,
+    };
 
     #[test]
     fn cycle_colours() {
@@ -90,7 +101,7 @@ mod tests {
             println!("{power}");
             assert_eq!(
                 Colour::from_power(power as Power),
-                Colour::from_power(power as Power % 18),
+                Colour::from_power(power as Power % COLOUR_COUNT),
             );
         }
     }
@@ -98,7 +109,7 @@ mod tests {
     #[test]
     fn unique_colours() {
         for power in 0..u16::MAX {
-            for skip in 1..=17 {
+            for skip in 1..(COLOUR_COUNT - 2) {
                 assert_ne!(
                     Colour::from_power(power as Power),
                     Colour::from_power(power as Power + skip),
@@ -140,6 +151,13 @@ mod tests {
                 },
             ),
             (
+                4,
+                Colour {
+                    row: 0,
+                    column: COLOUR_LEFT_COLUMN + 2,
+                },
+            ),
+            (
                 5,
                 Colour {
                     row: 0,
@@ -150,6 +168,13 @@ mod tests {
                 6,
                 Colour {
                     row: 0,
+                    column: COLOUR_RIGHT_COLUMN,
+                },
+            ),
+            (
+                7,
+                Colour {
+                    row: 2,
                     column: COLOUR_RIGHT_COLUMN,
                 },
             ),
@@ -165,6 +190,13 @@ mod tests {
                 Colour {
                     row: 5,
                     column: COLOUR_RIGHT_COLUMN,
+                },
+            ),
+            (
+                10,
+                Colour {
+                    row: 5,
+                    column: COLOUR_RIGHT_COLUMN - 2,
                 },
             ),
             (
@@ -184,14 +216,35 @@ mod tests {
             (
                 13,
                 Colour {
-                    row: 4,
-                    column: COLOUR_WIN_COLUMN + 1,
+                    row: 5,
+                    column: COLOUR_WIN_COLUMN + 2,
+                },
+            ),
+            (
+                14,
+                Colour {
+                    row: 5,
+                    column: COLOUR_WIN_COLUMN + 4,
+                },
+            ),
+            (
+                15,
+                Colour {
+                    row: 5,
+                    column: COLOUR_WIN_COLUMN + 5,
+                },
+            ),
+            (
+                16,
+                Colour {
+                    row: 3,
+                    column: COLOUR_WIN_COLUMN + 5,
                 },
             ),
             (
                 17,
                 Colour {
-                    row: 0,
+                    row: 1,
                     column: COLOUR_WIN_COLUMN + 5,
                 },
             ),

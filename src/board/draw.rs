@@ -87,6 +87,7 @@ impl Board {
     }
 
     /// Draw the game header to the output String
+    #[inline]
     fn draw_header(&self, output: &mut String) -> fmt::Result {
         write!(
             output,
