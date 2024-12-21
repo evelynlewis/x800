@@ -9,6 +9,7 @@ pub(super) mod constants;
 pub(super) mod tile;
 
 mod draw;
+use constants::TILES_AREA;
 pub(super) use draw::draw;
 
 use tile::{Generation, Tile};
@@ -192,18 +193,18 @@ impl Board {
         };
 
         // Insert at location
-        let mut offset: usize = 0;
-        for tile in &mut self.tiles {
-            if *tile == Tile::Empty() {
-                if offset == insert_index {
-                    *tile = Tile::Number(insert_value, self.generation);
+        let mut skipped: usize = 0;
+        for index in 0..TILES_AREA {
+            if let Tile::Empty() = self.tiles[index] {
+                if skipped == insert_index {
+                    self.tiles[index] = Tile::Number(insert_value, self.generation);
                     // Update bookkeeping variables
                     self.generation += 1;
                     self.open_tiles -= 1;
                     self.max_tile = cmp::max(insert_value, self.max_tile);
                     return true;
                 }
-                offset += 1;
+                skipped += 1;
             }
         }
 
