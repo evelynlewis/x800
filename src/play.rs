@@ -95,7 +95,7 @@ pub(crate) fn play(input: &Input) {
     let draw_thread = draw_join.as_ref().map(thread::JoinHandle::thread);
 
     // Draw timestamp
-    let mut last_draw = time::Instant::now();
+    let mut next_draw = time::Instant::now() + MIN_DRAW_DELAY;
     // Initially draw the board
     if let Some(t) = draw_thread {
         draw_scan.store(true, sync::atomic::Ordering::Relaxed);
@@ -168,10 +168,10 @@ pub(crate) fn play(input: &Input) {
 
         // In case of update, draw the board
         if let Some(t) = draw_thread {
-            if last_draw.elapsed() > MIN_DRAW_DELAY {
+            if time::Instant::now() > next_draw {
                 draw_scan.store(true, sync::atomic::Ordering::Relaxed);
                 t.unpark();
-                last_draw = time::Instant::now();
+                next_draw += MIN_DRAW_DELAY;
             }
         }
     }
