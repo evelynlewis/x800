@@ -4,27 +4,30 @@ x800 : /ˈɛks ˈeɪt ˈhəndɹəd/
 
 ## Introduction
 
-2048 is played by merging a four-by-four grid of power-of-two tiles, to maximize the sum of merged tile values.
+2048 is played by merging a four-by-four grid of power-of-two tiles, to maximize the sum of merged tile values. `x800` is a fast and portable implementation.
 
 `x800` can evaluate millions of moves per second, even on modest hardware. A Linux machine with an Intel Pentium CPU from 2013 was tested to play 4184 complete loops of a 1100 move `x800` game in one second, or 4.60 million moves-per-second. In the same test, a M1 MacBook Air with MacOS completes 10.6 million moves-per-second.
 
-Using the `mini` build feature to disable rendering, `x800` on the M1 machine runs at 15.5 million moves-per-second, or 64.5 nanoseconds per move, including amortized startup time. In this duration, light travels 19.4 metres: a distance which Usain Bolt ran in 1.58 [seconds](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10669785) in 2009 to set the current 100m sprint record. See also the benchmark [section](#benchmarks) below, and the [util/benchr.sh](./util/benchr.sh) script.
+Using the `mini` build feature to disable rendering, `x800` on the M1 machine runs at 15.5 million moves-per-second, or 64.5 nanoseconds per move, including amortized startup time. In this duration, light travels 19.4 metres: a distance which Usain Bolt ran in 1.58 [seconds](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10669785) in 2009 to set the current 100m sprint record.
 
-The project has few build dependencies. Rather than ncurses or an external Rust terminal library, `x800` uses simple output buffering and standard [ANSI escape codes](https://en.wikipedia.org/wiki/ANSI_escape_code). The required POSIX-compatible [`libc`](https://docs.rs/libc/latest/libc/) crate is part of Rust's standard library on POSIX targets. The two other dependencies are [fastrand](https://crates.io/crates/fastrand), a simple non-cryptographic pseudorandom number generators, and [spin](https://crates.io/crates/spin), providing spin-based synchronization primitives. All build dependencies are used free from child dependencies.
+See also the benchmark [section](#benchmarks) below, and the [util/benchr.sh](./util/benchr.sh) script.
 
-The project CI builds and tests `x800` on 25 cross-compiled POSIX targets - that is, all `rust-std` POSIX targets supported by the latest stable version of the widely-used `cross` cross-compilation [tool](https://github.com/cross-rs/cross). The project is also built and tested natively on all standard GitHub-hosted Linux or macOS [runners](https://docs.github.com/en/actions/using-github-hosted-runners/using-github-hosted-runners/about-github-hosted-runners#standard-github-hosted-runners-for-public-repositories). Binary tarballs for any supported platform can be downloaded from the latest GitHub Actions [`build-bot`](https://github.com/evelynlewis/x800/actions/workflows/ci.yml) run.
+The project has few build dependencies. Rather than ncurses or an external Rust terminal library, `x800` uses simple output buffering with standard [ANSI escape codes](https://en.wikipedia.org/wiki/ANSI_escape_code). The required POSIX-compatible [`libc`](https://docs.rs/libc/latest/libc/) crate is part of Rust's standard library on POSIX targets.
+
+Plus:
+
+- [spin](https://crates.io/crates/spin) provides synchronization primitives used to minimize inter-thread latency.
+- [fastrand](https://crates.io/crates/fastrand) is a simple and fast non-cryptographic pseudorandom number generator.
+
+The project CI builds and tests `x800` on 25 cross-compiled POSIX targets - that is, all `rust-std` POSIX targets supported by the latest stable version of the widely-used `cross` cross-compilation [tool](https://github.com/cross-rs/cross).
+
+The project is also built and tested natively on all standard GitHub-hosted Linux or macOS [runners](https://docs.github.com/en/actions/using-github-hosted-runners/using-github-hosted-runners/about-github-hosted-runners#standard-github-hosted-runners-for-public-repositories). Binary tarballs for any cross-compiled or native platform can be downloaded from the latest GitHub Actions [`build-bot`](https://github.com/evelynlewis/x800/actions/workflows/ci.yml) run. See below for local build instructions.
 
 The project started in part as a hands-on spike project for the author to learn [Rust](https://rust-lang.org) as a systems software developer experienced in C and C++. The name `x800` is the number 2048 in base sixteen, modified to comply with Cargo's package naming rules which disallow a leading digit.
-
-## Preview
-
-![`x800` gameplay](etc/screen.png)
 
 ## Quick start
 
 Use the [`rustup`](https://rustup.rs) tool to install the required Rust toolchain including `cargo` on your machine.
-
-### Install
 
 To install or update `x800`:
 
@@ -32,19 +35,21 @@ To install or update `x800`:
 cargo install x800 --git 'https://github.com/evelynlewis/x800.git'
 ```
 
-To run:
+To run `x800`:
 
 ```sh
 x800
 ```
-
-### Uninstall
 
 To uninstall `x800`:
 
 ```sh
 cargo uninstall x800
 ```
+
+## Preview
+
+![`x800` gameplay](etc/screen.png)
 
 ## Gameplay
 
@@ -98,12 +103,14 @@ cross build --release --target=arm-unknown-linux-gnueabihf
 To set up `x800` for local testing and experimentation:
 
 ```sh
+# Packages required on Ubuntu. These are likely already installed.
+sudo apt install build-essential git time
 git clone 'https://github.com/evelynlewis/x800.git'
 cd x800
-cargo build
+cargo bench
 ```
 
-See-also the development shell scripts in the `util/` directory.
+See-also the development shell scripts in the `util/` directory. In particular, the [`util/preflight.sh`](./util/preflight.sh) script runs a slew of tests starting from a clean build each time - useful to verify changes prior to integration. The [`util/benchr.sh`](./util/benchr.sh) script can also be used to benchmark candidate code changes.
 
 ## Benchmarks
 
