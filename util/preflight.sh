@@ -95,6 +95,10 @@ cargo install cargo-fuzz
 xcall cargo fuzz run roger --sanitizer none --release --features mini -- -runs=0
 plus_ok
 
+plus_header "Now validating score using ryan"
+xcall cargo run --features score --release --bin ryan fuzz/corpus/roger/gold
+plus_ok
+
 echo
 plus_line
 echo "ALL OK"

@@ -19,5 +19,7 @@ test -d ./fuzz
 # shellcheck source=fuzzenv.sh
 . ./util/fuzzenv.sh
 
+fuzz_build "$@"
+
 # Run fuzzer using cargo-fuzz
 fuzz_run_bench "$@" 2>>./fuzz/target/roger-output.txt &

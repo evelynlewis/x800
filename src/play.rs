@@ -56,7 +56,7 @@ struct Io(libc::c_int, libc::termios);
 #[allow(clippy::too_many_lines)]
 pub(crate) fn play(input: &Input) {
     // Runtime storage
-    let board = sync::Arc::new(sync::Mutex::new(Board::default()));
+    let board = sync::Arc::new(spin::Mutex::new(Board::default()));
 
     // Game save setup
     #[cfg(feature = "save")]
@@ -69,7 +69,7 @@ pub(crate) fn play(input: &Input) {
 
     // Limit scope for lock
     {
-        let mut unlocked = board.lock().unwrap();
+        let mut unlocked = board.lock();
         for _ in 0..INITIAL_TILES_COUNT {
             unlocked.spawn_tile();
         }
@@ -147,7 +147,7 @@ pub(crate) fn play(input: &Input) {
         // Read input and take action
         match action {
             Action::Direction(direction) => {
-                let mut unlocked = board.lock().unwrap();
+                let mut unlocked = board.lock();
                 moved = unlocked.update(direction, &mut work_line);
                 // Skip adding a tile after invalid move
                 if !moved && unlocked.has_space() {
@@ -204,5 +204,5 @@ pub(crate) fn play(input: &Input) {
     }
 
     #[cfg(feature = "score")]
-    println!("{}", board.lock().unwrap().score());
+    println!("{}", board.lock().score());
 }

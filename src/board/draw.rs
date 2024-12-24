@@ -14,9 +14,15 @@ use std::{
     thread,
 };
 
-/// Board drawing worker function
+/**
+ * Board drawing worker function
+ *
+ * Note: `spin::Mutex` is used in place of `std::sync::Mutex` as the draw
+ * thread requires only very brief access to the shared data, so we would
+ * prefer to avoid putting the main loop thread to sleep for this duration.
+ */
 pub(crate) fn draw(
-    board: &sync::Arc<sync::Mutex<Board>>,
+    board: &sync::Arc<spin::Mutex<Board>>,
     done: &sync::Arc<atomic::AtomicBool>,
     scan: &sync::Arc<atomic::AtomicBool>,
 ) -> fmt::Result {
@@ -49,7 +55,7 @@ pub(crate) fn draw(
         }
 
         // Clone for drawing
-        local_board.clone_from(&board.lock().unwrap());
+        local_board.clone_from(&board.lock());
 
         // Write out to string
         Board::draw_clear(buffer)?;
