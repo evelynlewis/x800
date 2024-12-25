@@ -8,7 +8,7 @@ x800 : /ˈɛks ˈeɪt ˈhəndɹəd/
 
 `x800` can evaluate millions of moves per second, even on modest hardware. A Linux machine with an Intel Pentium CPU from 2013 was tested to play 4184 complete loops of a 1100 move `x800` game in one second, or 4.60 million moves-per-second. In the same test, a M1 MacBook Air with MacOS completes 10.6 million moves-per-second.
 
-Using the `mini` build feature to disable rendering, `x800` on the M1 machine runs at 15.5 million moves-per-second, or 64.5 nanoseconds per move, including amortized startup time. In this duration, light travels 19.4 metres: a distance which Usain Bolt ran in 1.58 [seconds](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10669785) in 2009 to set the current 100m sprint record.
+Using the `mini` build feature to disable rendering, `x800` on the M1 machine runs at 15.7 million moves-per-second, or 63.6 nanoseconds per move, including amortized startup time. In this duration, light travels 19.1 metres: a distance which Usain Bolt ran in 1.56 [seconds](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10669785) in 2009 to set the current 100m sprint record.
 
 See also the benchmark [section](#benchmarks) below, and the [util/benchr.sh](./util/benchr.sh) script.
 

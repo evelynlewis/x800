@@ -3,13 +3,11 @@
 
 //! A minimal program entry point
 
-use play::{play, Input};
-
 mod board;
 mod colour;
 mod play;
 
 /// The main program entry point
 fn main() {
-    play(&Input::Interactive);
+    play::play(&play::Input::Interactive);
 }

@@ -4,7 +4,7 @@
 //! Implementation of x800 core event loop
 
 use std::{
-    io::{self, Read},
+    io::{self, Read as _},
     mem, sync, thread, time,
 };
 
@@ -169,7 +169,7 @@ pub(crate) fn play(input: &Input) {
         // In case of update, draw the board
         if let Some(t) = draw_thread {
             if time::Instant::now() > next_draw {
-                draw_scan.store(true, sync::atomic::Ordering::Relaxed);
+                draw_scan.store(true, sync::atomic::Ordering::Release);
                 t.unpark();
                 next_draw += MIN_DRAW_DELAY;
             }
@@ -178,7 +178,6 @@ pub(crate) fn play(input: &Input) {
 
     // Signal and join board-drawing thread, if it exists
     if let Some(t) = draw_thread {
-        draw_scan.store(true, sync::atomic::Ordering::Relaxed);
         draw_quit.store(true, sync::atomic::Ordering::Release);
         t.unpark();
         if let Some(h) = draw_join {

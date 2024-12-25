@@ -6,13 +6,7 @@
 use super::super::colour::Colour;
 use super::constants;
 use super::Board;
-use std::{
-    fmt,
-    fmt::Write as FmtWrite,
-    io::Write as IoWrite,
-    sync::{self, atomic},
-    thread,
-};
+use std::{fmt, fmt::Write as FmtWrite, io::Write as IoWrite, sync, thread};
 
 /**
  * Board drawing worker function
@@ -23,8 +17,8 @@ use std::{
  */
 pub(crate) fn draw(
     board: &sync::Arc<spin::Mutex<Board>>,
-    done: &sync::Arc<atomic::AtomicBool>,
-    scan: &sync::Arc<atomic::AtomicBool>,
+    done: &sync::Arc<sync::atomic::AtomicBool>,
+    scan: &sync::Arc<sync::atomic::AtomicBool>,
 ) -> fmt::Result {
     // Use one buffer for program duration
     let buffer = &mut String::with_capacity(constants::DISPLAY_BUFFER_SIZE);
@@ -41,17 +35,15 @@ pub(crate) fn draw(
     loop {
         // Wait for wakeup
         thread::park();
-        // Avoid spurious wakeup
-        if !scan.swap(false, atomic::Ordering::Relaxed) {
-            // So we're not supposed to wake up, but should we exit?
-            if done.load(atomic::Ordering::Acquire) {
-                exit_after = true;
-            } else {
-                continue;
-            }
-        } else if done.load(atomic::Ordering::Acquire) {
-            // We should exit after
+
+        // Avoid spurious wakeups
+        // First check if we should print and exit
+        if done.load(sync::atomic::Ordering::Acquire) {
+            // Print and then exit
             exit_after = true;
+        } else if !scan.swap(false, sync::atomic::Ordering::Acquire) {
+            // Spurious wakeup - continue and re-park the thread
+            continue;
         }
 
         // Clone for drawing

@@ -10,11 +10,10 @@ use std::mem;
 mod board;
 mod colour;
 mod play;
-use play::play;
 
 fn driver(input: &[u8], seed: u64) {
     fastrand::seed(seed);
-    play(&play::Input::Slice(input));
+    play::play(&play::Input::Slice(input));
 }
 
 /// # Panics
