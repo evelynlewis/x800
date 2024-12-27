@@ -21,15 +21,17 @@ pub(super) const TILES_WIDTH: usize = 4;
 pub(super) const TILES_PER_LINE: usize = 4;
 /// The area of playable tiles
 pub(super) const TILES_AREA: usize = TILES_PER_LINE * TILES_PER_LINE;
-// Length of a complete output line, as-displayed, and including borders and whitespace
+/// Length of a complete output line, as-displayed, and including borders and whitespace
 pub(super) const PRINT_LINE_LEN: usize = (TILES_PER_LINE * TILES_WIDTH) + PRE_MARGIN.len();
 
 // Public constants
+/// Marker line used at top and bottom
+pub(super) const BOUNDARY_MARKER_LINE: &str = "────────────────────────";
 /// Text printed to the left of the board
 pub(crate) const PRE_MARGIN: &str = "\r\r      ";
 /// Text printed to mark the end of a game
 pub(crate) const GAME_OVER: &str = "─── the game is over ───\r\n";
-// Input character which ends gameplay
+/// Input character which ends gameplay
 pub(crate) const END_OF_GAME_CHARACTER: u8 = 3;
 
 // Print output to stdout

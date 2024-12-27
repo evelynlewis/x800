@@ -85,7 +85,7 @@ pub(crate) fn play(input: &Input) {
             let draw_quit = draw_quit.clone();
             let draw_scan = draw_scan.clone();
             move || {
-                board::draw(&board, &draw_quit, &draw_scan).expect(constants::GAME_FAILURE_MESSAGE);
+                board::draw(&board, &draw_quit, &draw_scan);
             }
         }))
     } else {

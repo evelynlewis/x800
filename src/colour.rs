@@ -15,7 +15,7 @@ use super::board::tile::Power;
 use std::fmt;
 
 /// Information which fully specifies a given Colour
-#[derive(PartialEq, Eq, Debug, Default)]
+#[derive(PartialEq, Eq, Debug)]
 pub(super) struct Colour {
     row: Power,
     column: Power,
@@ -63,6 +63,11 @@ impl Colour {
             },
             _ => Self::from_power(0 as Power),
         }
+    }
+
+    /// Our own Default implementation to allow `const`
+    pub(super) const fn default() -> Self {
+        Self { row: 0, column: 0 }
     }
 }
 

@@ -6,7 +6,7 @@
 use super::super::colour::Colour;
 use super::constants;
 use super::Board;
-use std::{fmt, fmt::Write as FmtWrite, io::Write as IoWrite, sync, thread};
+use std::{fmt::Write as _, io::Write as _, sync, thread};
 
 /**
  * Board drawing worker function
@@ -19,9 +19,15 @@ pub(crate) fn draw(
     board: &sync::Arc<spin::Mutex<Board>>,
     done: &sync::Arc<sync::atomic::AtomicBool>,
     scan: &sync::Arc<sync::atomic::AtomicBool>,
-) -> fmt::Result {
+) {
     // Use one buffer for program duration
     let buffer = &mut String::with_capacity(constants::DISPLAY_BUFFER_SIZE);
+
+    // Validate constants
+    assert_eq!(
+        constants::BOUNDARY_MARKER_LINE.chars().count(),
+        constants::PRINT_LINE_LEN
+    );
 
     // Preferred output stream
     let mut output = constants::WRITER();
@@ -50,10 +56,9 @@ pub(crate) fn draw(
         local_board.clone_from(&board.lock());
 
         // Write out to string
-        Board::draw_clear(buffer)?;
-        local_board.draw_header(buffer)?;
-        local_board.draw_tiles(buffer)?;
-        local_board.draw_score(buffer)?;
+        local_board.draw_header(buffer);
+        local_board.draw_tiles(buffer);
+        local_board.draw_score(buffer);
 
         // Write out framebuffer
         output
@@ -70,56 +75,55 @@ pub(crate) fn draw(
             break;
         }
     }
-
-    Ok(())
 }
 
 impl Board {
-    /// Draw a 'clear screen' control character to the output String
-    fn draw_clear(output: &mut String) -> fmt::Result {
-        write!(
-            output,
-            "{}",
-            format_args!("{}\u{1B}[2H\u{1B}[2J", Colour::default())
-        )
-    }
-
-    /// Draw the game header to the output String
+    /// Clear the game screen and draw the game header to the output String
+    /// Writing fmt output to a String should never fail, so in that case panic
     #[inline]
-    fn draw_header(&self, output: &mut String) -> fmt::Result {
+    fn draw_header(&self, output: &mut String) {
         write!(
             output,
             "{}",
             format_args!(
-                "{}{}{:<colour_len$}{}\r\n{}{}\r\n",
+                "{}{}{}{}{:<colour_len$}{}\r\n{}{}\r\n",
+                // Clear screen control character
+                Colour::default(),
+                "\u{1B}[2H\u{1B}[2J",
+                // Header
                 constants::PRE_MARGIN,
+                // Print top banner
                 Colour::from_power(self.max_tile),
                 String::new(),
+                // Top boundary line
                 Colour::default(),
                 constants::PRE_MARGIN,
-                "─".repeat(constants::PRINT_LINE_LEN),
+                constants::BOUNDARY_MARKER_LINE,
+                // Banner length
                 colour_len = constants::PRINT_LINE_LEN
-            )
+            ),
         )
+        .unwrap();
     }
 
     /// Draw all [`Board`] Tiles to the output String
-    fn draw_tiles(&self, output: &mut String) -> fmt::Result {
-        // Allow bounds-checking elision
-        assert_eq!(self.tiles.len(), constants::TILES_AREA);
+    /// Writing fmt output to a String should never fail, so in that case panic
+    #[inline]
+    fn draw_tiles(&self, output: &mut String) {
         // Iterate over each row and column, then print
-        output.write_str("      ")?;
-        for i in 0..constants::TILES_PER_LINE {
+        output.write_str("      ").unwrap();
+        // Allow bounds elision
+        for i in 0..(self.tiles.len() / constants::TILES_PER_LINE) {
             for j in 0..constants::TILES_PER_LINE {
-                write!(output, "{}", self.tiles[constants::TILES_PER_LINE * i + j])?;
+                write!(output, "{}", self.tiles[constants::TILES_PER_LINE * i + j]).unwrap();
             }
-            output.write_str("\r\n      ")?;
+            output.write_str("\r\n      ").unwrap();
         }
-        Ok(())
     }
 
     /// Draw the current score to the output String
-    fn draw_score(&self, output: &mut String) -> fmt::Result {
+    /// Writing fmt output to a String should never fail, so in that case panic
+    fn draw_score(&self, output: &mut String) {
         const LENGTH: usize = constants::PRINT_LINE_LEN - SCORE_TEXT.len();
         const SPACE: &str = constants::PRE_MARGIN;
         const SCORE_TEXT: &str = constants::SCORE_TEXT;
@@ -135,10 +139,11 @@ impl Board {
             output,
             "{}{}{before}{score:<LENGTH$}{after}",
             constants::PRE_MARGIN,
-            "─".repeat(constants::PRINT_LINE_LEN),
+            constants::BOUNDARY_MARKER_LINE,
             score = self.score,
             before = format_args!("{SPACE}{header}{SPACE}{score_colour}{SCORE_TEXT}"),
             after = format_args!("{no_colour}\r\n"),
         )
+        .unwrap();
     }
 }
