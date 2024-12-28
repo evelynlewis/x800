@@ -112,12 +112,11 @@ impl Board {
     fn draw_tiles(&self, output: &mut String) {
         // Iterate over each row and column, then print
         output.write_str("      ").unwrap();
-        // Allow bounds elision
-        for i in 0..(self.tiles.len() / constants::TILES_PER_LINE) {
-            for j in 0..constants::TILES_PER_LINE {
-                write!(output, "{}", self.tiles[constants::TILES_PER_LINE * i + j]).unwrap();
+        for (i, tile) in self.tiles.iter().enumerate() {
+            write!(output, "{tile}").unwrap();
+            if i % constants::TILES_PER_LINE == (constants::TILES_PER_LINE - 1) {
+                output.write_str("\r\n      ").unwrap();
             }
-            output.write_str("\r\n      ").unwrap();
         }
     }
 
