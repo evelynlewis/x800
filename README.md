@@ -6,18 +6,17 @@ x800 : /ˈɛks ˈeɪt ˈhəndɹəd/
 
 2048 is played by merging a four-by-four grid of power-of-two tiles, to maximize the sum of merged tile values. `x800` is a fast and portable implementation.
 
-`x800` can evaluate millions of moves per second, even on modest hardware. A Linux machine with an Intel Pentium CPU from 2013 was tested to play 4184 complete loops of a 1100 move `x800` game in one second, or 4.60 million moves-per-second. In the same test, a M1 MacBook Air with MacOS completes 10.6 million moves-per-second.
+`x800` can evaluate millions of moves per second, even on modest hardware. A Linux machine with an Intel Pentium CPU from 2013 was tested to play 4212 complete loops of a 1100 move `x800` game in one second, or 4.63 million moves-per-second. In the same test, a M1 MacBook Air with MacOS completes 10.7 million moves-per-second.
 
-Using the `mini` build feature to disable rendering, `x800` on the M1 machine runs at 15.7 million moves-per-second, or 63.6 nanoseconds per move, including amortized startup time. In this duration, light travels 19.1 metres: a distance which Usain Bolt ran in 1.56 [seconds](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10669785) in 2009 to set the current 100m sprint record.
+Using the `mini` build feature to disable rendering, `x800` on the M1 machine runs at 15.0 million moves-per-second, or 66.5 nanoseconds per move. In this duration, light travels 19.9 metres: a distance which Usain Bolt ran in 1.63 [seconds](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10669785) in 2009 to set the current 100m sprint record.
 
 See also the benchmark [section](#benchmarks) below, and the [util/benchr.sh](./util/benchr.sh) script.
 
-The project has few build dependencies. Rather than ncurses or an external Rust terminal library, `x800` uses simple output buffering with standard [ANSI escape codes](https://en.wikipedia.org/wiki/ANSI_escape_code). The required POSIX-compatible [`libc`](https://docs.rs/libc/latest/libc/) crate is part of Rust's standard library on POSIX targets.
+The project has few build dependencies. Rather than ncurses or an external Rust terminal library, `x800` uses simple output buffering with standard [ANSI escape codes](https://en.wikipedia.org/wiki/ANSI_escape_code).
 
-Plus:
-
-- [spin](https://crates.io/crates/spin) provides synchronization primitives used to minimize inter-thread latency.
-- [fastrand](https://crates.io/crates/fastrand) is a simple and fast non-cryptographic pseudorandom number generator.
+- The required POSIX-compatible [`libc`](https://docs.rs/libc/latest/libc/) Crate is part of Rust's standard library on POSIX targets.
+- The [spin](https://crates.io/crates/spin) Crate provides spinlock-based synchronization primitives used to minimize inter-thread latency.
+- The [fastrand](https://crates.io/crates/fastrand) Crate is a simple and fast non-cryptographic pseudorandom number generator.
 
 The project CI builds and tests `x800` on 25 cross-compiled POSIX targets - that is, all `rust-std` POSIX targets supported by the latest stable version of the widely-used `cross` cross-compilation [tool](https://github.com/cross-rs/cross).
 

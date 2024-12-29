@@ -17,8 +17,8 @@ test -d ./util
 . ./util/common.sh
 
 LOOPS=10000
-WARMUP=12
-RUNS=24
+WARMUP=16
+RUNS=32
 
 test_ryan() {
     plus_header "Building the ryan driver in $1 mode"
