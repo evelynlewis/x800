@@ -16,28 +16,32 @@ test -d ./util
 # shellcheck source=common.sh
 . ./util/common.sh
 
-if [ $# -gt 0 ]; then
-    LOOPS=$1
-else
-    LOOPS=10000
-fi
+LOOPS=10000
+WARMUP=12
+RUNS=24
 
 test_ryan() {
     plus_header "Building the ryan driver in $1 mode"
-    cargo build --release --features="$1" --bin ryan
+    sh -xc "cargo build --release --features=$1 --bin ryan"
     echo
-    echo "Running ${LOOPS} iterations:"
-    # Allow for best of a few iterations
-    i=0
-    while [ $i -lt 8 ]; do
-	echo
-        time -p ./target/release/ryan ./fuzz/corpus/roger/gold "${LOOPS}" >/dev/null
-        i=$((i + 1))
-    done
+    echo "GAMES_PER_RUN: ${LOOPS}"
+    sh -xc "hyperfine -N --warmup ${WARMUP} --runs ${RUNS} \"./target/release/ryan ./fuzz/corpus/roger/gold ${LOOPS}\""
     echo
     plus_ok
     echo
 }
+
+plus_header "Checking for \`hyperfine\` in path"
+
+if ! command -v hyperfine > /dev/null; then
+    plus_header "\`hyperfine\` not found: please install with \`cargo install hyperfine\`"
+else
+    plus_ok
+fi
+
+plus_header "Pre-cleaning build directory"
+sh -xc "cargo clean"
+plus_ok
 
 test_ryan default
 test_ryan sink

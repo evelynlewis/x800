@@ -74,12 +74,7 @@ plus_header "Now validating timed benchmarks"
 xcall cargo bench --bench timed
 plus_ok
 
-# Build and run hyperfine benchmarks
-plus_header "Now validating hyperfine benchmarks"
-xcall ./util/benchhyperfine.sh
-plus_ok
-
-# Build and run hyperfine benchmarks
+# Build and run ryan benchmarks
 plus_header "Now validating ryan benchmarks"
 xcall ./util/benchr.sh
 plus_ok

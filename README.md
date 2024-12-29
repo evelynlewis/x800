@@ -103,90 +103,35 @@ cross build --release --target=arm-unknown-linux-gnueabihf
 To set up `x800` for local testing and experimentation:
 
 ```sh
-# Packages required on Ubuntu. These are likely already installed.
-sudo apt install build-essential git time
+# Packages to build on Ubuntu. These are likely already installed.
+sudo apt install build-essential git
 git clone 'https://github.com/evelynlewis/x800.git'
 cd x800
-cargo bench
+cargo build
 ```
 
 See-also the development shell scripts in the `util/` directory. In particular, the [`util/preflight.sh`](./util/preflight.sh) script runs a slew of tests starting from a clean build each time - useful to verify changes prior to integration. The [`util/benchr.sh`](./util/benchr.sh) script can also be used to benchmark candidate code changes.
 
 ## Benchmarks
 
-### Random input and 'gold file' input benchmarks using the `hyperfine` tool
+The `ryan` benchmarks in [`util/benchr.sh`](./util/benchr.sh) are run using the the [`ryan`](./src/ryan/README.md) reproducible `x800` driver. They use the [`hyperfine`](https://github.com/sharkdp/hyperfine) tool to benchmark a large number of loops of a known high-scoring, or 'gold', `x800` save file.
 
-_The Rust Performance Book_ [describes](<(https://nnethercote.github.io/perf-book/benchmarking.html)>) `hyperfine` as "an excellent general-purpose benchmarking tool." It seems to deliver.
-
-#### `hyperfine` with random input
-
-The `hyperfine` 'random input' latency numbers correspond to the duration of a complete game run beginning-to-end with random input. Statistical reasoning of the number of moves this typically corresponds to is left as an exercise for the reader.
-
-#### Requirements
-
-These benchmarks require GNU `base32`, `tr`, `dd`, and a recent version of [`hyperfine`](https://github.com/sharkdp/hyperfine).
-
-The required GNU shell tools are part of GNU `coreutils` and preinstalled on most Linux systems.The `hyperfine` binary can be installed via your system package manager or with `cargo install hyperfine`.
-
-#### `hyperfine` with 'gold file' input
-
-The "gold file" benchmark latency numbers correspond to a large number of loops of a known high-scoring, (ie. "gold"), `x800` save file. The number of iterations is listed in the test results below under `GAMES PER RUN`. These tests are run through the the [`ryan`](./src/ryan/README.md) reproducible `x800` driver.
-
-#### `hyperfine` benchmark: Intel Pentium G3220T at 2.60GHz with Linux 6.5
+The `hyperfine` tool can be installed via your system package manager or with:
 
 ```sh
-./util/benchhyperfine.sh
-================================================================================
-Building project
-
-    Finished `release` profile [optimized] target(s) in 0.01s
-================================================================================
-Installing hyperfine
-
-================================================================================
-Running with random input
-
-Benchmark 1: ./target/release/x800
-  Time (mean ± σ):       1.0 ms ±   0.0 ms    [User: 0.3 ms, System: 0.5 ms]
-  Range (min … max):     0.9 ms …   1.2 ms    256 runs
-
-================================================================================
-Running with gold file input
-
-PATH:           /home/evelyn/lab/x800/fuzz/corpus/roger/1ae2a1d8d4bf9db9c858c19c24b79a94439a3a1a
-GAME SAVE SIZE: 1108
-GAMES PER RUN:  1000
-Benchmark 1: ./target/release/ryan /home/evelyn/lab/x800/fuzz/corpus/roger/1ae2a1d8d4bf9db9c858c19c24b79a94439a3a1a 1000
-  Time (mean ± σ):     243.1 ms ±   1.9 ms    [User: 214.6 ms, System: 32.6 ms]
-  Range (min … max):   240.4 ms … 248.1 ms    32 runs
+cargo install hyperfine
 ```
 
-#### `hyperfine` benchmark: M1 MacBook Air with MacOS 15
+The `ryan` benchmarks can be run with:
 
 ```sh
-================================================================================
-Building project
+./util/benchr.sh
+```
 
-    Finished `release` profile [optimized] target(s) in 0.00s
-================================================================================
-Installing hyperfine
+Other benchmarks and tests can be run with:
 
-================================================================================
-Running with random input
-
-Benchmark 1: ./target/release/x800
-  Time (mean ± σ):       3.3 ms ±   0.2 ms    [User: 1.2 ms, System: 1.9 ms]
-  Range (min … max):     3.0 ms …   3.6 ms    256 runs
-
-================================================================================
-Running with gold file input
-
-PATH:           /Users/evelynlewis/lab/x800/fuzz/corpus/roger/1ae2a1d8d4bf9db9c858c19c24b79a94439a3a1a
-GAME SAVE SIZE: 1108
-GAMES PER RUN:  1000
-Benchmark 1: ./target/release/ryan /Users/evelynlewis/lab/x800/fuzz/corpus/roger/1ae2a1d8d4bf9db9c858c19c24b79a94439a3a1a 1000
-  Time (mean ± σ):     112.6 ms ±   0.7 ms    [User: 100.7 ms, System: 18.1 ms]
-  Range (min … max):   111.4 ms … 114.1 ms    32 runs
+```sh
+cargo bench --all-targets
 ```
 
 ## Fuzzing
