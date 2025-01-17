@@ -20,7 +20,9 @@ jobs:
         os:
           [
             ubuntu-latest,
+            ubuntu-24.04-arm,
             ubuntu-24.04,
+            ubuntu-22.04-arm,
             ubuntu-22.04,
             ubuntu-20.04,
             macos-latest,
@@ -32,13 +34,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Setup
-        run: rustup toolchain install stable --profile minimal
-      - name: Build
-        run: cargo build --verbose
+        run: |
+          ####
+          # This since `rustup` is not installed on arm64 runners on release day
+          command -v rustup || curl https://sh.rustup.rs -sSf | sh -s -- -y
+          . "$HOME/.cargo/env"
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+          ####
+          rustup toolchain install stable --profile minimal
       - name: Run tests
-        run: cargo test --verbose
-      - name: Build docs
-        run: cargo doc --verbose
+        run: |
+          cargo clean --verbose
+          cargo test --verbose
+      - name: Build
+        run: |
+          cargo clean --verbose
+          cargo build --verbose
       - name: ${{ matrix.os }} release build
         run: |
           cargo clean --verbose
@@ -154,6 +165,7 @@ jobs:
           cargo install cargo-fuzz
       - name: Validate
         run: |
+          cargo clean --verbose
           cargo fuzz run roger --sanitizer none --release -- -runs=0
       - name: Coverage
         run: |
