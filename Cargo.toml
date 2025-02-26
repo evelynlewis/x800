@@ -56,9 +56,9 @@ divan = { version = "0.1.14", default-features = false }
 x800 = { path = ".", features = ["sink"] }
 
 [features]
-default = []
-sink = []
-mini = ["sink"]
+interactive = []
+default = ["interactive"]
+sink = ["interactive"]
 score = ["sink"]
 save = []
 

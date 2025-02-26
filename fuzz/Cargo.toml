@@ -17,7 +17,6 @@ x800 = { path = "..", default-features = false }
 
 [features]
 default = ["sink"]
-mini = ["x800/mini"]
 sink = ["x800/sink"]
 
 [lints.clippy]

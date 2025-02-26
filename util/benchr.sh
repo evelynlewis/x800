@@ -21,8 +21,8 @@ WARMUP=16
 RUNS=32
 
 test_ryan() {
-    plus_header "Building the ryan driver in $1 mode"
-    sh -xc "cargo build --release --features=$1 --bin ryan"
+    plus_header "Building the ryan driver in \"$1\" mode"
+    sh -xc "cargo build --release --no-default-features --features=$1 --bin ryan"
     echo
     echo "GAMES_PER_RUN: ${LOOPS}"
     sh -xc "hyperfine -N --warmup ${WARMUP} --runs ${RUNS} \"./target/release/ryan ./fuzz/corpus/roger/gold ${LOOPS}\""
@@ -45,4 +45,4 @@ plus_ok
 
 test_ryan default
 test_ryan sink
-test_ryan mini
+test_ryan ""

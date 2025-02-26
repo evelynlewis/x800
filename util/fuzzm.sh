@@ -4,15 +4,15 @@
 # SPDX-License-Identifier: MIT
 
 #
-# Start roger fuzzer in mini mode`
+# Start roger fuzzer engine non-interactively
 #
 # usage:
-# ./util/min.sh
+# ./util/fuzzm.sh
 #
 
 set -e
 test -d ./fuzz
 test -d ./util
 
-# Call fuzzer in mini mode
-./util/fuzzr.sh --features mini
+# Start roger fuzzer engine non-interactively
+./util/fuzzr.sh --no-default-features

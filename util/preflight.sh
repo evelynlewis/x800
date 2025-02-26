@@ -49,12 +49,12 @@ plus_header "Now validiating clippy"
 xcall cargo clippy -- -Dwarnings
 plus_ok
 
-plus_header "Now validating build with sink feature"
-xcall cargo build --features sink
+plus_header "Now validating build without default features"
+xcall cargo build --no-default-features
 plus_ok
 
-plus_header "Now validating build with mini feature"
-xcall cargo build --features mini
+plus_header "Now validating build with sink feature"
+xcall cargo build --features sink
 plus_ok
 
 plus_header "Now validating build with save feature"
@@ -85,9 +85,9 @@ cargo install cargo-fuzz
 xcall cargo fuzz run roger --sanitizer none --release -- -runs=0
 plus_ok
 
-plus_header "Now validating fuzzer in mini mode"
+plus_header "Now validating fuzzer with a minimal interface"
 cargo install cargo-fuzz
-xcall cargo fuzz run roger --sanitizer none --release --features mini -- -runs=0
+xcall cargo fuzz run roger --sanitizer none --release --no-default-features -- -runs=0
 plus_ok
 
 plus_header "Now validating score using ryan"

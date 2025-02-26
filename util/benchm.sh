@@ -13,4 +13,4 @@
 set -e
 test -d ./util
 
-./util/benchs.sh --features mini
+./util/benchs.sh --no-default-features

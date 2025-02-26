@@ -22,7 +22,7 @@ const MIN_DRAW_DELAY: time::Duration = time::Duration::from_millis(4);
 /// Configures terminal as needed
 fn io_config(input: &Input) -> Option<Io> {
     const FD: libc::c_int = libc::STDIN_FILENO;
-    if cfg!(feature = "mini") || *input != Input::Interactive {
+    if cfg!(not(feature = "interactive")) || *input != Input::Interactive {
         return None;
     }
     let return_ios: libc::termios;
@@ -79,7 +79,7 @@ pub(crate) fn play(input: &Input) {
     let draw_quit = sync::Arc::new(sync::atomic::AtomicBool::new(false));
     let draw_scan = sync::Arc::new(sync::atomic::AtomicBool::new(false));
     // Spawn board-drawing thread
-    let draw_join = if cfg!(not(feature = "mini")) {
+    let draw_join = if cfg!(feature = "interactive") {
         Some(thread::spawn({
             let board = board.clone();
             let draw_quit = draw_quit.clone();
