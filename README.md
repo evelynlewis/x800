@@ -70,7 +70,7 @@ A description of 2048 gameplay, from [Wikipedia](<https://en.wikipedia.org/wiki/
 
 1. A Rust toolchain supporting the target system's target-triple, including `std` support. See [notes 1 and 2](#notes).
 2. The target's Rust `libc` crate is POSIX-conforming. See [notes 2 and 3](#notes).
-3. A Minimum Supported Rust Version (MSRV) of 1.66.
+3. A Minimum Supported Rust Version (MSRV) of 1.80.
 
 There are no other known requirements.
 
