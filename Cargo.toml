@@ -29,7 +29,7 @@ path = "src/lib.rs"
 [dependencies]
 fastrand = "2.0.1"
 libc = "0.2"
-spin = { version = "0.9.8", default-features = false, features = ["use_ticket_mutex"] }
+spin = { version = "0.10", default-features = false, features = ["use_ticket_mutex"] }
 
 [lints.clippy]
 all = "deny"
