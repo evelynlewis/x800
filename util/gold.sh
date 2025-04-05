@@ -21,7 +21,7 @@ fi
 
 cross run --target "$1" --features score --release --bin ryan "${INPUT}" 2>/dev/null >"${CANDIDATE}"
 
-if [ "$(cat "${CANDIDATE}")" != "$(cat "${EXPECTED}")" ]; then
+if [ "$(cat "${CANDIDATE}")" -ne "$(cat "${EXPECTED}")" ]; then
     printf "FAIL: WANT: %s FOUND: %s\n" "$(cat "${EXPECTED}")" "$(cat "${CANDIDATE}")"
     rm "${CANDIDATE}"
     exit 1
