@@ -27,6 +27,7 @@ fn timed_gold(c: Bencher) {
 }
 
 #[inline(always)]
+#[allow(clippy::inline_always)]
 fn timed_file(c: Bencher, file: &str) {
     let content = fs::read(file).unwrap();
     c.bench(|| one_shot(black_box(&content)));

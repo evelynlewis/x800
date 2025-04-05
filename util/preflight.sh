@@ -46,7 +46,7 @@ xcall cargo build
 plus_ok
 
 plus_header "Now validiating clippy"
-xcall cargo clippy -- -Dwarnings
+xcall cargo clippy --locked --all-targets -- -Dwarnings
 plus_ok
 
 plus_header "Now validating build without default features"

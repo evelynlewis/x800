@@ -129,10 +129,7 @@ impl Board {
                         unreachable!();
                     }
                     (Tile::Number(a_pow, a_gen), Tile::Number(b_pow, b_gen)) => {
-                        // Breaking this up allows for vectorization
-                        if a_pow != b_pow {
-                            continue;
-                        } else if (a_gen != self.generation) && (b_gen != self.generation) {
+                        if (a_pow == b_pow) && (a_gen != self.generation) && (b_gen != self.generation) {
                             // New next-power block
                             let next_pow = a_pow + 1;
                             work_line[a_index] = Tile::Number(next_pow, self.generation);

@@ -105,8 +105,8 @@ mod tests {
         for power in 0..=u16::MAX {
             println!("{power}");
             assert_eq!(
-                Colour::from_power(power as Power),
-                Colour::from_power(power as Power % COLOUR_COUNT),
+                Colour::from_power(Power::from(power)),
+                Colour::from_power(Power::from(power) % COLOUR_COUNT),
             );
         }
     }
@@ -116,8 +116,8 @@ mod tests {
         for power in 0..u16::MAX {
             for skip in 1..(COLOUR_COUNT - 2) {
                 assert_ne!(
-                    Colour::from_power(power as Power),
-                    Colour::from_power(power as Power + skip),
+                    Colour::from_power(Power::from(power)),
+                    Colour::from_power(Power::from(power) + skip),
                     "With {power}, skipping {skip}",
                 );
             }
@@ -125,6 +125,7 @@ mod tests {
     }
 
     #[test]
+    #[allow(clippy::too_many_lines)]
     fn parameterized_colour_values() {
         let pairs = std::collections::HashMap::from([
             (

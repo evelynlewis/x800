@@ -164,7 +164,7 @@ pub(crate) fn play(input: &Input) {
             Action::Shutdown => {
                 break;
             }
-        };
+        }
 
         // In case of update, draw the board
         if let Some(t) = draw_thread {
