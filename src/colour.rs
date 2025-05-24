@@ -114,7 +114,7 @@ mod tests {
     #[test]
     fn unique_colours() {
         for power in 0..u16::MAX {
-            for skip in 1..(COLOUR_COUNT - 2) {
+            for skip in 1..COLOUR_COUNT {
                 assert_ne!(
                     Colour::from_power(Power::from(power)),
                     Colour::from_power(Power::from(power) + skip),
