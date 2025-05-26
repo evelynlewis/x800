@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-# Copyright (c) 2024 Evelyn Lewis
+# Copyright (c) 2024-2025 Evelyn Lewis
 # SPDX-License-Identifier: MIT
 
 INPUT=fuzz/corpus/roger/gold

@@ -151,7 +151,7 @@ The helper script at `util/flamegraph.sh` allows for easy sampling of `x800`. In
 
 MIT License
 
-Copyright (c) 2024 Evelyn Lewis
+Copyright (c) 2024-2025 Evelyn Lewis
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

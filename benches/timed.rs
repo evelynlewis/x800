@@ -1,4 +1,4 @@
-// Copyright (c) 2024 Evelyn Lewis
+// Copyright (c) 2024-2025 Evelyn Lewis
 // SPDX-License-Identifier: MIT
 
 use divan::{black_box, Bencher};
