@@ -49,6 +49,10 @@ plus_header "Now validiating clippy"
 xcall cargo clippy --locked --all-targets -- -Dwarnings
 plus_ok
 
+plus_header "Now validiating fmt"
+xcall cargo fmt --all --check --verbose
+plus_ok
+
 plus_header "Now validating build without default features"
 xcall cargo build --no-default-features
 plus_ok
