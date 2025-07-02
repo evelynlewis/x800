@@ -81,6 +81,7 @@ impl Action {
 
 impl Board {
     /// Update the [`Board`], given a move [`Direction`] and its current state.
+    #[allow(clippy::needless_continue)] // Avoiding `continue` below is a perf regression
     pub(super) fn update(&mut self, direction: Direction, work_line: &mut vec::Vec<Tile>) -> bool {
         const LEFT_INDEX: [[usize; constants::TILES_PER_LINE]; constants::TILES_PER_LINE] =
             [[0, 1, 2, 3], [4, 5, 6, 7], [8, 9, 10, 11], [12, 13, 14, 15]];
@@ -119,8 +120,8 @@ impl Board {
 
             // While there are still elements at (index, index + 1)
             for index in 0..init_end {
-                // Use constant end index with early break to allow vectorization
-                if index + 1 + cleared > init_end {
+                if index + cleared >= init_end {
+                    // Done early
                     break;
                 }
                 let (a_index, b_index) = (index, index + 1);
@@ -129,10 +130,10 @@ impl Board {
                         unreachable!();
                     }
                     (Tile::Number(a_pow, a_gen), Tile::Number(b_pow, b_gen)) => {
-                        if (a_pow == b_pow)
-                            && (a_gen != self.generation)
-                            && (b_gen != self.generation)
-                        {
+                        if a_pow != b_pow {
+                            // Allow improved branch prediction
+                            continue;
+                        } else if (a_gen != self.generation) && (b_gen != self.generation) {
                             // New next-power block
                             let next_pow = a_pow + 1;
                             work_line[a_index] = Tile::Number(next_pow, self.generation);
