@@ -1,6 +1,6 @@
 # shellcheck shell=sh
 
-# Copyright (c) 2024 Evelyn Lewis
+# Copyright (c) 2024-2025 Evelyn Lewis
 # SPDX-License-Identifier: MIT
 
 # This file should be sourced not run
