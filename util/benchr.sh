@@ -35,6 +35,7 @@ plus_header "Checking for \`hyperfine\` in path"
 
 if ! command -v hyperfine > /dev/null; then
     plus_header "\`hyperfine\` not found: please install with \`cargo install hyperfine\`"
+    exit 1
 else
     plus_ok
 fi
