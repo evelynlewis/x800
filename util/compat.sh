@@ -24,6 +24,7 @@ compat() {
     elif exists "$1"; then
         echo "$1"
     else
+        echo "Tool not found: $1" > /dev/stderr
         exit 1
     fi
 }
