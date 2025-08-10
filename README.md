@@ -6,9 +6,9 @@ x800 : /ˈɛks ˈeɪt ˈhəndɹəd/
 
 2048 is played by merging a four-by-four grid of power-of-two tiles, to maximize the sum of merged tile values. `x800` is a fast and portable implementation.
 
-`x800` can evaluate millions of moves per second, even on modest hardware. A Linux machine with an Intel Pentium CPU from 2013 was tested to play 4212 complete loops of a 1100 move `x800` game in one second, or 4.63 million moves-per-second. In the same test, a M1 MacBook Air with MacOS completes 10.7 million moves-per-second.
+`x800` can evaluate millions of moves per second, even on modest hardware. A Linux machine with an Intel Pentium CPU from 2013 was tested to play 3957 complete loops of a large 1080 move `x800` game in one second, or 4.27 million moves-per-second. In the same test, a M1 MacBook Air with MacOS completes 10.2 million moves-per-second.
 
-Disabling the default `interactive` build feature to run the x800 execution engine alone, `x800` on the M1 machine runs at 15.0 million moves-per-second, or 66.5 nanoseconds per move. In this duration, light travels 19.9 metres: a distance which Usain Bolt ran in 1.63 [seconds](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10669785) in 2009 to set the current 100m sprint record.
+Disabling the default `interactive` build feature to run a single thread of the x800 evaluation engine alone, `x800` on the M1 machine runs at 15.7 million moves-per-second, or 63.7 nanoseconds per move. In this duration, light travels 19.1 metres: a distance which Usain Bolt ran in 1.56 [seconds](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10669785) in 2009 to set the current 100m sprint record.
 
 See also the benchmark [section](#benchmarks) below, and the [util/benchr.sh](./util/benchr.sh) script.
 
