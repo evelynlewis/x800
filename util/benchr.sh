@@ -16,7 +16,7 @@ test -d ./util
 # shellcheck source=common.sh
 . ./util/common.sh
 
-LOOPS=10000
+LOOPS=1000
 WARMUP=16
 RUNS=32
 

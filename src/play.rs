@@ -14,7 +14,7 @@ use std::io::Write;
 use crate::board::{self, constants, tile::Tile, Action, Board};
 
 /// The number of tiles to generate at startup
-const INITIAL_TILES_COUNT: u32 = 2;
+const INITIAL_TILES_COUNT: usize = 2;
 
 /// Minimum wait between non-final draws
 const MIN_DRAW_DELAY: time::Duration = time::Duration::from_millis(4);

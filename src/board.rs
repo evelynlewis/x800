@@ -101,8 +101,7 @@ impl Board {
 
         // Loop bookkeeping
         let mut state_changed = false;
-        let mut init_end: usize;
-        let mut line_tile: Tile;
+        let mut work_len: usize;
 
         for index_line in index_table {
             // Clear the vector to begin
@@ -115,37 +114,42 @@ impl Board {
                 }
             }
 
-            init_end = work_line.len().saturating_sub(1);
+            // Number of tile merged
             let mut cleared: usize = 0;
+            work_len = work_line.len().saturating_sub(1);
 
-            // While there are still elements at (index, index + 1)
-            for index in 0..init_end {
-                if index + cleared >= init_end {
-                    // Done early
-                    break;
-                }
-                let (a_index, b_index) = (index, index + 1);
-                match (work_line[a_index], work_line[b_index]) {
-                    (Tile::Empty(), _) | (_, Tile::Empty()) => {
-                        unreachable!();
+            if 0 != work_len {
+                let mut a_tile: &Tile;
+                let mut b_tile: &Tile;
+
+                for a_index in 0..work_len {
+                    if a_index + cleared >= work_len {
+                        break;
                     }
-                    (Tile::Number(a_pow, a_gen), Tile::Number(b_pow, b_gen)) => {
-                        if a_pow != b_pow {
-                            // Allow improved branch prediction
-                            continue;
-                        } else if (a_gen != self.generation) && (b_gen != self.generation) {
-                            // New next-power block
-                            let next_pow = a_pow + 1;
-                            work_line[a_index] = Tile::Number(next_pow, self.generation);
+                    a_tile = &work_line[a_index];
+                    b_tile = &work_line[a_index + 1];
+                    match (a_tile, b_tile) {
+                        (Tile::Empty(), _) | (_, Tile::Empty()) => {
+                            unreachable!();
+                        }
+                        (Tile::Number(a_pow, a_gen), Tile::Number(b_pow, b_gen)) => {
+                            if a_pow != b_pow {
+                                // Allow improved branch prediction
+                                continue;
+                            } else if (*a_gen != self.generation) && (*b_gen != self.generation) {
+                                // New next-power block
+                                let next_pow = a_pow + 1;
+                                work_line[a_index] = Tile::Number(next_pow, self.generation);
 
-                            // One fewer element
-                            work_line.remove(b_index);
-                            cleared += 1;
+                                // One fewer element
+                                work_line.remove(a_index + 1);
+                                cleared += 1;
 
-                            // Update statistics
-                            self.open_tiles += 1;
-                            self.score += 1 << next_pow;
-                            self.max_tile = cmp::max(next_pow, self.max_tile);
+                                // Update statistics
+                                self.open_tiles += 1;
+                                self.score += 1 << next_pow;
+                                self.max_tile = cmp::max(next_pow, self.max_tile);
+                            }
                         }
                     }
                 }
@@ -155,11 +159,12 @@ impl Board {
             work_line.resize(constants::TILES_PER_LINE, Tile::Empty());
 
             // Apply to tiles
+            let mut tile: Tile;
             for (line_i, tiles_i) in index_line.into_iter().enumerate() {
-                line_tile = work_line[line_i];
-                if self.tiles[tiles_i] != line_tile {
+                tile = work_line[line_i];
+                if self.tiles[tiles_i] != tile {
                     state_changed = true;
-                    self.tiles[tiles_i] = line_tile;
+                    self.tiles[tiles_i] = tile;
                 }
             }
         }

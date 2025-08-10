@@ -21,7 +21,7 @@ pub(super) struct Colour {
     column: Power,
 }
 
-const COLOUR_COUNT: u32 = 18;
+const COLOUR_COUNT: Power = 18;
 
 impl Colour {
     /// Generate a colour based on a Tile's power-of-two
