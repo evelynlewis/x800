@@ -8,6 +8,7 @@
 use std::mem;
 
 mod board;
+mod clock;
 mod colour;
 mod play;
 

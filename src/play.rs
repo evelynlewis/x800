@@ -5,19 +5,20 @@
 
 use std::{
     io::{self, Read as _},
-    mem, sync, thread, time,
+    mem, sync, thread,
 };
 
 #[cfg(feature = "save")]
 use std::io::Write;
 
 use crate::board::{self, constants, tile::Tile, Action, Board};
+use crate::clock;
 
 /// The number of tiles to generate at startup
 const INITIAL_TILES_COUNT: usize = 2;
 
-/// Minimum wait between non-final draws
-const MIN_DRAW_DELAY: time::Duration = time::Duration::from_millis(4);
+/// Minimum wait in ticks between non-final draws
+const MIN_DRAW_DELAY: u64 = 1024 * 1024;
 
 /// Configures terminal as needed
 fn io_config(input: &Input) -> Option<Io> {
@@ -94,8 +95,10 @@ pub(crate) fn play(input: &Input) {
     // We need the thread handle separately
     let draw_thread = draw_join.as_ref().map(thread::JoinHandle::thread);
 
-    // Draw timestamp
-    let mut next_draw = time::Instant::now() + MIN_DRAW_DELAY;
+    // Next draw timestamp in CPU ticks
+    let mut draw_time: u64 = clock::instant(0);
+    let mut current_time: u64;
+
     // Initially draw the board
     if let Some(t) = draw_thread {
         draw_scan.store(true, sync::atomic::Ordering::Relaxed);
@@ -168,10 +171,11 @@ pub(crate) fn play(input: &Input) {
 
         // In case of update, draw the board
         if let Some(t) = draw_thread {
-            if time::Instant::now() > next_draw {
+            current_time = clock::instant(draw_time);
+            if current_time > draw_time {
                 draw_scan.store(true, sync::atomic::Ordering::Release);
                 t.unpark();
-                next_draw += MIN_DRAW_DELAY;
+                draw_time = current_time.wrapping_add(MIN_DRAW_DELAY);
             }
         }
     }

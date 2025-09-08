@@ -4,6 +4,7 @@
 //! A minimal program entry point
 
 mod board;
+mod clock;
 mod colour;
 mod play;
 
