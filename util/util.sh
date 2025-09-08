@@ -8,21 +8,21 @@
 # This file should be sourced not run
 #
 # usage:
-# . common.sh
+# . util.sh
 #
 
 plus_line() {
-    echo ================================================================================
+	echo ================================================================================
 }
 
 plus_header() {
-    plus_line
-    echo "$*"
-    echo
+	plus_line
+	echo "$*"
+	echo
 }
 
 plus_ok() {
-    echo "OK"
-    plus_line
-    echo
+	echo "OK"
+	plus_line
+	echo
 }

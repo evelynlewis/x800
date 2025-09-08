@@ -1,16 +1,16 @@
 #!/bin/sh
-# Copyright (c) 2024 Evelyn Lewis
+# Copyright (c) 2024-2025 Evelyn Lewis
 # SPDX-License-Identifier: MIT
 
 #
 # usage:
-# ./util/covlive.sh
+# ./util/cov-live.sh
 #
 set -e
 
 test -d ./util/
-# shellcheck source=common.sh
-. ./util/common.sh
+# shellcheck source=util.sh
+. ./util/util.sh
 
 rm -r /tmp/roger/
 
@@ -20,7 +20,7 @@ while true; do
 	CURRENT="$(stat -c %Y fuzz/corpus/roger)"
 	if [ "${CURRENT}" != "${PREVIOUS}" ]; then
 		plus_header "Changes detected: processing..."
-		./util/covhtml.sh /tmp/roger
+		./util/cov-html.sh /tmp/roger
 
 		PREVIOUS=${CURRENT}
 		plus_header "Waiting for changes..."

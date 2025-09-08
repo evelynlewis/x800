@@ -7,10 +7,10 @@
 # Benchmark without draw code
 #
 # usage:
-# ./util/benchm.sh
+# ./util/bench-mini.sh
 #
 
 set -e
 test -d ./util
 
-./util/benchs.sh --no-default-features
+./util/bench-shell.sh --no-default-features

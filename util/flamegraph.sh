@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Copyright (c) 2024 Evelyn Lewis
+# Copyright (c) 2024-2025 Evelyn Lewis
 # SPDX-License-Identifier: MIT
 
 #
@@ -10,7 +10,7 @@
 # ./util/flamegraph.sh SCRIPT
 #
 # Example:
-# ./util/flamegraph.sh fuzz
+# ./util/flamegraph.sh fuzz-libfuzz.sh
 #
 
 set -e
@@ -21,15 +21,17 @@ test -d ./fuzz/
 # Require one argument
 if [ $# -eq 0 ]; then
 	echo "Please provide an argument. An example:"
-	echo "$0 fuzzu"
+	echo "$0 fuzz-libfuzz.sh"
 	exit 1
 elif [ $# -gt 1 ]; then
 	echo "Too many arguments provided"
 	exit 1
 fi
+
 # Script to launch the target
-LAUNCH_SCRIPT="./util/$1.sh"
+LAUNCH_SCRIPT="./util/$1"
 echo "Launching fuzzer with script:"
+
 if command -v "${LAUNCH_SCRIPT}"; then
 	echo "Script is valid"
 else
@@ -38,8 +40,9 @@ else
 fi
 
 # Setup fuzzer environment variables
-# shellcheck source=fuzzenv.sh
-. ./util/fuzzenv.sh
+# shellcheck source=fuzz-env.sh
+. ./util/fuzz-env.sh
+
 WARMUP_DURATION="4"
 
 if pgrep "${FUZZER_NAME}"; then
@@ -51,10 +54,13 @@ fi
 echo "
 Starting '${FUZZER_NAME}' launch script
 "
+
 sh -cx "${LAUNCH_SCRIPT}"
 
 echo "
-Waiting ${WARMUP_DURATION}s for process warmup."
+Waiting ${WARMUP_DURATION}s for process warmup.
+"
+
 sleep ${WARMUP_DURATION}
 
 echo "

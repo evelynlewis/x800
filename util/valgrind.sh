@@ -20,8 +20,8 @@ if ! test -d fuzz; then
 	exit 1
 fi
 
-# shellcheck source=fuzzenv.sh
-. util/fuzzenv.sh
+# shellcheck source=fuzz-env.sh
+. util/fuzz-env.sh
 
 cargo fuzz build --release --sanitizer none roger
 

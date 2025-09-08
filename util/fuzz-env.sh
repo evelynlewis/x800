@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Evelyn Lewis
+# Copyright (c) 2024-2025 Evelyn Lewis
 # SPDX-License-Identifier: MIT
 
 #
@@ -6,7 +6,7 @@
 # This file should be sourced not run
 #
 # usage:
-# . fuzzenv.sh
+# . fuzz-env.sh
 #
 
 # shellcheck shell=sh
@@ -36,16 +36,4 @@ fuzz_build() {
 fuzz_run() {
 	# shellcheck disable=SC2086
 	cargo fuzz run "$@" ${FUZZER_BUILD_ARGS} "${FUZZER_NAME}" -- ${FUZZER_RUN_ARGS}
-}
-
-# Run fuzzer using cargo-fuzz without args
-fuzz_run_bench() {
-	# shellcheck disable=SC2086
-	cargo fuzz run "$@" ${FUZZER_BUILD_ARGS} "${FUZZER_NAME}"
-}
-
-# Run fuzzer using cargo-fuzz
-fuzz_check() {
-	# shellcheck disable=SC2086
-	cargo fuzz run ${FUZZER_BUILD_ARGS} "${FUZZER_NAME}" "$@"
 }

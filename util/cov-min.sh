@@ -1,13 +1,13 @@
 #!/bin/sh
 
-# Copyright (c) 2024 Evelyn Lewis
+# Copyright (c) 2024-2025 Evelyn Lewis
 # SPDX-License-Identifier: MIT
 
 #
 # Minimize fuzzer coverage
 #
 # usage:
-# ./util/covmin.sh [DIR]
+# ./util/cov-min.sh [DIR]
 #
 set -ex
 
@@ -31,8 +31,8 @@ mkdir -p "${MAIN_DIR}"
 # Merge corpus directories
 EXTRA_FUZZER_RUN_ARGS="-merge=1 ${MAIN_DIR} ${TMP_DIR}"
 
-# shellcheck source=fuzzenv.sh
-. util/fuzzenv.sh
+# shellcheck source=fuzz-env.sh
+. util/fuzz-env.sh
 
 # Merge all corpus directories
 # shellcheck disable=SC2119

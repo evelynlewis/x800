@@ -10,7 +10,7 @@ x800 : /ˈɛks ˈeɪt ˈhəndɹəd/
 
 Disabling the default `interactive` build feature to run a single thread of the x800 evaluation engine alone, `x800` on the M1 machine runs at 15.7 million moves-per-second, or 63.7 nanoseconds per move. In this duration, light travels 19.1 metres: a distance which Usain Bolt ran in 1.56 [seconds](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10669785) in 2009 to set the current 100m sprint record.
 
-See also the benchmark [section](#benchmarks) below, and the [util/benchr.sh](./util/benchr.sh) script.
+See also the benchmark [section](#benchmarks) below, and the [util/bench-ryan.sh](./util/bench-ryan.sh) script.
 
 The project has few build dependencies. Rather than ncurses or an external Rust terminal library, `x800` uses simple output buffering with standard [ANSI escape codes](https://en.wikipedia.org/wiki/ANSI_escape_code).
 
@@ -109,11 +109,11 @@ cd x800
 cargo build
 ```
 
-See-also the development shell scripts in the `util/` directory. In particular, the [`util/preflight.sh`](./util/preflight.sh) script runs a slew of tests starting from a clean build each time - useful to verify changes prior to integration. The [`util/benchr.sh`](./util/benchr.sh) script can also be used to benchmark candidate code changes.
+See-also the development shell scripts in the `util/` directory. In particular, the [`util/preflight.sh`](./util/preflight.sh) script runs a slew of tests starting from a clean build each time - useful to verify changes prior to integration. The [`util/bench-ryan.sh`](./util/bench-ryan.sh) script can also be used to benchmark candidate code changes.
 
 ## Benchmarks
 
-The `ryan` benchmarks in [`util/benchr.sh`](./util/benchr.sh) are run using the the [`ryan`](./src/ryan/README.md) reproducible `x800` driver. They use the [`hyperfine`](https://github.com/sharkdp/hyperfine) tool to benchmark a large number of loops of a known high-scoring, or 'gold', `x800` save file.
+The `ryan` benchmarks in [`util/bench-ryan.sh`](./util/bench-ryan.sh) are run using the the [`ryan`](./src/ryan/README.md) reproducible `x800` driver. They use the [`hyperfine`](https://github.com/sharkdp/hyperfine) tool to benchmark a large number of loops of a known high-scoring, or 'gold', `x800` save file.
 
 The `hyperfine` tool can be installed via your system package manager or with:
 
@@ -124,7 +124,7 @@ cargo install hyperfine
 The `ryan` benchmarks can be run with:
 
 ```sh
-./util/benchr.sh
+./util/bench-ryan.sh
 ```
 
 Other benchmarks and tests can be run with:
@@ -135,9 +135,9 @@ cargo bench --all-targets
 
 ## Fuzzing
 
-A fuzzer named `roger`, after the rabbit, is provided in the `fuzz/` directory. It's built using [`cargo-fuzz`](https://github.com/rust-fuzz/cargo-fuzz), which uses [LibFuzzer](https://llvm.org/docs/LibFuzzer.html), part of the LLVM project. A convenience script is under `util/fuzzr.sh`.
+A fuzzer named `roger`, after the rabbit, is provided in the `fuzz/` directory. It's built using [`cargo-fuzz`](https://github.com/rust-fuzz/cargo-fuzz), which uses [LibFuzzer](https://llvm.org/docs/LibFuzzer.html), part of the LLVM project. A convenience script is under `util/fuzz-libfuzz`.
 
-A variant of `roger` using [honggfuzz](https://honggfuzz.dev) and [honggfuzz-rs](https://github.com/rust-fuzz/honggfuzz-rs) is also included. It's named `hroger`, and there's a convenience script under `util/fuzzh.sh`.
+A variant of `roger` using [honggfuzz](https://honggfuzz.dev) and [honggfuzz-rs](https://github.com/rust-fuzz/honggfuzz-rs) is also included. It's named `hroger`, and there's a convenience script under `util/fuzz-hongg.sh`.
 
 Both a small dictionary and a minimized corpus with good coverage are checked into the repository. Both are compatible with each fuzzer.
 

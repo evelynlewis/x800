@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Copyright (c) 2024 Evelyn Lewis
+# Copyright (c) 2024-2025 Evelyn Lewis
 # SPDX-License-Identifier: MIT
 
 #
@@ -14,8 +14,8 @@ test -d ./util/
 test -d ./fuzz/
 test -f Cargo.toml
 
-# shellcheck source=fuzzenv.sh
-. util/fuzzenv.sh
+# shellcheck source=fuzz-env.sh
+. util/fuzz-env.sh
 
 # Corpus selection. Corpus can be passed as first argument
 CORPUS="fuzz/corpus/${FUZZER_NAME}/"
@@ -27,7 +27,7 @@ echo "Using corpus directory: '${CORPUS}'"
 # Use HTML mode when invoked as such
 USE_HTML=0
 NAME="$(basename "$0")"
-HTML_BIN_NAME="covhtml.sh"
+HTML_BIN_NAME="cov-html.sh"
 HTML_OUT_FILE="fuzz/target/roger.html"
 HTML_ARGS=""
 if [ "${NAME}" = "${HTML_BIN_NAME}" ]; then

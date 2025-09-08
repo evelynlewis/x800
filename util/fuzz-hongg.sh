@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Copyright (c) 2024 Evelyn Lewis
+# Copyright (c) 2024-2025 Evelyn Lewis
 # SPDX-License-Identifier: MIT
 
 #
@@ -8,16 +8,16 @@
 # Builds and starts hroger in background
 #
 # usage:
-# ./util/fuzzh.sh
+# ./util/fuzz-hongg.sh
 #
 set -e
 
 # See usage: should be run from x800 root
 if ! cd fuzz 2>/dev/null; then
-    echo "Error: must be run from root directory"
-    echo "usage:"
-    echo "./util/fuzzh.sh"
-    exit 1
+	echo "Error: must be run from root directory"
+	echo "usage:"
+	echo "./util/fuzz-hongg.sh"
+	exit 1
 fi
 
 # Install required tooling
@@ -25,10 +25,9 @@ cargo install honggfuzz
 
 # Used by honggfuzz
 export HFUZZ_INPUT="./corpus/roger/"
-export HFUZZ_RUN_ARGS="$@"
+export HFUZZ_RUN_ARGS="$*"
 
 # Build first
 cargo hfuzz build
 
 cargo hfuzz run hroger
-

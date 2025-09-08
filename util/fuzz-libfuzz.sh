@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Copyright (c) 2024 Evelyn Lewis
+# Copyright (c) 2024-2025 Evelyn Lewis
 # SPDX-License-Identifier: MIT
 
 #
@@ -8,13 +8,13 @@
 # Builds and starts roger in background
 #
 # usage:
-# ./util/fuzzr.sh [ARGS]
+# ./util/fuzz-libfuzz [ARGS]
 #
 set -e
 trap '' HUP
 
-# shellcheck source=fuzzenv.sh
-. ./util/fuzzenv.sh
+# shellcheck source=fuzz-env.sh
+. ./util/fuzz-env.sh
 
 test -d ./fuzz
 

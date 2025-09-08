@@ -131,15 +131,15 @@ jobs:
       - name: ryan benchmarks
         run: |
           echo "Running ryan benchmarks"
-          ./util/benchr.sh
+          ./util/bench-ryan.sh
       - name: Basic shell benchmark
         run: |
           echo "Running basic shell benchmark"
-          ./util/benchs.sh
+          ./util/bench-shell.sh
       - name: Mini shell benchmark
         run: |
           echo "Running mini shell benchmark"
-          ./util/benchm.sh
+          ./util/bench-mini.sh
       - name: Divan benchmarks
         run: |
           echo "Running Divan benchmarks"

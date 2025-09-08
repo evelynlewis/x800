@@ -18,8 +18,8 @@ xcall() {
 }
 
 test -d ./util/
-# shellcheck source=common.sh
-. ./util/common.sh
+# shellcheck source=util.sh
+. ./util/util.sh
 
 plus_line
 echo "Starting pre-flight validation"
@@ -80,7 +80,12 @@ plus_ok
 
 # Build and run ryan benchmarks
 plus_header "Now validating ryan benchmarks"
-xcall ./util/benchr.sh
+xcall ./util/bench-ryan.sh
+plus_ok
+
+# Build and run shell benchmarks
+plus_header "Now validating shell benchmarks"
+xcall ./util/bench-shell.sh
 plus_ok
 
 # Run fuzzer on known inputs
