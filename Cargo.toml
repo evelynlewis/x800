@@ -22,6 +22,10 @@ path = "src/bin.rs"
 name = "ryan"
 path = "src/ryan/bin.rs"
 
+[[bin]]
+name = "xmini"
+path = "src/xmini/bin.rs"
+
 [lib]
 name = "x800"
 path = "src/lib.rs"
@@ -66,3 +70,6 @@ save = []
 name = "timed"
 harness = false
 required-features = ["sink"]
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(fuzzing)'] }
