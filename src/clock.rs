@@ -3,11 +3,14 @@
 
 //! Time utilites
 
+#![cfg(feature = "interactive")]
+
 #[cfg(any(target_arch = "x86", target_arch = "x86_64", target_arch = "aarch64"))]
 use std::arch;
 
 /// CPU tick counter
 /// Does not use its argument
+#[inline]
 #[cfg(target_arch = "aarch64")]
 pub fn instant(_prev: u64) -> u64 {
     let mut tick;
@@ -22,6 +25,7 @@ pub fn instant(_prev: u64) -> u64 {
 
 /// CPU tick counterA
 /// Does not use its argument
+#[inline]
 #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 pub fn instant(_prev: u64) -> u64 {
     let mut eax: u32;
@@ -34,6 +38,7 @@ pub fn instant(_prev: u64) -> u64 {
 
 /// Stub CPU tick counter
 /// Returns a value greater than its argument
+#[inline]
 #[cfg(not(any(target_arch = "x86", target_arch = "x86_64", target_arch = "aarch64")))]
 pub fn instant(prev: u64) -> u64 {
     prev + 1

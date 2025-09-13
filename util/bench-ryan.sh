@@ -17,7 +17,7 @@ test -d ./util
 . ./util/util.sh
 
 LOOPS=1000
-WARMUP=16
+WARMUP=32
 RUNS=32
 
 test_ryan() {

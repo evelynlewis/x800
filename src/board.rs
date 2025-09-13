@@ -10,6 +10,8 @@ pub(super) mod tile;
 
 mod draw;
 use constants::TILES_AREA;
+
+#[cfg(feature = "interactive")]
 pub(super) use draw::draw;
 
 use tile::{Generation, Tile};
@@ -41,6 +43,7 @@ impl Board {
         }
     }
     #[inline]
+    #[cfg(feature = "interactive")]
     pub(super) fn clone_from(&mut self, source: &Self) {
         if self.generation != source.generation {
             *self = source.clone();

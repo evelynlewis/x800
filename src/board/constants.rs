@@ -3,6 +3,10 @@
 
 //! Various constants used by [`super::Board`]
 
+// Needed since some constants are only used interactively
+#![cfg_attr(not(feature = "interactive"), allow(unused_imports))]
+#![cfg_attr(not(feature = "interactive"), allow(dead_code))]
+
 use super::tile::Power;
 use std::io;
 

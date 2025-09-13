@@ -3,6 +3,9 @@
 
 //! Implementation of [Board] drawing
 
+// Module is interactive-only
+#![cfg(feature = "interactive")]
+
 use super::super::colour::Colour;
 use super::constants;
 use super::Board;

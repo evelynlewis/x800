@@ -5,19 +5,25 @@
 
 use std::{
     io::{self, Read as _},
-    mem, sync, thread,
+    mem, sync,
 };
+
+#[cfg(feature = "interactive")]
+use std::thread;
+
+use crate::board::{constants, tile::Tile, Action, Board};
+
+#[cfg(feature = "interactive")]
+use crate::{board::draw, clock};
 
 #[cfg(feature = "save")]
 use std::io::Write;
-
-use crate::board::{self, constants, tile::Tile, Action, Board};
-use crate::clock;
 
 /// The number of tiles to generate at startup
 const INITIAL_TILES_COUNT: usize = 2;
 
 /// Minimum wait in ticks between non-final draws
+#[cfg(feature = "interactive")]
 const MIN_DRAW_DELAY: u64 = 1024 * 1024;
 
 /// Configures terminal as needed
@@ -77,32 +83,37 @@ pub(crate) fn play(input: &Input) {
     }
 
     // Bookkeeping for board-drawing thread
+    #[cfg(feature = "interactive")]
     let draw_quit = sync::Arc::new(sync::atomic::AtomicBool::new(false));
+    #[cfg(feature = "interactive")]
     let draw_scan = sync::Arc::new(sync::atomic::AtomicBool::new(false));
+
     // Spawn board-drawing thread
-    let draw_join = if cfg!(feature = "interactive") {
-        Some(thread::spawn({
-            let board = board.clone();
-            let draw_quit = draw_quit.clone();
-            let draw_scan = draw_scan.clone();
-            move || {
-                board::draw(&board, &draw_quit, &draw_scan);
-            }
-        }))
-    } else {
-        None
-    };
+    #[cfg(feature = "interactive")]
+    let draw_join = thread::spawn({
+        let board = board.clone();
+        let draw_quit = draw_quit.clone();
+        let draw_scan = draw_scan.clone();
+        move || {
+            draw(&board, &draw_quit, &draw_scan);
+        }
+    });
+
     // We need the thread handle separately
-    let draw_thread = draw_join.as_ref().map(thread::JoinHandle::thread);
+    #[cfg(feature = "interactive")]
+    let draw_thread = draw_join.thread();
 
     // Next draw timestamp in CPU ticks
+    #[cfg(feature = "interactive")]
     let mut draw_time: u64 = clock::instant(0);
+    #[cfg(feature = "interactive")]
     let mut current_time: u64;
 
     // Initially draw the board
-    if let Some(t) = draw_thread {
+    #[cfg(feature = "interactive")]
+    {
         draw_scan.store(true, sync::atomic::Ordering::Relaxed);
-        t.unpark();
+        draw_thread.unpark();
     }
 
     // Moves input iterator setup
@@ -170,23 +181,23 @@ pub(crate) fn play(input: &Input) {
         }
 
         // In case of update, draw the board
-        if let Some(t) = draw_thread {
+        #[cfg(feature = "interactive")]
+        {
             current_time = clock::instant(draw_time);
             if current_time > draw_time {
                 draw_scan.store(true, sync::atomic::Ordering::Release);
-                t.unpark();
+                draw_thread.unpark();
                 draw_time = current_time.wrapping_add(MIN_DRAW_DELAY);
             }
         }
     }
 
     // Signal and join board-drawing thread, if it exists
-    if let Some(t) = draw_thread {
+    #[cfg(feature = "interactive")]
+    {
         draw_quit.store(true, sync::atomic::Ordering::Release);
-        t.unpark();
-        if let Some(h) = draw_join {
-            h.join().unwrap();
-        }
+        draw_thread.unpark();
+        draw_join.join().unwrap();
     }
 
     // Reset terminal
