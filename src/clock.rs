@@ -28,12 +28,12 @@ pub fn instant(_prev: u64) -> u64 {
 #[inline]
 #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 pub fn instant(_prev: u64) -> u64 {
-    let mut eax: u32;
-    let mut edx: u32;
+    let mut eax_accumulator: u32;
+    let mut edx_data: u32;
     unsafe {
-        arch::asm!("rdtsc", out("eax") eax, out("edx") edx);
+        arch::asm!("rdtsc", out("eax") eax_accumulator, out("edx") edx_data);
     }
-    (eax as u64) | (edx as u64) << 32
+    u64::from(eax_accumulator) | u64::from(edx_data) << 32
 }
 
 /// Stub CPU tick counter
