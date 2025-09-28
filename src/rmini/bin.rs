@@ -1,6 +1,7 @@
 // Copyright (c) 2025 Evelyn Lewis
 // SPDX-License-Identifier: MIT
 
+use libc::{EXIT_FAILURE, EXIT_SUCCESS};
 use std::{env, fs, path, process};
 
 const ARG_COUNT: usize = 1;
@@ -30,7 +31,7 @@ usage:
     let error = |msg: String| -> ! {
         println!("{binary_name}: ERROR: {msg}");
         usage();
-        process::exit(1);
+        process::exit(EXIT_FAILURE);
     };
 
     // Usable arguments: args[0] is the binary name
@@ -59,8 +60,9 @@ usage:
             ));
         }
         Ok(d) => {
-            if filtered.len() < 8 {
-                return;
+            if d.len() < HEADER_SIZE {
+                // Nothing to do
+                process::exit(EXIT_SUCCESS);
             }
 
             // Copy header and valid moves

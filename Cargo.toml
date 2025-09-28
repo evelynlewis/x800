@@ -23,8 +23,8 @@ name = "ryan"
 path = "src/ryan/bin.rs"
 
 [[bin]]
-name = "xmini"
-path = "src/xmini/bin.rs"
+name = "rmini"
+path = "src/rmini/bin.rs"
 
 [lib]
 name = "x800"
