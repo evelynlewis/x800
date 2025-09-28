@@ -14,7 +14,7 @@ test -d ./util/
 test -d ./fuzz/
 test -f Cargo.toml
 
-# shellcheck source=fuzz-env.sh
+# shellcheck source=util/fuzz-env.sh
 . util/fuzz-env.sh
 
 # Corpus selection. Corpus can be passed as first argument
@@ -45,7 +45,7 @@ rm -rf ./fuzz/coverage/
 
 # Build fuzz target and generate coverage
 # shellcheck disable=SC2086
-cargo fuzz coverage "${FUZZER_NAME}" ${FUZZER_BUILD_ARGS} "${CORPUS}" -- -use_value_profile=1 >/dev/null
+cargo fuzz coverage "${FUZZER_NAME}" ${FUZZER_BUILD_ARGS} --features=default "${CORPUS}" -- -use_value_profile=1 >/dev/null
 
 # Ensure there is exactly one fuzzer, and that it is valid
 FUZZER="$(find target -type f -name "${FUZZER_NAME}" | grep coverage)"
