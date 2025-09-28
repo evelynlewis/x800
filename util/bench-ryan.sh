@@ -14,11 +14,11 @@ set -e
 test -d ./fuzz/corpus/roger
 test -d ./util
 
-# shellcheck source=util.sh
+# shellcheck source=util/util.sh
 . ./util/util.sh
 
 FILE="fuzz/corpus/roger/gold"
-MOVES=$(( $(stat -c %s $(realpath ${FILE})) - 8))
+MOVES=$(( $(stat -c %s "$(realpath ${FILE})") - 8))
 
 LOOPS=1000
 WARMUP=16

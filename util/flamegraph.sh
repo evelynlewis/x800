@@ -40,7 +40,7 @@ else
 fi
 
 # Setup fuzzer environment variables
-# shellcheck source=fuzz-env.sh
+# shellcheck source=util/fuzz-env.sh
 . ./util/fuzz-env.sh
 
 WARMUP_DURATION="4"

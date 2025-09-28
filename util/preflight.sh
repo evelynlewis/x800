@@ -18,7 +18,7 @@ xcall() {
 }
 
 test -d ./util/
-# shellcheck source=util.sh
+# shellcheck source=util/util.sh
 . ./util/util.sh
 
 plus_line

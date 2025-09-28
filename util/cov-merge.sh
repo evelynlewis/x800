@@ -22,7 +22,7 @@ rsync -av "${MAIN_DIR}" "$@" "${ARCHIVE_DIR}"
 # Merge corpus directories
 EXTRA_FUZZER_RUN_ARGS="-merge=1 ${MAIN_DIR} ${ARCHIVE_DIR} $*"
 
-# shellcheck source=fuzz-env.sh
+# shellcheck source=./util/fuzz-env.sh
 . util/fuzz-env.sh
 
 # Merge all corpus directories

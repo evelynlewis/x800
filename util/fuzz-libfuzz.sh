@@ -13,7 +13,7 @@
 set -e
 trap '' HUP
 
-# shellcheck source=fuzz-env.sh
+# shellcheck source=util/fuzz-env.sh
 . ./util/fuzz-env.sh
 
 test -d ./fuzz

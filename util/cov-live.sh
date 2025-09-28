@@ -9,7 +9,7 @@
 set -e
 
 test -d ./util/
-# shellcheck source=util.sh
+# shellcheck source=util/util.sh
 . ./util/util.sh
 
 rm -r /tmp/roger/
