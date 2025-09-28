@@ -13,19 +13,24 @@ set -e
 
 test -d ./fuzz/corpus/roger
 test -d ./util
+
 # shellcheck source=util.sh
 . ./util/util.sh
 
+FILE="fuzz/corpus/roger/gold"
+MOVES=$(( $(stat -c %s $(realpath ${FILE})) - 8))
+
 LOOPS=1000
-WARMUP=32
-RUNS=32
+WARMUP=16
+RUNS=16
 
 test_ryan() {
 	plus_header "Building the ryan driver in \"$1\" mode"
 	sh -xc "cargo build --release --no-default-features --features=$1 --bin ryan"
 	echo
-	echo "GAMES_PER_RUN: ${LOOPS}"
-	sh -xc "hyperfine -N --warmup ${WARMUP} --runs ${RUNS} \"./target/release/ryan ./fuzz/corpus/roger/gold ${LOOPS}\""
+	echo "MOVES: ${MOVES}"
+	echo "GAMES: ${LOOPS}"
+	sh -xc "hyperfine -N --warmup ${WARMUP} --runs ${RUNS} \"./target/release/ryan ${FILE} ${LOOPS}\""
 	echo
 	plus_ok
 	echo
