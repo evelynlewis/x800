@@ -18,7 +18,7 @@ test -d ./util
 . ./util/util.sh
 
 FILE="fuzz/corpus/roger/gold"
-MOVES=$(( $(stat -c %s "$(realpath ${FILE})") - 8))
+MOVES=$(( $(wc -c <"$(realpath ${FILE})") - 8))
 
 LOOPS=1000
 WARMUP=16
