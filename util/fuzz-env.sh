@@ -16,6 +16,7 @@ FUZZER_NAME="roger"
 FUZZER_BUILD_ARGS="\
 --sanitizer none \
 --release \
+--no-default-features \
 ${EXTRA_FUZZER_BUILD_ARGS} \
 "
 
