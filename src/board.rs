@@ -207,18 +207,18 @@ impl Board {
             if let Tile::Empty() = self.tiles[index] {
                 if skipped == insert_index {
                     self.tiles[index] = Tile::Number(insert_value, self.generation);
-                    // Update bookkeeping variables
-                    self.generation += 1;
-                    self.open_tiles -= 1;
-                    self.max_tile = cmp::max(insert_value, self.max_tile);
-                    return true;
+                    break;
                 }
                 skipped += 1;
             }
         }
 
-        // Should never happen since insert_index is less than open_tiles
-        unreachable!("Failed to insert tile at offset {}", insert_index);
+        // Update bookkeeping variables
+        self.generation += 1;
+        self.open_tiles -= 1;
+        self.max_tile = cmp::max(insert_value, self.max_tile);
+
+        true
     }
 
     #[allow(dead_code)]
