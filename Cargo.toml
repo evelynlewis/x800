@@ -50,7 +50,7 @@ lto = "fat"
 panic = "abort"
 strip = "symbols"
 
-[profile.release-debuginfo]
+[profile.profile]
 inherits = "release"
 debug = true
 strip = "none"
