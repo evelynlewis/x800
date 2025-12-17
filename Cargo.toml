@@ -13,6 +13,7 @@ categories = ["command-line-utilities", "games", "embedded"]
 repository = "https://github.com/evelynlewis/x800"
 keywords = ["2048", "command-line", "game", "libc", "minimal", "embedded"]
 readme = "README.md"
+default-run = "x800"
 
 [[bin]]
 name = "x800"
@@ -60,7 +61,8 @@ x800 = { path = ".", features = ["sink"] }
 
 [features]
 draw = []
-default = ["draw"]
+posix = []
+default = ["draw", "posix"]
 sink = ["draw"]
 score = ["sink"]
 save = []

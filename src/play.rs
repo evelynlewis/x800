@@ -3,10 +3,10 @@
 
 //! Implementation of x800 core event loop
 
-use std::{
-    io::{self, Read as _},
-    mem,
-};
+use std::io::{self, Read as _};
+
+#[cfg(feature = "posix")]
+use std::mem;
 
 #[cfg(feature = "draw")]
 use crate::clock;
@@ -24,6 +24,7 @@ const INITIAL_TILES_COUNT: usize = 2;
 const MIN_DRAW_DELAY: u64 = 1024 * 1024;
 
 /// Configures terminal as needed
+#[cfg(feature = "posix")]
 fn io_config(input: &Input) -> Option<Io> {
     const FD: libc::c_int = libc::STDIN_FILENO;
     if cfg!(not(feature = "draw")) || *input != Input::Interactive {
@@ -53,6 +54,7 @@ pub(crate) enum Input<'a> {
 }
 
 /// Wrapper for handling IO-related data structures
+#[cfg(feature = "posix")]
 struct Io(libc::c_int, libc::termios);
 
 /// Main program event loop
@@ -69,6 +71,7 @@ pub(crate) fn play(input: &Input) {
     save.extend(fastrand::get_seed().to_le_bytes());
 
     // Configure terminal
+    #[cfg(feature = "posix")]
     let io = io_config(input);
 
     // Limit scope for lock
@@ -170,6 +173,7 @@ pub(crate) fn play(input: &Input) {
     board.draw_quit(&mut frame);
 
     // Reset terminal
+    #[cfg(feature = "posix")]
     if let Some(io) = io {
         unsafe {
             libc::tcsetattr(io.0, libc::TCSANOW, &io.1);

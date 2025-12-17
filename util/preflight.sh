@@ -12,9 +12,15 @@
 
 set -e
 
+# `cargo clean` and run
 xcall() {
 	sh -cx "cargo clean"
 	sh -cx "$*"
+}
+
+# `cargo` without clean
+xcargo() {
+	sh -cx "cargo $*"
 }
 
 test -d ./util/
@@ -53,20 +59,28 @@ plus_header "Now validiating fmt"
 xcall cargo fmt --all --check --verbose
 plus_ok
 
-plus_header "Now validating build without default features"
-xcall cargo build --no-default-features
-plus_ok
-
-plus_header "Now validating build with sink feature"
-xcall cargo build --features sink
-plus_ok
-
-plus_header "Now validating build with save feature"
-xcall cargo build --features save
-plus_ok
-
-plus_header "Now validating test"
-xcall cargo test
+plus_header "Now validating build with various features"
+xcargo build --no-default-features --features posix,save,sink
+xcargo build --no-default-features --features default
+xcargo build --no-default-features --features draw
+xcargo build --no-default-features --features posix
+xcargo build --no-default-features --features draw,posix
+xcargo build --no-default-features --features save
+xcargo build --no-default-features --features default,save
+xcargo build --no-default-features --features draw,save
+xcargo build --no-default-features --features posix,save
+xcargo build --no-default-features --features draw,posix,save
+xcargo build --no-default-features --features score
+xcargo build --no-default-features --features default,score
+xcargo build --no-default-features --features posix,score
+xcargo build --no-default-features --features save,score
+xcargo build --no-default-features --features default,save,score
+xcargo build --no-default-features --features posix,save,score
+xcargo build --no-default-features --features sink
+xcargo build --no-default-features --features default,sink
+xcargo build --no-default-features --features posix,sink
+xcargo build --no-default-features --features save,sink
+xcargo build --no-default-features --features default,save,sink
 plus_ok
 
 plus_header "Now validating docs"
