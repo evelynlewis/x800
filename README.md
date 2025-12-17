@@ -15,7 +15,6 @@ See also the benchmark [section](#benchmarks) below, and the [util/bench-ryan.sh
 The project has few build dependencies. Rather than ncurses or an external Rust terminal library, `x800` uses simple output buffering with standard [ANSI escape codes](https://en.wikipedia.org/wiki/ANSI_escape_code).
 
 - The required POSIX-compatible [`libc`](https://docs.rs/libc/latest/libc/) Crate is part of Rust's standard library on POSIX targets.
-- The [spin](https://crates.io/crates/spin) Crate provides spinlock-based synchronization primitives used to minimize inter-thread latency.
 - The [fastrand](https://crates.io/crates/fastrand) Crate is a simple and fast non-cryptographic pseudorandom number generator.
 
 The project CI builds and tests `x800` on 25 cross-compiled POSIX targets - that is, all `rust-std` POSIX targets supported by the latest stable version of the widely-used `cross` cross-compilation [tool](https://github.com/cross-rs/cross).
@@ -140,12 +139,6 @@ A fuzzer named `roger`, after the rabbit, is provided in the `fuzz/` directory. 
 A variant of `roger` using [honggfuzz](https://honggfuzz.dev) and [honggfuzz-rs](https://github.com/rust-fuzz/honggfuzz-rs) is also included. It's named `hroger`, and there's a convenience script under `util/fuzz-hongg.sh`.
 
 Both a small dictionary and a minimized corpus with good coverage are checked into the repository. Both are compatible with each fuzzer.
-
-## Flame graphs
-
-Flame graphs, first created by [Brendan Gregg](https://www.brendangregg.com/flamegraphs.html), are a powerful and intuitive performance-visualization tool. This project makes use of the Rust [flamegraph](https://github.com/flamegraph-rs/flamegraph) crate for its straightforward flame graph support.
-
-The helper script at `util/flamegraph.sh` allows for easy sampling of `x800`. In its default configuration, the script uses the `roger` fuzzer as the binary under test.
 
 ## License
 

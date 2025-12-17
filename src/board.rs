@@ -11,9 +11,6 @@ pub(super) mod tile;
 mod draw;
 use constants::TILES_AREA;
 
-#[cfg(feature = "interactive")]
-pub(super) use draw::draw;
-
 use tile::{Generation, Tile};
 
 /// Storage for an x800 board
@@ -33,20 +30,13 @@ pub(super) struct Board {
 
 /// Default starting [`Board`] structure
 impl Board {
-    pub(super) const fn default() -> Board {
+    pub(super) fn default() -> Board {
         Board {
             tiles: [Tile::Empty(); constants::TILES_AREA],
             score: 0,
             open_tiles: 16,
             max_tile: 0,
             generation: 0,
-        }
-    }
-    #[inline]
-    #[cfg(feature = "interactive")]
-    pub(super) fn clone_from(&mut self, source: &Self) {
-        if self.generation != source.generation {
-            *self = source.clone();
         }
     }
 }

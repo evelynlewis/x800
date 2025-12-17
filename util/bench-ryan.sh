@@ -21,8 +21,8 @@ FILE="fuzz/corpus/roger/gold"
 MOVES=$(( $(wc -c <"$(realpath ${FILE})") - 8))
 
 LOOPS=1000
-WARMUP=16
-RUNS=16
+WARMUP=24
+RUNS=24
 
 test_ryan() {
 	plus_header "Building the ryan driver in \"$1\" mode"

@@ -4,8 +4,8 @@
 //! Various constants used by [`super::Board`]
 
 // Needed since some constants are only used interactively
-#![cfg_attr(not(feature = "interactive"), allow(unused_imports))]
-#![cfg_attr(not(feature = "interactive"), allow(dead_code))]
+#![cfg_attr(not(feature = "draw"), allow(unused_imports))]
+#![cfg_attr(not(feature = "draw"), allow(dead_code))]
 
 use super::tile::Power;
 use std::io;
@@ -49,6 +49,6 @@ pub(crate) const WRITER: fn() -> io::Stdout = io::stdout;
 pub(crate) const WRITER: fn() -> io::Sink = io::sink;
 
 /// Size of a complete buffer needed to print a [`super::Board`] frame to the terminal
-pub(super) const DISPLAY_BUFFER_SIZE: usize = (TILES_PER_LINE + 6) * (TILES_PER_LINE + 4);
+pub(crate) const DISPLAY_BUFFER_SIZE: usize = (TILES_PER_LINE + 6) * (TILES_PER_LINE + 4);
 /// Message printed on various game failures
 pub(crate) const GAME_FAILURE_MESSAGE: &str = " an ongoing game problem \r\n";

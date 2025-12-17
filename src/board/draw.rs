@@ -3,90 +3,59 @@
 
 //! Implementation of [Board] drawing
 
-// Module is interactive-only
-#![cfg(feature = "interactive")]
+// Module is draw-only
+#![cfg(feature = "draw")]
 
 use super::super::colour::Colour;
 use super::constants;
 use super::Board;
-use std::{fmt::Write as _, io::Write as _, sync, thread};
+use std::{fmt::Write as _, io::Write as _};
 
-/**
- * Board drawing worker function
- *
- * Note: `spin::Mutex` is used in place of `std::sync::Mutex` as the draw
- * thread requires only very brief access to the shared data, so we would
- * prefer to avoid putting the main loop thread to sleep for this duration.
- */
-pub(crate) fn draw(
-    board: &sync::Arc<spin::Mutex<Board>>,
-    done: &sync::Arc<sync::atomic::AtomicBool>,
-    scan: &sync::Arc<sync::atomic::AtomicBool>,
-) {
-    // Use one buffer for program duration
-    let buffer = &mut String::with_capacity(constants::DISPLAY_BUFFER_SIZE);
+impl Board {
+    /// Draw a normal board frame
+    pub(crate) fn draw_frame(&self, frame: &mut String) {
+        // Validate constants
+        assert_eq!(
+            constants::BOUNDARY_MARKER_LINE.chars().count(),
+            constants::PRINT_LINE_LEN
+        );
 
-    // Validate constants
-    assert_eq!(
-        constants::BOUNDARY_MARKER_LINE.chars().count(),
-        constants::PRINT_LINE_LEN
-    );
-
-    // Preferred output stream
-    let mut output = constants::WRITER();
-
-    // Our own personal local board
-    let mut local_board: Board = Board::default();
-
-    // Make a clean exit
-    let mut exit_after = false;
-
-    loop {
-        // Wait for wakeup
-        thread::park();
-
-        // Avoid spurious wakeups
-        // First check if we should print and exit
-        if done.load(sync::atomic::Ordering::Acquire) {
-            // Print and then exit
-            exit_after = true;
-        } else if !scan.swap(false, sync::atomic::Ordering::Acquire) {
-            // Spurious wakeup - continue and re-park the thread
-            continue;
-        }
-
-        // Clone for drawing
-        local_board.clone_from(&board.lock());
+        // Preferred output stream
+        let mut output = constants::WRITER();
 
         // Write out to string
-        local_board.draw_header(buffer);
-        local_board.draw_tiles(buffer);
-        local_board.draw_score(buffer);
+        self.draw_header(frame);
+        self.draw_tiles(frame);
+        self.draw_score(frame);
 
         // Write out framebuffer
         output
-            .write_all(buffer.as_bytes())
+            .write_all(frame.as_bytes())
             .expect("Failed to render");
         output.flush().expect("failed to flush board render");
-        buffer.clear();
-
-        // Exit after to ensure we have always written prior
-        if exit_after {
-            // Print end-of-game message first
-            write!(output, "{}{}", constants::PRE_MARGIN, constants::GAME_OVER)
-                .expect("Failed to write to output stream");
-            break;
-        }
+        frame.clear();
     }
-}
 
-impl Board {
+    /// Draw the final board frame
+    pub(crate) fn draw_quit(&mut self, frame: &mut String) {
+        // Normal draw first
+        self.draw_frame(frame);
+        // Print end-of-game message
+        write!(
+            constants::WRITER(),
+            "{}{}",
+            constants::PRE_MARGIN,
+            constants::GAME_OVER
+        )
+        .expect("Failed to write to output stream");
+    }
+
     /// Clear the game screen and draw the game header to the output String
     /// Writing fmt output to a String should never fail, so in that case panic
     #[inline]
-    fn draw_header(&self, output: &mut String) {
+    fn draw_header(&self, frame: &mut String) {
         write!(
-            output,
+            frame,
             "{}",
             format_args!(
                 "{}{}{}{}{:<colour_len$}{}\r\n{}{}\r\n",
@@ -112,20 +81,20 @@ impl Board {
     /// Draw all [`Board`] Tiles to the output String
     /// Writing fmt output to a String should never fail, so in that case panic
     #[inline]
-    fn draw_tiles(&self, output: &mut String) {
+    fn draw_tiles(&self, frame: &mut String) {
         // Iterate over each row and column, then print
-        output.write_str("      ").unwrap();
+        frame.write_str("      ").unwrap();
         for (i, tile) in self.tiles.iter().enumerate() {
-            write!(output, "{tile}").unwrap();
+            write!(frame, "{tile}").unwrap();
             if i % constants::TILES_PER_LINE == (constants::TILES_PER_LINE - 1) {
-                output.write_str("\r\n      ").unwrap();
+                frame.write_str("\r\n      ").unwrap();
             }
         }
     }
 
     /// Draw the current score to the output String
     /// Writing fmt output to a String should never fail, so in that case panic
-    fn draw_score(&self, output: &mut String) {
+    fn draw_score(&self, frame: &mut String) {
         const LENGTH: usize = constants::PRINT_LINE_LEN - SCORE_TEXT.len();
         const SPACE: &str = constants::PRE_MARGIN;
         const SCORE_TEXT: &str = constants::SCORE_TEXT;
@@ -138,7 +107,7 @@ impl Board {
         };
 
         write!(
-            output,
+            frame,
             "{}{}{before}{score:<LENGTH$}{after}",
             constants::PRE_MARGIN,
             constants::BOUNDARY_MARKER_LINE,

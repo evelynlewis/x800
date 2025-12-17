@@ -3,3 +3,4 @@
 fuzz-*.log
 doc/
 x800-game-save-*.bin
+profile.json.gz

@@ -5,16 +5,13 @@
 
 use std::{
     io::{self, Read as _},
-    mem, sync,
+    mem,
 };
 
-#[cfg(feature = "interactive")]
-use std::thread;
+#[cfg(feature = "draw")]
+use crate::clock;
 
 use crate::board::{constants, tile::Tile, Action, Board};
-
-#[cfg(feature = "interactive")]
-use crate::{board::draw, clock};
 
 #[cfg(feature = "save")]
 use std::io::Write;
@@ -23,13 +20,13 @@ use std::io::Write;
 const INITIAL_TILES_COUNT: usize = 2;
 
 /// Minimum wait in ticks between non-final draws
-#[cfg(feature = "interactive")]
+#[cfg(feature = "draw")]
 const MIN_DRAW_DELAY: u64 = 1024 * 1024;
 
 /// Configures terminal as needed
 fn io_config(input: &Input) -> Option<Io> {
     const FD: libc::c_int = libc::STDIN_FILENO;
-    if cfg!(not(feature = "interactive")) || *input != Input::Interactive {
+    if cfg!(not(feature = "draw")) || *input != Input::Interactive {
         return None;
     }
     let return_ios: libc::termios;
@@ -63,7 +60,7 @@ struct Io(libc::c_int, libc::termios);
 #[allow(clippy::too_many_lines)]
 pub(crate) fn play(input: &Input) {
     // Runtime storage
-    let board = sync::Arc::new(spin::Mutex::new(Board::default()));
+    let mut board = Board::default();
 
     // Game save setup
     #[cfg(feature = "save")]
@@ -76,45 +73,24 @@ pub(crate) fn play(input: &Input) {
 
     // Limit scope for lock
     {
-        let mut unlocked = board.lock();
         for _ in 0..INITIAL_TILES_COUNT {
-            unlocked.spawn_tile();
+            board.spawn_tile();
         }
     }
-
-    // Bookkeeping for board-drawing thread
-    #[cfg(feature = "interactive")]
-    let draw_quit = sync::Arc::new(sync::atomic::AtomicBool::new(false));
-    #[cfg(feature = "interactive")]
-    let draw_scan = sync::Arc::new(sync::atomic::AtomicBool::new(false));
-
-    // Spawn board-drawing thread
-    #[cfg(feature = "interactive")]
-    let draw_join = thread::spawn({
-        let board = board.clone();
-        let draw_quit = draw_quit.clone();
-        let draw_scan = draw_scan.clone();
-        move || {
-            draw(&board, &draw_quit, &draw_scan);
-        }
-    });
-
-    // We need the thread handle separately
-    #[cfg(feature = "interactive")]
-    let draw_thread = draw_join.thread();
 
     // Next draw timestamp in CPU ticks
-    #[cfg(feature = "interactive")]
+    #[cfg(feature = "draw")]
     let mut draw_time: u64 = clock::instant(0);
-    #[cfg(feature = "interactive")]
+    // Current time in CPU ticks
+    #[cfg(feature = "draw")]
     let mut current_time: u64;
 
+    // Frame buffer
+    #[cfg(feature = "draw")]
+    let mut frame = String::with_capacity(constants::DISPLAY_BUFFER_SIZE);
     // Initially draw the board
-    #[cfg(feature = "interactive")]
-    {
-        draw_scan.store(true, sync::atomic::Ordering::Relaxed);
-        draw_thread.unpark();
-    }
+    #[cfg(feature = "draw")]
+    board.draw_frame(&mut frame);
 
     // Moves input iterator setup
     let mut moves_slice = if let Input::Slice(slice) = input {
@@ -161,14 +137,13 @@ pub(crate) fn play(input: &Input) {
         // Read input and take action
         match action {
             Action::Direction(direction) => {
-                let mut unlocked = board.lock();
-                moved = unlocked.update(direction, &mut work_line);
+                moved = board.update(direction, &mut work_line);
                 // Skip adding a tile after invalid move
-                if !moved && unlocked.has_space() {
+                if !moved && board.has_space() {
                     continue;
                 }
                 // Add new tile if the board has space
-                if !unlocked.spawn_tile() {
+                if !board.spawn_tile() {
                     break;
                 }
             }
@@ -181,24 +156,18 @@ pub(crate) fn play(input: &Input) {
         }
 
         // In case of update, draw the board
-        #[cfg(feature = "interactive")]
+        #[cfg(feature = "draw")]
         {
             current_time = clock::instant(draw_time);
             if current_time > draw_time {
-                draw_scan.store(true, sync::atomic::Ordering::Release);
-                draw_thread.unpark();
-                draw_time = current_time.wrapping_add(MIN_DRAW_DELAY);
+                board.draw_frame(&mut frame);
             }
+            draw_time = current_time.wrapping_add(MIN_DRAW_DELAY);
         }
     }
 
-    // Signal and join board-drawing thread, if it exists
-    #[cfg(feature = "interactive")]
-    {
-        draw_quit.store(true, sync::atomic::Ordering::Release);
-        draw_thread.unpark();
-        draw_join.join().unwrap();
-    }
+    #[cfg(feature = "draw")]
+    board.draw_quit(&mut frame);
 
     // Reset terminal
     if let Some(io) = io {
@@ -218,5 +187,5 @@ pub(crate) fn play(input: &Input) {
     }
 
     #[cfg(feature = "score")]
-    println!("{}", board.lock().score());
+    println!("{}", board.score());
 }
