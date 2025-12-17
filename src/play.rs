@@ -27,7 +27,7 @@ const MIN_DRAW_DELAY: u64 = 1024 * 1024;
 #[cfg(feature = "posix")]
 fn io_config(input: &Input) -> Option<Io> {
     const FD: libc::c_int = libc::STDIN_FILENO;
-    if cfg!(not(feature = "draw")) || *input != Input::Interactive {
+    if cfg!(not(feature = "draw")) || *input != Input::Stdin {
         return None;
     }
     let return_ios: libc::termios;
@@ -47,11 +47,22 @@ fn io_config(input: &Input) -> Option<Io> {
 
 /// Defines input mode
 #[allow(dead_code)]
-#[derive(PartialEq, Eq)]
 pub(crate) enum Input<'a> {
     Slice(&'a [u8]),
-    Interactive,
+    Stdin,
+    Channel(std::sync::mpsc::Receiver<u8>),
 }
+
+impl PartialEq for Input<'_> {
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (Self::Slice(l0), Self::Slice(r0)) => l0 == r0,
+            _ => core::mem::discriminant(self) == core::mem::discriminant(other),
+        }
+    }
+}
+
+impl Eq for Input<'_> {}
 
 /// Wrapper for handling IO-related data structures
 #[cfg(feature = "posix")]
@@ -101,8 +112,13 @@ pub(crate) fn play(input: &Input) {
     } else {
         None
     };
-    let mut moves_stdin = if let Input::Interactive = input {
+    let mut moves_stdin = if let Input::Stdin = input {
         Some(io::stdin().lock().bytes())
+    } else {
+        None
+    };
+    let mut moves_channel = if let Input::Channel(channel) = input {
+        Some(channel.iter())
     } else {
         None
     };
@@ -124,13 +140,23 @@ pub(crate) fn play(input: &Input) {
                     .copied()
                     .unwrap_or(constants::END_OF_GAME_CHARACTER),
             ),
-            Input::Interactive => Action::parse({
+            Input::Stdin => Action::parse({
                 let move_byte = moves_stdin
                     .as_mut()
                     .unwrap()
                     .next()
                     .unwrap_or(Ok(constants::END_OF_GAME_CHARACTER))
                     .expect(constants::GAME_FAILURE_MESSAGE);
+                #[cfg(feature = "save")]
+                save.push(move_byte);
+                move_byte
+            }),
+            Input::Channel(_) => Action::parse({
+                let move_byte = moves_channel
+                    .as_mut()
+                    .unwrap()
+                    .next()
+                    .unwrap_or(constants::END_OF_GAME_CHARACTER);
                 #[cfg(feature = "save")]
                 save.push(move_byte);
                 move_byte
@@ -182,7 +208,7 @@ pub(crate) fn play(input: &Input) {
 
     // All game activity must be done prior
     #[cfg(feature = "save")]
-    if *input == Input::Interactive {
+    if *input == Input::Stdin {
         let name = format!("x800-game-save-{}.bin", fastrand::u64(..));
         let mut save_file = std::fs::File::create(name).expect("Failed to open save file");
         save_file

@@ -10,5 +10,5 @@ mod play;
 
 /// The main program entry point
 fn main() {
-    play::play(&play::Input::Interactive);
+    play::play(&play::Input::Stdin);
 }
