@@ -97,11 +97,6 @@ plus_header "Now validating ryan benchmarks"
 xcall ./util/bench-ryan.sh
 plus_ok
 
-# Build and run shell benchmarks
-plus_header "Now validating shell benchmarks"
-xcall ./util/bench-shell.sh
-plus_ok
-
 # Run fuzzer on known inputs
 plus_header "Now validating fuzzer in default mode"
 cargo install cargo-fuzz
