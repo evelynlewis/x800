@@ -6,11 +6,10 @@
 use std::{cmp, vec};
 
 pub(super) mod constants;
+pub(super) mod draw;
 pub(super) mod tile;
 
-mod draw;
 use constants::TILES_AREA;
-
 use tile::{Generation, Tile};
 
 /// Storage for an x800 board
@@ -26,19 +25,6 @@ pub(super) struct Board {
     max_tile: tile::Power,
     /// Generation of the board
     pub(super) generation: Generation,
-}
-
-/// Default starting [`Board`] structure
-impl Board {
-    pub(super) fn default() -> Board {
-        Board {
-            tiles: [Tile::Empty(); constants::TILES_AREA],
-            score: 0,
-            open_tiles: 16,
-            max_tile: 0,
-            generation: 0,
-        }
-    }
 }
 
 /// Directions the player can move
@@ -73,6 +59,67 @@ impl Action {
 }
 
 impl Board {
+    /// Default starting [`Board`] structure
+    pub(crate) fn default() -> Board {
+        Board {
+            tiles: [Tile::Empty; constants::TILES_AREA],
+            score: 0,
+            open_tiles: 16,
+            max_tile: 0,
+            generation: 0,
+        }
+    }
+
+    /// Check if the [`Board`] has one or more [`Tile::Empty`] [`Tile`]s
+    #[inline]
+    pub(super) fn has_space(&self) -> bool {
+        self.open_tiles != 0
+    }
+
+    /// Current score
+    #[allow(dead_code)]
+    pub(super) fn score(&self) -> u32 {
+        self.score
+    }
+
+    /// Create a new '2' or '4' number tile in a blank space
+    pub(super) fn spawn_tile(&mut self) -> bool {
+        // Values
+        const CHANCE_OF_FOUR_TILES: u64 = 4;
+
+        if !self.has_space() {
+            return false;
+        }
+
+        // Collect random numbers
+        #[allow(clippy::cast_possible_truncation)]
+        let insert_index = fastrand::u64(..self.open_tiles as u64) as usize;
+        let insert_value = if fastrand::u64(..CHANCE_OF_FOUR_TILES) == (CHANCE_OF_FOUR_TILES - 1) {
+            2 // '4' tile
+        } else {
+            1 // '2' tile
+        };
+
+        // Insert at location
+        let mut skipped: usize = 0;
+        for index in 0..TILES_AREA {
+            if let Tile::Empty = self.tiles[index] {
+                if skipped == insert_index {
+                    self.tiles[index] = Tile::Number(insert_value, self.generation);
+                    break;
+                }
+                skipped += 1;
+            }
+        }
+
+        // Update bookkeeping variables
+        self.generation += 1;
+        self.open_tiles -= 1;
+        self.max_tile = cmp::max(insert_value, self.max_tile);
+
+        true
+    }
+
     /// Update the [`Board`], given a move [`Direction`] and its current state.
     #[allow(clippy::needless_continue)] // Avoiding `continue` below is a perf regression
     pub(super) fn update(&mut self, direction: Direction, work_line: &mut vec::Vec<Tile>) -> bool {
@@ -122,7 +169,7 @@ impl Board {
                     a_tile = &work_line[a_index];
                     b_tile = &work_line[a_index + 1];
                     match (a_tile, b_tile) {
-                        (Tile::Empty(), _) | (_, Tile::Empty()) => {
+                        (Tile::Empty, _) | (_, Tile::Empty) => {
                             unreachable!();
                         }
                         (Tile::Number(a_pow, a_gen), Tile::Number(b_pow, b_gen)) => {
@@ -149,7 +196,7 @@ impl Board {
             }
 
             // Re-add empty tiles to the end of the vector
-            work_line.resize(constants::TILES_PER_LINE, Tile::Empty());
+            work_line.resize(constants::TILES_PER_LINE, Tile::Empty);
 
             // Apply to tiles
             let mut tile: Tile;
@@ -165,54 +212,5 @@ impl Board {
         work_line.clear();
 
         state_changed
-    }
-
-    /// Check if the [`Board`] has one or more [`Tile::Empty`] [`Tile`]s
-    #[inline]
-    pub(super) fn has_space(&self) -> bool {
-        self.open_tiles != 0
-    }
-
-    /// Create a new '2' or '4' number tile in a blank space
-    pub(super) fn spawn_tile(&mut self) -> bool {
-        // Values
-        const CHANCE_OF_FOUR_TILES: u64 = 4;
-
-        if !self.has_space() {
-            return false;
-        }
-
-        // Collect random numbers
-        #[allow(clippy::cast_possible_truncation)]
-        let insert_index = fastrand::u64(..self.open_tiles as u64) as usize;
-        let insert_value = if fastrand::u64(..CHANCE_OF_FOUR_TILES) == (CHANCE_OF_FOUR_TILES - 1) {
-            2 // '4' tile
-        } else {
-            1 // '2' tile
-        };
-
-        // Insert at location
-        let mut skipped: usize = 0;
-        for index in 0..TILES_AREA {
-            if let Tile::Empty() = self.tiles[index] {
-                if skipped == insert_index {
-                    self.tiles[index] = Tile::Number(insert_value, self.generation);
-                    break;
-                }
-                skipped += 1;
-            }
-        }
-
-        // Update bookkeeping variables
-        self.generation += 1;
-        self.open_tiles -= 1;
-        self.max_tile = cmp::max(insert_value, self.max_tile);
-
-        true
-    }
-
-    #[allow(dead_code)]
-    pub(super) fn score(&self) -> u32 {
-        self.score
     }
 }

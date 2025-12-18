@@ -6,9 +6,9 @@ use std::fs;
 use x800::one_shot;
 
 mod shared {
-    pub const STARTUP_FILE: &str = "fuzz/corpus/roger/startup";
-    pub const GOLD_FILE: &str = "fuzz/corpus/roger/gold";
-    pub const SHORT_FILE: &str = "fuzz/corpus/roger/short";
+    pub(super) const STARTUP_FILE: &str = "fuzz/corpus/roger/startup";
+    pub(super) const GOLD_FILE: &str = "fuzz/corpus/roger/gold";
+    pub(super) const SHORT_FILE: &str = "fuzz/corpus/roger/short";
 }
 
 #[divan::bench(sample_count = 10, sample_size = 1000)]

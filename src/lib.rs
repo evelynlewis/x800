@@ -12,6 +12,7 @@ mod clock;
 mod colour;
 mod play;
 
+/// Play using a slice input
 fn driver(input: &[u8], seed: u64) {
     fastrand::seed(seed);
     play::play(&play::Input::Slice(input));

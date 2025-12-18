@@ -3,15 +3,13 @@
 
 //! Implementation of x800 core event loop
 
+use core::mem;
 use std::io::{self, Read as _};
 
-#[cfg(feature = "posix")]
-use std::mem;
+use crate::board::{constants, tile::Tile, Action, Board};
 
 #[cfg(feature = "draw")]
 use crate::clock;
-
-use crate::board::{constants, tile::Tile, Action, Board};
 
 #[cfg(feature = "save")]
 use std::io::Write;
@@ -23,7 +21,34 @@ const INITIAL_TILES_COUNT: usize = 2;
 #[cfg(feature = "draw")]
 const MIN_DRAW_DELAY: u64 = 1024 * 1024;
 
-/// Configures terminal as needed
+/// Defines input mode
+#[allow(dead_code)]
+pub(super) enum Input<'a> {
+    /// Receive input over a channel
+    Channel(std::sync::mpsc::Receiver<u8>),
+    /// Read input from a slice
+    Slice(&'a [u8]),
+    /// Read input from standard input
+    Stdin,
+}
+
+impl PartialEq for Input<'_> {
+    /// Check for equality
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (Self::Slice(l0), Self::Slice(r0)) => l0 == r0,
+            _ => mem::discriminant(self) == mem::discriminant(other),
+        }
+    }
+}
+
+impl Eq for Input<'_> {}
+
+/// Wrapper for handling IO-related data structures
+#[cfg(feature = "posix")]
+struct Io(libc::c_int, libc::termios);
+
+/// Configure the terminal
 #[cfg(feature = "posix")]
 fn io_config(input: &Input) -> Option<Io> {
     const FD: libc::c_int = libc::STDIN_FILENO;
@@ -45,33 +70,10 @@ fn io_config(input: &Input) -> Option<Io> {
     Some(Io(FD, return_ios))
 }
 
-/// Defines input mode
-#[allow(dead_code)]
-pub(crate) enum Input<'a> {
-    Slice(&'a [u8]),
-    Stdin,
-    Channel(std::sync::mpsc::Receiver<u8>),
-}
-
-impl PartialEq for Input<'_> {
-    fn eq(&self, other: &Self) -> bool {
-        match (self, other) {
-            (Self::Slice(l0), Self::Slice(r0)) => l0 == r0,
-            _ => core::mem::discriminant(self) == core::mem::discriminant(other),
-        }
-    }
-}
-
-impl Eq for Input<'_> {}
-
-/// Wrapper for handling IO-related data structures
-#[cfg(feature = "posix")]
-struct Io(libc::c_int, libc::termios);
-
 /// Main program event loop
 #[inline]
 #[allow(clippy::too_many_lines)]
-pub(crate) fn play(input: &Input) {
+pub(super) fn play(input: &Input) {
     // Runtime storage
     let mut board = Board::default();
 

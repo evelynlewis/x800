@@ -10,12 +10,12 @@ use std::fmt;
 /// The power-of-two of a [`Tile`]
 pub(crate) type Power = u32;
 /// The move number which created a [`Tile`]
-pub(crate) type Generation = u64;
+pub(super) type Generation = u64;
 
 /// Basic [`super::Board`] block
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub(crate) enum Tile {
-    Empty(),
+    Empty,
     Number(Power, Generation),
 }
 
@@ -34,7 +34,7 @@ impl fmt::Display for Tile {
                     width = EMPTY_TILE.len(),
                 )
             }
-            Self::Empty() => {
+            Self::Empty => {
                 write!(f, "{EMPTY_TILE}")
             }
         }

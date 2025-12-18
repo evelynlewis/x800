@@ -27,27 +27,26 @@ pub(super) const TILES_PER_LINE: usize = 4;
 pub(super) const TILES_AREA: usize = TILES_PER_LINE * TILES_PER_LINE;
 /// Length of a complete output line, as-displayed, and including borders and whitespace
 pub(super) const PRINT_LINE_LEN: usize = (TILES_PER_LINE * TILES_WIDTH) + PRE_MARGIN.len();
-
-// Public constants
 /// Marker line used at top and bottom
 pub(super) const BOUNDARY_MARKER_LINE: &str = "────────────────────────";
 /// Text printed to the left of the board
-pub(crate) const PRE_MARGIN: &str = "\r\r      ";
+pub(super) const PRE_MARGIN: &str = "\r\r      ";
 /// Text printed to mark the end of a game
-pub(crate) const GAME_OVER: &str = "─── the game is over ───\r\n";
-/// Input character which ends gameplay
-pub(crate) const END_OF_GAME_CHARACTER: u8 = 3;
+pub(super) const GAME_OVER: &str = "─── the game is over ───\r\n";
 
 // Print output to stdout
 #[cfg(not(feature = "sink"))]
 /// Function to create a writer object
-pub(crate) const WRITER: fn() -> io::Stdout = io::stdout;
+pub(super) const WRITER: fn() -> io::Stdout = io::stdout;
 
 // Send all output to a null sink
 #[cfg(feature = "sink")]
 /// Function to create a writer object
-pub(crate) const WRITER: fn() -> io::Sink = io::sink;
+pub(super) const WRITER: fn() -> io::Sink = io::sink;
 
+// Public constants
+/// Input character which ends gameplay
+pub(crate) const END_OF_GAME_CHARACTER: u8 = 3;
 /// Size of a complete buffer needed to print a [`super::Board`] frame to the terminal
 pub(crate) const DISPLAY_BUFFER_SIZE: usize = (TILES_PER_LINE + 6) * (TILES_PER_LINE + 4);
 /// Message printed on various game failures

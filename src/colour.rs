@@ -12,19 +12,36 @@
 //! and across the top.
 
 use super::board::tile::Power;
-use std::fmt;
+use core::fmt;
+
+/// Number of colours in use
+const COLOUR_COUNT: Power = 18;
+
+/// <https://en.wikipedia.org/wiki/ANSI_escape_code#8-bit>
+const COLOUR_LEFT_COLUMN: Power = 34;
+
+/// <https://en.wikipedia.org/wiki/ANSI_escape_code#8-bit>
+const COLOUR_RIGHT_COLUMN: Power = COLOUR_LEFT_COLUMN + 5;
+
+/// <https://en.wikipedia.org/wiki/ANSI_escape_code#8-bit>
+const COLOUR_WIN_COLUMN: Power = COLOUR_LEFT_COLUMN + 6;
 
 /// Information which fully specifies a given Colour
 #[derive(PartialEq, Eq, Debug)]
 pub(super) struct Colour {
-    row: Power,
+    /// Column in ANSI colour chart
     column: Power,
+    /// Row in ANSI colour chart
+    row: Power,
 }
 
-const COLOUR_COUNT: Power = 18;
-
 impl Colour {
-    /// Generate a colour based on a Tile's power-of-two
+    /// Our own Default implementation to allow `const`
+    pub(super) const fn default() -> Self {
+        Self { row: 0, column: 0 }
+    }
+
+    /// Generate a colour based on a Tile's power-of-twok
     #[inline]
     pub(super) const fn from_power(power: Power) -> Self {
         let limited = power % COLOUR_COUNT;
@@ -64,21 +81,7 @@ impl Colour {
             _ => Self::from_power(0 as Power),
         }
     }
-
-    /// Our own Default implementation to allow `const`
-    pub(super) const fn default() -> Self {
-        Self { row: 0, column: 0 }
-    }
 }
-
-/// <https://en.wikipedia.org/wiki/ANSI_escape_code#8-bit>
-const COLOUR_LEFT_COLUMN: Power = 34;
-
-/// <https://en.wikipedia.org/wiki/ANSI_escape_code#8-bit>
-const COLOUR_WIN_COLUMN: Power = COLOUR_LEFT_COLUMN + 6;
-
-/// <https://en.wikipedia.org/wiki/ANSI_escape_code#8-bit>
-const COLOUR_RIGHT_COLUMN: Power = COLOUR_LEFT_COLUMN + 5;
 
 impl fmt::Display for Colour {
     /// Generate and print foreground and background escape codes for a Colour

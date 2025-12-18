@@ -6,10 +6,11 @@
 // Module is draw-only
 #![cfg(feature = "draw")]
 
+use std::{fmt::Write as _, io::Write as _};
+
 use super::super::colour::Colour;
 use super::constants;
 use super::Board;
-use std::{fmt::Write as _, io::Write as _};
 
 impl Board {
     /// Draw a normal board frame

@@ -12,7 +12,7 @@ use std::arch;
 /// Does not use its argument
 #[inline]
 #[cfg(target_arch = "aarch64")]
-pub fn instant(_prev: u64) -> u64 {
+pub(super) fn instant(_prev: u64) -> u64 {
     let mut tick;
     unsafe {
         arch::asm!(
@@ -27,7 +27,7 @@ pub fn instant(_prev: u64) -> u64 {
 /// Does not use its argument
 #[inline]
 #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
-pub fn instant(_prev: u64) -> u64 {
+pub(super) fn instant(_prev: u64) -> u64 {
     let mut eax_accumulator: u32;
     let mut edx_data: u32;
     unsafe {
@@ -40,6 +40,6 @@ pub fn instant(_prev: u64) -> u64 {
 /// Returns a value greater than its argument
 #[inline]
 #[cfg(not(any(target_arch = "x86", target_arch = "x86_64", target_arch = "aarch64")))]
-pub fn instant(prev: u64) -> u64 {
+pub(super) fn instant(prev: u64) -> u64 {
     prev + 1
 }
