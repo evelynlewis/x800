@@ -28,7 +28,6 @@ jobs:
             macos-26,
             macos-15,
             macos-14,
-            macos-13,
           ]
     runs-on: ${{ matrix.os }}
     steps:
