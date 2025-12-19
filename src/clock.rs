@@ -5,13 +5,16 @@
 
 #![cfg(feature = "draw")]
 
-#[cfg(any(target_arch = "x86", target_arch = "x86_64", target_arch = "aarch64"))]
+#[cfg(all(
+    not(fuzzing),
+    any(target_arch = "x86", target_arch = "x86_64", target_arch = "aarch64")
+))]
 use std::arch;
 
 /// CPU tick counter
 /// Does not use its argument
 #[inline]
-#[cfg(target_arch = "aarch64")]
+#[cfg(all(target_arch = "aarch64", not(fuzzing)))]
 pub(super) fn instant(_prev: u64) -> u64 {
     let mut tick;
     unsafe {
@@ -26,7 +29,7 @@ pub(super) fn instant(_prev: u64) -> u64 {
 /// CPU tick counterA
 /// Does not use its argument
 #[inline]
-#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+#[cfg(all(any(target_arch = "x86", target_arch = "x86_64"), not(fuzzing)))]
 pub(super) fn instant(_prev: u64) -> u64 {
     let mut eax_accumulator: u32;
     let mut edx_data: u32;
@@ -39,7 +42,10 @@ pub(super) fn instant(_prev: u64) -> u64 {
 /// Stub CPU tick counter
 /// Returns a value greater than its argument
 #[inline]
-#[cfg(not(any(target_arch = "x86", target_arch = "x86_64", target_arch = "aarch64")))]
+#[cfg(any(
+    fuzzing,
+    not(any(target_arch = "x86", target_arch = "x86_64", target_arch = "aarch64"))
+))]
 pub(super) fn instant(prev: u64) -> u64 {
     prev + 1
 }
