@@ -6,13 +6,13 @@ x800 : /ˈɛks ˈeɪt ˈhəndɹəd/
 
 2048 is played by merging a four-by-four grid of power-of-two tiles, to maximize the sum of merged tile values. `x800` is a fast and portable implementation.
 
-`x800` can evaluate millions of moves per second, even on modest hardware. A Linux machine with an Intel Pentium CPU from 2013 was tested to play 4759 complete loops of a high-scoring 1080 move `x800` game in one second, or 4.86 million moves-per-second.
+`x800` can evaluate millions of moves per second, even on modest hardware. A Linux machine with an Intel Pentium CPU from 2013 was tested to play 1000 runs of a high-scoring 1152 move `x800` game at 213 microseconds per game - or 5.41 million moves-per-second.
 
-In the same test, a 2020 M1 MacBook Air with MacOS 26 completes 13.5 million moves-per-second, or 74.0 nanoseconds per move. In this duration, light travels 22.2 metres - a distance which Usain Bolt ran in 1.81 [seconds](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10669785) in 2009 to set the current 100m sprint record.
+In the same test, a 2020 M1 MacBook Air with MacOS 26 completes the benchmark game in 76.3 microseconds - for 15.1 million moves-per-second, or an amortized 66.2 nanoseconds per move. In this time, light travels 19.9 metres - a distance which Usain Bolt ran in 1.62 [seconds](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10669785) in 2009 to set the current 100 metre sprint record.
 
-See also the benchmark [section](#benchmarks) below, and the [util/bench-ryan.sh](./util/bench-ryan.sh) script.
+See also the benchmark [section](#benchmarks) below.
 
-The project has few build dependencies. Rather than ncurses or an external Rust terminal library, `x800` uses simple output buffering with standard [ANSI escape codes](https://en.wikipedia.org/wiki/ANSI_escape_code).
+The project has few build dependencies. Rather than `ncurses` or an external Rust terminal library, `x800` uses simple output buffering with standard [ANSI escape codes](https://en.wikipedia.org/wiki/ANSI_escape_code).
 
 - The required POSIX-compatible [`libc`](https://docs.rs/libc/latest/libc/) Crate is part of Rust's standard library on POSIX targets.
 - The [fastrand](https://crates.io/crates/fastrand) Crate is a simple and fast non-cryptographic pseudorandom number generator.
@@ -21,7 +21,7 @@ The project CI builds and tests `x800` on 25 cross-compiled POSIX targets - that
 
 The project is also built and tested natively on all standard GitHub-hosted Linux or macOS [runners](https://docs.github.com/en/actions/using-github-hosted-runners/using-github-hosted-runners/about-github-hosted-runners#standard-github-hosted-runners-for-public-repositories). Binary tarballs for any cross-compiled or native platform can be downloaded from the latest GitHub Actions [`build-bot`](https://github.com/evelynlewis/x800/actions/workflows/ci.yml) run. See below for local build instructions.
 
-The project started in part as a hands-on spike project for the author to learn [Rust](https://rust-lang.org) as a systems software developer experienced in C and C++. The name `x800` is the number 2048 in base sixteen, modified to comply with Cargo's package naming rules which disallow a leading digit.
+The name `x800` is the number 2048 in base sixteen, modified to comply with Cargo's package naming rules which disallow a leading digit.
 
 ## Quick start
 
@@ -81,7 +81,7 @@ This means that Linux, MacOS, and other BSDs should all work on a variety of arc
 2. For information on Rust platform support see the appropriate [page](https://doc.rust-lang.org/rustc/platform-support.html) in the Rust documentation.
 3. Refer to the Rust `libc` [documentation](https://docs.rs/libc/latest/libc/). The platform selection dropdown at the top of the page is useful.
 
-### Cross-compilation with `cross` crate
+### Cross-compilation with the `cross` crate
 
 In case you wanted to play 2048 on a somewhat more underpowered or unique platform, the [`cross`](https://github.com/cross-rs/cross) crate can be used to cross-compile for the target on a better-supported host.
 
@@ -112,9 +112,11 @@ See-also the development shell scripts in the `util/` directory. In particular, 
 
 ## Benchmarks
 
-The `ryan` benchmarks in [`util/bench-ryan.sh`](./util/bench-ryan.sh) are run using the the [`ryan`](./src/ryan/README.md) reproducible `x800` driver. They use the [`hyperfine`](https://github.com/sharkdp/hyperfine) tool to benchmark a large number of loops of a known high-scoring, or 'gold', `x800` save file.
+The benchmarks in [`util/bench-ryan.sh`](./util/bench-ryan.sh) use the `ryan` reproducible driver. `ryan` can replay an arbitrary game of `x800` as captured during `x800` gameplay using the `save` feature, or generated externally. These input files have a stable ABI, and the file format is also used by `x800` fuzzers. See the associated [README.md](./src/ryan/README.md) for more details.
 
-The `hyperfine` tool can be installed via your system package manager or with:
+The `bench-ryan.sh` script uses the `hyperfine` tool to run many loops of particular input file, known as a 'gold' file. The gold file is a high-scoring file produced by an `x800` fuzzer; this file changes from time to time.
+
+`hyperfine` can be installed via your system package manager or with:
 
 ```sh
 cargo install hyperfine
@@ -166,18 +168,17 @@ SOFTWARE.
 
 ## Some references
 
-- [_Multicomponent Velocity Measurement for Linear Sprinting: Usain Bolt’s 100 m World-Record Analysis_, _Bioengineering (Basel, Switzerland)_, National Library of Medicine](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10669785)
+- [_Multicomponent Velocity Measurement for Linear Sprinting: Usain Bolt’s 100 m World-Record Analysis_, National Library of Medicine](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10669785)
 - [_ANSI escape code_, Wikipedia](https://en.wikipedia.org/wiki/ANSI_escape_code)
 - [_The TTY demystified_, Linus Åkesson](http://www.linusakesson.net/programming/tty/)
-- [_Zero-dependency random number generation in Rust_, Orhun Parmaksız](https://blog.orhun.dev/zero-deps-random-in-rust/)
 - [_termios(3) — Linux manual page_, man7.org](https://man7.org/linux/man-pages/man3/termios.3.html)
 - [_Performance Analysis and Tuning on Modern CPUs, 1st Edition_, Denis Bakhvalov](https://easyperf.net)
 - [_The Rust Performance Book_, Nicholas Nethercote](https://nnethercote.github.io/perf-book)
 - [_Rust Fuzz Book_, The Rust Fuzzing Authority](https://rust-fuzz.github.io/book)
+- [_Flame Graphs_, Brendan Gregg](https://www.brendangregg.com/flamegraphs.html)
 - [_cross_, GitHub](https://github.com/cross-rs/cross)
 - [_hyperfine_, GitHub](https://github.com/sharkdp/hyperfine)
 - [_cargo-fuzz_, GitHub](https://github.com/rust-fuzz/cargo-fuzz)
 - [_LibFuzzer_, llvm.org](https://llvm.org/docs/LibFuzzer.html)
 - [_honggfuzz_, honggfuzz.dev](https://honggfuzz.dev)
 - [_honggfuzz-rs_, GitHub](https://github.com/rust-fuzz/honggfuzz-rs)
-- [_Flame Graphs_, Brendan Gregg](https://www.brendangregg.com/flamegraphs.html)
