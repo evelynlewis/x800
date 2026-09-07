@@ -5,7 +5,6 @@
 
 use super::constants;
 use crate::colour::Colour;
-use std::fmt;
 
 /// The power-of-two of a [`Tile`]
 pub(crate) type Power = u32;
@@ -19,9 +18,9 @@ pub(crate) enum Tile {
     Number(Power, Generation),
 }
 
-impl fmt::Display for Tile {
+impl std::fmt::Display for Tile {
     /// Format [`Tile`] to be displayed
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         use constants::EMPTY_TILE;
         match self {
             Self::Number(num, _) => {

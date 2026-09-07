@@ -3,8 +3,6 @@
 
 //! Data structures and functions needed to implement the x800 board
 
-use std::{cmp, vec};
-
 pub(super) mod constants;
 pub(super) mod draw;
 pub(super) mod tile;
@@ -115,14 +113,18 @@ impl Board {
         // Update bookkeeping variables
         self.generation += 1;
         self.open_tiles -= 1;
-        self.max_tile = cmp::max(insert_value, self.max_tile);
+        self.max_tile = std::cmp::max(insert_value, self.max_tile);
 
         true
     }
 
     /// Update the [`Board`], given a move [`Direction`] and its current state.
     #[allow(clippy::needless_continue)] // Avoiding `continue` below is a perf regression
-    pub(super) fn update(&mut self, direction: Direction, work_line: &mut vec::Vec<Tile>) -> bool {
+    pub(super) fn update(
+        &mut self,
+        direction: Direction,
+        work_line: &mut std::vec::Vec<Tile>,
+    ) -> bool {
         const LEFT_INDEX: [[usize; constants::TILES_PER_LINE]; constants::TILES_PER_LINE] =
             [[0, 1, 2, 3], [4, 5, 6, 7], [8, 9, 10, 11], [12, 13, 14, 15]];
         const RIGHT_INDEX: [[usize; constants::TILES_PER_LINE]; constants::TILES_PER_LINE] =
@@ -188,7 +190,7 @@ impl Board {
                                 // Update statistics
                                 self.open_tiles += 1;
                                 self.score += 1 << next_pow;
-                                self.max_tile = cmp::max(next_pow, self.max_tile);
+                                self.max_tile = std::cmp::max(next_pow, self.max_tile);
                             }
                         }
                     }

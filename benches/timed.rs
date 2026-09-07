@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 use divan::{black_box, Bencher};
-use std::fs;
 use x800::one_shot;
 
 mod shared {
@@ -29,7 +28,7 @@ fn timed_gold(c: Bencher) {
 #[inline(always)]
 #[allow(clippy::inline_always)]
 fn timed_file(c: Bencher, file: &str) {
-    let content = fs::read(file).unwrap();
+    let content = std::fs::read(file).unwrap();
     c.bench(|| one_shot(black_box(&content)));
 }
 

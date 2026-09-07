@@ -8,7 +8,6 @@
 #![cfg_attr(not(feature = "draw"), allow(dead_code))]
 
 use super::tile::Power;
-use std::io;
 
 // Internal constants
 /// Text printed for an empty [`super::Tile`] in the board
@@ -37,12 +36,12 @@ pub(super) const GAME_OVER: &str = "─── the game is over ───\r\n";
 // Print output to stdout
 #[cfg(not(feature = "sink"))]
 /// Function to create a writer object
-pub(super) const WRITER: fn() -> io::Stdout = io::stdout;
+pub(super) const WRITER: fn() -> std::io::Stdout = std::io::stdout;
 
 // Send all output to a null sink
 #[cfg(feature = "sink")]
 /// Function to create a writer object
-pub(super) const WRITER: fn() -> io::Sink = io::sink;
+pub(super) const WRITER: fn() -> std::io::Sink = std::io::sink;
 
 // Public constants
 /// Input character which ends gameplay

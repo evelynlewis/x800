@@ -3,7 +3,6 @@
 
 //! Implementation of x800 core event loop
 
-use core::mem;
 use std::io::{self, Read as _};
 
 use crate::board::{constants, tile::Tile, Action, Board};
@@ -37,7 +36,7 @@ impl PartialEq for Input<'_> {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
             (Self::Slice(l0), Self::Slice(r0)) => l0 == r0,
-            _ => mem::discriminant(self) == mem::discriminant(other),
+            _ => std::mem::discriminant(self) == std::mem::discriminant(other),
         }
     }
 }
@@ -57,7 +56,7 @@ fn io_config(input: &Input) -> Option<Io> {
     }
     let return_ios: libc::termios;
     unsafe {
-        let mut ios: libc::termios = mem::zeroed();
+        let mut ios: libc::termios = std::mem::zeroed();
         // Read current configuration
         libc::tcgetattr(FD, &mut ios);
         // Save initial value for later use
