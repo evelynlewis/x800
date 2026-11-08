@@ -100,7 +100,7 @@ impl fmt::Display for Colour {
 #[cfg(test)]
 mod tests {
     use super::{
-        Colour, Power, COLOUR_COUNT, COLOUR_LEFT_COLUMN, COLOUR_RIGHT_COLUMN, COLOUR_WIN_COLUMN,
+        COLOUR_COUNT, COLOUR_LEFT_COLUMN, COLOUR_RIGHT_COLUMN, COLOUR_WIN_COLUMN, Colour, Power,
     };
 
     #[test]

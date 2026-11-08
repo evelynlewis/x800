@@ -5,7 +5,7 @@
 
 use std::io::{self, Read as _};
 
-use crate::board::{constants, tile::Tile, Action, Board};
+use crate::board::{Action, Board, constants, tile::Tile};
 
 #[cfg(feature = "draw")]
 use crate::clock;
@@ -58,13 +58,13 @@ fn io_config(input: &Input) -> Option<Io> {
     unsafe {
         let mut ios: libc::termios = std::mem::zeroed();
         // Read current configuration
-        libc::tcgetattr(FD, &mut ios);
+        libc::tcgetattr(FD, &raw mut ios);
         // Save initial value for later use
         return_ios = ios;
 
         // Enable and set raw mode in case of terminal
-        libc::cfmakeraw(&mut ios);
-        libc::tcsetattr(FD, libc::TCSANOW, &ios);
+        libc::cfmakeraw(&raw mut ios);
+        libc::tcsetattr(FD, libc::TCSANOW, &raw const ios);
     }
     Some(Io(FD, return_ios))
 }
@@ -203,7 +203,7 @@ pub(super) fn play(input: &Input) {
     #[cfg(feature = "posix")]
     if let Some(io) = io {
         unsafe {
-            libc::tcsetattr(io.0, libc::TCSANOW, &io.1);
+            libc::tcsetattr(io.0, libc::TCSANOW, &raw const io.1);
         }
     }
 

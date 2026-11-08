@@ -9,8 +9,8 @@
 use std::{fmt::Write as _, io::Write as _};
 
 use super::super::colour::Colour;
-use super::constants;
 use super::Board;
+use super::constants;
 
 impl Board {
     /// Draw a normal board frame

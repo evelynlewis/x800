@@ -1,7 +1,7 @@
 // Copyright (c) 2024-2025 Evelyn Lewis
 // SPDX-License-Identifier: MIT
 
-use divan::{black_box, Bencher};
+use divan::{Bencher, black_box};
 use x800::one_shot;
 
 mod shared {
