@@ -1,4 +1,4 @@
-// Copyright (c) 2024 Evelyn Lewis
+// Copyright (c) 2024-2026 Evelyn Lewis
 // SPDX-License-Identifier: MIT
 
 // Include README.md docs inline

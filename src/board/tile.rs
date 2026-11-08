@@ -1,4 +1,4 @@
-// Copyright (c) 2024 Evelyn Lewis
+// Copyright (c) 2024-2026 Evelyn Lewis
 // SPDX-License-Identifier: MIT
 
 //! Data structures and functions needed to define, index, and display a [Tile]

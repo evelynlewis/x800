@@ -146,7 +146,7 @@ Both a small dictionary and a minimized corpus with good coverage are checked in
 
 MIT License
 
-Copyright (c) 2024-2025 Evelyn Lewis
+Copyright (c) 2024-2026 Evelyn Lewis
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
